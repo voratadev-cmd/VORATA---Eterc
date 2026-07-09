@@ -1,0 +1,25 @@
+.app {
+  display: grid;
+  grid-template-columns: 224px 1fr;
+  min-height: 100vh;
+  background: var(--bg);
+  transition: background 0.2s var(--easing);
+}
+.app.is-mobile {
+  grid-template-columns: 1fr;
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.page {
+  padding: var(--s-6) var(--s-8);
+  flex: 1;
+  min-width: 0;
+}
+.app.is-mobile .page {
+  padding: var(--s-4);
+}

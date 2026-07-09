@@ -1,0 +1,59 @@
+/* Avatar — disco premium da marca. Gradiente MONOCROMÁTICO (claro→profundo) p/ profundidade sem o
+   "marrom-barro" do antigo brand→ink; brilho sutil no topo + anel de borda interno + sombra leve.
+   Tokens-only (white/black só em color-mix p/ realce/sombra — detalhe geométrico, como sombra). */
+.avatar {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--r-pill);
+  background: radial-gradient(
+    120% 120% at 30% 20%,
+    color-mix(in srgb, var(--brand) 72%, white) 0%,
+    var(--brand) 46%,
+    var(--brand-700) 100%
+  );
+  color: #fff;
+  font-size: var(--fs-13);
+  font-weight: var(--fw-semibold);
+  letter-spacing: 0.01em;
+  flex-shrink: 0;
+  overflow: hidden;
+  text-transform: uppercase;
+  box-shadow: var(--sh-sm);
+}
+/* anel interno + leve sombra inferior dão a sensação de moeda polida (vale p/ iniciais e foto) */
+.avatar::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, white 16%, transparent),
+    inset 0 -3px 6px color-mix(in srgb, black 12%, transparent),
+    inset 0 1px 0 color-mix(in srgb, white 22%, transparent);
+  pointer-events: none;
+}
+.avatar-sm {
+  width: 28px;
+  height: 28px;
+  font-size: var(--fs-12);
+}
+.avatar-lg {
+  width: 48px;
+  height: 48px;
+  font-size: var(--fs-16);
+}
+.avatar-xl {
+  width: 64px;
+  height: 64px;
+  font-size: var(--fs-20);
+}
+.avatar img {
+  position: relative;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}

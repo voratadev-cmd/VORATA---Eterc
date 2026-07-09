@@ -1,0 +1,183 @@
+/* M-Contábil · Apuração Pericial */
+
+.cpr-secao {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: var(--s-4) var(--s-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+}
+.cpr-secao-head {
+  display: flex;
+  gap: var(--s-3);
+  align-items: flex-start;
+  padding-bottom: var(--s-3);
+  border-bottom: 1px solid var(--border);
+}
+.cpr-secao-icon {
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--brand-50);
+  color: var(--brand);
+  flex-shrink: 0;
+}
+[data-theme="dark"] .cpr-secao-icon {
+  background: rgba(67, 124, 218, 0.12);
+}
+.cpr-secao-titulo {
+  font-size: var(--fs-15);
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+  margin: 0;
+}
+.cpr-secao-sub {
+  font-size: 11px;
+  color: var(--text-3);
+  margin: 2px 0 0 0;
+  line-height: 1.55;
+}
+
+.cpr-metodologia {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 16px;
+  background: var(--surface-2);
+  border-radius: var(--r-sm);
+}
+.cpr-metod-label {
+  font-size: 10px;
+  font-weight: var(--fw-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-3);
+}
+.cpr-metod-valor {
+  font-size: var(--fs-13);
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+  font-family: var(--font-mono);
+}
+
+.cpr-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--s-3);
+}
+@media (max-width: 720px) {
+  .cpr-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.cpr-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: var(--s-3) var(--s-4);
+  background: var(--surface-2);
+  border-radius: var(--r-sm);
+  border-left: 4px solid;
+}
+.cpr-card-custo {
+  border-left-color: var(--danger);
+}
+.cpr-card-receita {
+  border-left-color: var(--success);
+}
+.cpr-card-label {
+  font-size: 10px;
+  font-weight: var(--fw-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-3);
+}
+.cpr-card-valor {
+  font-size: var(--fs-28);
+  font-weight: var(--fw-bold);
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+  line-height: 1.15;
+}
+.cpr-card-custo .cpr-card-valor {
+  color: var(--danger);
+}
+.cpr-card-receita .cpr-card-valor {
+  color: var(--success);
+}
+.cpr-card-nota {
+  font-size: 11px;
+  color: var(--text-3);
+  line-height: 1.4;
+}
+
+.cpr-resultado {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: var(--s-4) var(--s-5);
+  border-radius: var(--r-md);
+}
+.cpr-resultado-success {
+  background: var(--success-bg);
+}
+.cpr-resultado-danger {
+  background: var(--danger-bg);
+}
+.cpr-resultado-label {
+  font-size: 11px;
+  font-weight: var(--fw-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.cpr-resultado-success .cpr-resultado-label,
+.cpr-resultado-success .cpr-resultado-valor {
+  color: var(--success);
+}
+.cpr-resultado-danger .cpr-resultado-label,
+.cpr-resultado-danger .cpr-resultado-valor {
+  color: var(--danger);
+}
+.cpr-resultado-valor {
+  font-size: var(--fs-32);
+  font-weight: var(--fw-bold);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+.cpr-resultado-nota {
+  font-size: var(--fs-13);
+  color: var(--text-2);
+  font-weight: var(--fw-medium);
+}
+
+.cpr-observacao {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: var(--s-3) var(--s-4);
+  background: var(--info-bg);
+  border-radius: var(--r-sm);
+}
+[data-theme="dark"] .cpr-observacao {
+  background: rgba(67, 124, 218, 0.08);
+}
+.cpr-observacao-icon {
+  flex-shrink: 0;
+  color: var(--info);
+  margin-top: 2px;
+}
+.cpr-observacao-texto {
+  font-size: var(--fs-13);
+  color: var(--text-2);
+  line-height: 1.6;
+}
+.cpr-observacao-texto strong {
+  color: var(--info);
+  font-weight: var(--fw-bold);
+}

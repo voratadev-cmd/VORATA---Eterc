@@ -1,0 +1,553 @@
+/* C.14 — Mapa da Obra. Tokens-only. Retigráfico em SVG sobre asfalto escuro (--ink) com texto
+   --on-accent; farol comunicado por cor de valor / Badge / hachura — nunca tarja de borda. */
+
+.mp-page {
+  padding: var(--s-6) var(--s-8);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+  /* enche a largura (padrão do app) — sem cap nem sobra lateral em telas grandes. */
+}
+
+/* ── Cabeçalho ─────────────────────────────────────────────────────────────── */
+.mp-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--s-4);
+}
+.mp-title {
+  font-size: var(--fs-28);
+  font-weight: var(--fw-bold);
+  color: var(--text);
+  line-height: var(--lh-tight);
+}
+.mp-sub {
+  margin-top: var(--s-1);
+  font-size: var(--fs-13);
+  color: var(--text-3);
+  max-width: 760px;
+  line-height: var(--lh-normal);
+}
+.mp-sub b {
+  color: var(--text-2);
+  font-weight: var(--fw-semibold);
+}
+
+.mp-howto {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-2);
+  background: var(--info-bg);
+  border: 1px solid color-mix(in srgb, var(--info) 30%, var(--surface));
+  border-radius: var(--r-md);
+  padding: var(--s-3) var(--s-4);
+  font-size: var(--fs-12);
+  color: var(--info);
+  line-height: var(--lh-normal);
+}
+.mp-howto-ic {
+  flex: none;
+  margin-top: 1px;
+}
+.mp-howto span {
+  max-width: 88ch;
+}
+.mp-howto b {
+  font-weight: var(--fw-semibold);
+}
+
+.mp-sec {
+  font-size: var(--fs-11);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--text-4);
+  font-weight: var(--fw-bold);
+  margin: var(--s-2) 0 calc(var(--s-1) * -1);
+}
+
+/* ── KPIs (padrão canônico: chip de ícone, sem tarja) ──────────────────────── */
+.mp-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--s-3);
+}
+.mp-kpc {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: var(--s-4);
+  transition:
+    transform 0.15s var(--easing),
+    border-color 0.15s var(--easing),
+    box-shadow 0.15s var(--easing);
+}
+.mp-kpc:hover {
+  transform: translateY(-2px);
+  border-color: var(--border-strong);
+  box-shadow: var(--sh-sm);
+}
+.mp-kpc-hd {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+}
+.mp-kpc-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--r-sm);
+  background: var(--surface-2);
+  color: var(--text-2);
+  flex: none;
+}
+.mp-kpc-l {
+  font-size: var(--fs-11);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  color: var(--text-3);
+  font-weight: var(--fw-semibold);
+}
+.mp-kpc-v {
+  margin-top: var(--s-2);
+  font-size: var(--fs-22);
+  font-weight: var(--fw-bold);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  color: var(--text);
+}
+.mp-kpc-v-success {
+  color: var(--success);
+}
+.mp-kpc-v-danger {
+  color: var(--danger);
+}
+.mp-kpc-s {
+  margin-top: var(--s-2);
+  font-size: var(--fs-11);
+  color: var(--text-4);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Card genérico ─────────────────────────────────────────────────────────── */
+.mp-card {
+  padding: var(--s-5);
+}
+.mp-pt {
+  font-size: var(--fs-15);
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+}
+.mp-pt-hint {
+  font-size: var(--fs-12);
+  font-weight: var(--fw-regular);
+  color: var(--text-4);
+}
+
+/* ── Slider ────────────────────────────────────────────────────────────────── */
+.mp-sliderwrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+}
+.mp-sliderhd {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-4);
+}
+.mp-slidermes {
+  font-size: var(--fs-15);
+  font-weight: var(--fw-bold);
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+.mp-slidermes span {
+  font-size: var(--fs-12);
+  font-weight: var(--fw-regular);
+  color: var(--text-3);
+}
+.mp-sliderlib {
+  font-size: var(--fs-12);
+  color: var(--text-3);
+  font-variant-numeric: tabular-nums;
+}
+.mp-sliderlib b {
+  color: var(--success);
+  font-weight: var(--fw-semibold);
+}
+.mp-slider {
+  width: 100%;
+  accent-color: var(--brand);
+  cursor: pointer;
+}
+
+/* ── Painel header com legenda ─────────────────────────────────────────────── */
+.mp-panhd {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-4);
+  flex-wrap: wrap;
+  margin-bottom: var(--s-3);
+}
+.mp-lgnd {
+  display: flex;
+  align-items: center;
+  gap: var(--s-4);
+  flex-wrap: wrap;
+  font-size: var(--fs-11);
+  color: var(--text-3);
+}
+.mp-lgnd span {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-1);
+}
+.mp-lgic {
+  width: 20px;
+  height: 17px;
+}
+.mp-sw-imp {
+  width: 14px;
+  height: 10px;
+  border-radius: 2px;
+  background: repeating-linear-gradient(
+    45deg,
+    var(--danger),
+    var(--danger) 3px,
+    transparent 3px,
+    transparent 6px
+  );
+  border: 1px solid color-mix(in srgb, var(--danger) 40%, transparent);
+}
+
+/* ── Retigráfico (SVG) ─────────────────────────────────────────────────────── */
+.mp-retigwrap {
+  overflow-x: auto;
+}
+.mp-retig {
+  width: 100%;
+  min-width: 880px;
+  height: auto;
+  display: block;
+}
+.mp-road {
+  fill: var(--ink);
+}
+.mp-segdiv {
+  stroke: color-mix(in srgb, var(--on-accent) 28%, transparent);
+  stroke-width: 1;
+}
+.mp-seglbl {
+  fill: var(--on-accent);
+  font-size: 11px;
+  font-weight: var(--fw-bold);
+  font-family: var(--font);
+}
+.mp-segval {
+  fill: color-mix(in srgb, var(--on-accent) 78%, transparent);
+  font-size: 9px;
+  font-family: var(--font);
+  font-variant-numeric: tabular-nums;
+}
+.mp-median {
+  stroke: color-mix(in srgb, var(--on-accent) 50%, transparent);
+  stroke-width: 2;
+  stroke-dasharray: 9 7;
+}
+.mp-hatch-bg {
+  fill: transparent;
+}
+.mp-hatch-line {
+  stroke: var(--danger);
+  stroke-width: 3.4;
+}
+.mp-hatch-rect {
+  opacity: 0.85;
+}
+.mp-tick {
+  stroke: var(--border-strong);
+  stroke-width: 1;
+}
+.mp-tick-lbl {
+  fill: var(--text-4);
+  font-size: 9px;
+  font-family: var(--font);
+  font-variant-numeric: tabular-nums;
+}
+
+/* pontuais */
+.mp-pstem {
+  stroke: var(--border-strong);
+  stroke-width: 1;
+}
+.mp-pontlbl {
+  fill: var(--text-3);
+  font-size: 8.5px;
+  font-family: var(--font);
+}
+.mp-i-bridge {
+  stroke: var(--text-2);
+  stroke-width: 1.6;
+}
+.mp-i-loop {
+  stroke: var(--text-2);
+  stroke-width: 1.6;
+}
+.mp-i-drop {
+  fill: var(--info);
+}
+.mp-i-talude-body {
+  fill: var(--warning);
+}
+.mp-i-talude-mark {
+  stroke: var(--on-accent);
+  stroke-width: 1.4;
+  fill: none;
+  stroke-linecap: round;
+}
+/* pontual impedido → realça em danger */
+.mp-pont-imp .mp-pstem {
+  stroke: var(--danger);
+  stroke-width: 1.5;
+}
+.mp-pont-imp .mp-pontlbl {
+  fill: var(--danger);
+  font-weight: var(--fw-bold);
+}
+.mp-pont-imp .mp-i-bridge,
+.mp-pont-imp .mp-i-loop {
+  stroke: var(--danger);
+}
+.mp-pont-imp .mp-i-drop {
+  fill: var(--danger);
+}
+.mp-pont-imp .mp-i-talude-body {
+  fill: var(--danger);
+}
+
+/* ── Formulário ────────────────────────────────────────────────────────────── */
+.mp-form {
+  margin-top: var(--s-3);
+  max-width: 1080px;
+}
+.mp-formgrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--s-3);
+}
+.mp-fld {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-1);
+}
+.mp-fld-2 {
+  grid-column: span 2;
+}
+.mp-fld > span {
+  font-size: var(--fs-11);
+  font-weight: var(--fw-semibold);
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+.mp-fld > em {
+  font-size: var(--fs-11);
+  color: var(--text-4);
+  font-style: italic;
+}
+.mp-formfoot {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  margin-top: var(--s-4);
+}
+.mp-formerr {
+  font-size: var(--fs-12);
+  color: var(--danger);
+  font-weight: var(--fw-medium);
+}
+
+/* ── Tabelas ───────────────────────────────────────────────────────────────── */
+.mp-tscroll {
+  overflow-x: auto;
+  margin-top: var(--s-3);
+}
+.mp-t {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-12);
+  min-width: 720px;
+}
+.mp-t-narrow {
+  max-width: 880px;
+}
+.mp-t thead th {
+  text-align: left;
+  padding: var(--s-2) var(--s-3);
+  background: var(--surface-2);
+  color: var(--text-3);
+  font-weight: var(--fw-semibold);
+  font-size: var(--fs-11);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  border-bottom: 1px solid var(--border);
+}
+.mp-t td {
+  padding: var(--s-2) var(--s-3);
+  border-bottom: 1px solid var(--border);
+  color: var(--text-2);
+  vertical-align: middle;
+}
+.mp-t .r {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.mp-t tbody tr:hover td {
+  background: var(--surface-2);
+}
+.mp-strong {
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+}
+.mp-nil {
+  color: var(--text-4);
+}
+.mp-pctcell {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  justify-content: flex-end;
+}
+.mp-pctbar {
+  display: inline-block;
+  width: 54px;
+  height: 6px;
+  background: var(--surface-3);
+  border-radius: var(--r-pill);
+  overflow: hidden;
+}
+.mp-pctbar i {
+  display: block;
+  height: 100%;
+  background: var(--danger);
+}
+.mp-tot td {
+  font-weight: var(--fw-bold);
+  color: var(--text);
+  background: var(--surface-2);
+  border-top: 2px solid var(--border-strong);
+}
+.mp-tot:hover td {
+  background: var(--surface-2);
+}
+.mp-transv td {
+  color: var(--text-3);
+  font-style: italic;
+}
+.mp-transv .mp-strong {
+  font-style: normal;
+}
+.mp-empty {
+  margin-top: var(--s-3);
+  text-align: center;
+  color: var(--text-4);
+  font-size: var(--fs-12);
+  padding: var(--s-5);
+  background: var(--surface-2);
+  border-radius: var(--r-md);
+}
+.mp-del {
+  background: var(--danger-bg);
+  color: var(--danger);
+  border: none;
+  padding: 3px var(--s-2);
+  border-radius: var(--r-sm);
+  font-size: var(--fs-11);
+  font-weight: var(--fw-semibold);
+  cursor: pointer;
+  font-family: inherit;
+}
+.mp-del:hover {
+  background: color-mix(in srgb, var(--danger) 22%, var(--surface));
+}
+.mp-note {
+  margin-top: var(--s-3);
+  font-size: var(--fs-12);
+  color: var(--text-3);
+  line-height: var(--lh-normal);
+  background: var(--surface-2);
+  border-radius: var(--r-md);
+  padding: var(--s-3) var(--s-4);
+  max-width: 760px;
+}
+.mp-note b {
+  color: var(--text-2);
+  font-weight: var(--fw-semibold);
+}
+
+/* ── Leitura IA (card escuro · div próprio, NÃO usa .card p/ não herdar fundo branco) ── */
+.mp-ia {
+  background: var(--ink);
+  border: none;
+  border-radius: var(--r-lg);
+  padding: var(--s-5);
+}
+.mp-ia .mp-pt {
+  color: var(--on-accent);
+}
+.mp-ia-h {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  margin-bottom: var(--s-2);
+}
+.mp-ia-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: var(--fs-11);
+  font-weight: var(--fw-bold);
+  letter-spacing: 0.5px;
+  color: var(--ink);
+  background: var(--on-accent);
+  border-radius: var(--r-sm);
+  padding: 2px var(--s-2);
+}
+.mp-ia p {
+  font-size: var(--fs-13);
+  line-height: var(--lh-normal);
+  color: color-mix(in srgb, var(--on-accent) 84%, transparent);
+  max-width: 72ch;
+}
+.mp-ia b {
+  color: var(--on-accent);
+  font-weight: var(--fw-semibold);
+}
+
+/* ── Responsivo ────────────────────────────────────────────────────────────── */
+@media (max-width: 1100px) {
+  .mp-kpis {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .mp-formgrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 720px) {
+  .mp-page {
+    padding: var(--s-5) var(--s-4);
+  }
+  .mp-kpis,
+  .mp-formgrid {
+    grid-template-columns: 1fr;
+  }
+  .mp-fld-2 {
+    grid-column: span 1;
+  }
+  .mp-head {
+    flex-direction: column;
+  }
+}

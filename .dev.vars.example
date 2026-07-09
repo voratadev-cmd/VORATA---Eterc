@@ -1,0 +1,7 @@
+# Server-side env vars do Cloudflare Worker (NÃO vão pro bundle do cliente).
+# Copie para .dev.vars e preencha os valores.
+# Formato: chave=valor (sem prefixo).
+#
+# Exemplo:
+# DATABASE_URL=postgresql://...
+# API_SECRET=...

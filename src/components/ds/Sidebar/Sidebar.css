@@ -1,0 +1,361 @@
+.sb {
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  position: sticky;
+  top: 0;
+  /* sticky cria contexto de empilhamento próprio; sem z-index o conteúdo (cards do dashboard) paga
+     por cima e engole o dropdown do seletor de obra. Acima do conteúdo+topbar(20), abaixo de modais(1000). */
+  z-index: 50;
+}
+.sb-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 41, 72, 0.4);
+  z-index: 30;
+  backdrop-filter: blur(2px);
+}
+.sb-mobile {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 280px;
+  height: 100vh;
+  transform: translateX(-100%);
+  transition: transform 0.25s var(--easing);
+  z-index: 40;
+  box-shadow: var(--sh-lg);
+}
+.sb-mobile.open {
+  transform: translateX(0);
+}
+
+.sb-brand {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--s-5) var(--s-5) var(--s-4);
+  min-height: 32px;
+}
+.sb-brand.empty {
+  padding: var(--s-3) var(--s-5);
+}
+.sb-logo {
+  font-size: var(--fs-20);
+  font-weight: var(--fw-bold);
+  letter-spacing: -0.02em;
+  color: var(--text);
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+}
+.sb-logo-mark {
+  color: var(--brand);
+}
+.sb-logo-tag {
+  margin-left: 6px;
+  padding: 2px 7px;
+  font-size: var(--fs-12);
+  background: var(--brand);
+  color: #fff;
+  border-radius: var(--r-sm);
+  letter-spacing: 0.04em;
+  font-weight: var(--fw-bold);
+}
+.sb-close {
+  background: transparent;
+  border: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--r-sm);
+  color: var(--text-2);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+.sb-close:hover {
+  background: var(--surface-2);
+}
+
+.sb-nav {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 var(--s-3) var(--s-3);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.sb-nav .sb-group + .sb-group {
+  margin-top: 4px;
+}
+.sb-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.sb-item {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  width: 100%;
+  padding: 8px 10px;
+  background: transparent;
+  border: 0;
+  border-radius: var(--r-sm);
+  color: var(--text-2);
+  font-size: var(--fs-14);
+  font-weight: var(--fw-medium);
+  cursor: pointer;
+  text-align: left;
+  font-family: var(--font);
+}
+.sb-item:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+.sb-item.disabled,
+.sb-item.disabled:hover {
+  opacity: 0.4;
+  cursor: not-allowed;
+  background: transparent;
+  color: var(--text-3);
+}
+.sb-item.disabled .sb-item-icon {
+  color: var(--text-4);
+}
+.sb-item.active {
+  background: var(--brand-50);
+  color: var(--brand-700);
+}
+[data-theme="dark"] .sb-item.active {
+  background: rgba(241, 136, 77, 0.14);
+  color: var(--brand);
+}
+.sb-item.active .sb-item-icon {
+  color: var(--brand);
+}
+
+/* Destaque do pai quando algum filho está ativo — visualmente igual ao `.active`
+   (background brand-50 + texto/ícone brand). O `.active` aplica em cima e ganha
+   precedência se ambos coincidirem. */
+.sb-item.child-active:not(.active) {
+  background: var(--brand-50);
+  color: var(--brand-700);
+  font-weight: var(--fw-semibold);
+}
+[data-theme="dark"] .sb-item.child-active:not(.active) {
+  background: rgba(241, 136, 77, 0.14);
+  color: var(--brand);
+}
+.sb-item.child-active:not(.active) .sb-item-icon {
+  color: var(--brand);
+}
+
+.sb-item-icon {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  color: var(--text-3);
+  flex-shrink: 0;
+}
+.sb-item:hover .sb-item-icon {
+  color: var(--text-2);
+}
+.sb-item-label {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sb-count {
+  font-size: var(--fs-12);
+  background: var(--surface-2);
+  color: var(--text-3);
+  padding: 2px 6px;
+  border-radius: var(--r-pill);
+  font-weight: var(--fw-semibold);
+  font-variant-numeric: tabular-nums;
+}
+[data-theme="dark"] .sb-count {
+  background: var(--surface-3);
+}
+.sb-item.active .sb-count {
+  background: var(--brand);
+  color: #fff;
+}
+.sb-caret {
+  display: grid;
+  place-items: center;
+  color: var(--text-3);
+  transition: transform 0.15s var(--easing);
+}
+.sb-caret.open {
+  transform: rotate(180deg);
+}
+
+/* Contador de filhos no grupo (ex.: "4" ao lado do caret). Sutil. */
+.sb-child-count {
+  font-size: 10px;
+  font-weight: var(--fw-semibold);
+  color: var(--text-4);
+  font-variant-numeric: tabular-nums;
+  padding: 1px 6px;
+  border-radius: var(--r-pill);
+  background: var(--surface-2);
+  line-height: 1.4;
+}
+.sb-item:hover .sb-child-count {
+  color: var(--text-3);
+  background: var(--surface-3);
+}
+.sb-item.active .sb-child-count,
+.sb-item.child-active .sb-child-count {
+  color: var(--brand-700);
+  background: var(--brand-50);
+}
+[data-theme="dark"] .sb-item.active .sb-child-count,
+[data-theme="dark"] .sb-item.child-active .sb-child-count {
+  color: var(--brand);
+  background: rgba(241, 136, 77, 0.18);
+}
+
+/* Bullet brand: aparece quando o grupo está FECHADO e há filho ativo dentro.
+   Sinaliza "tem item selecionado aqui dentro" sem precisar abrir o grupo. */
+.sb-child-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--brand);
+  flex-shrink: 0;
+}
+
+/* Wrapper que anima a ALTURA do submenu: grid-template-rows 0fr→1fr — truque
+   moderno que permite transicionar de/para "auto" sem medir altura em JS.
+   A sub-lista fica sempre montada; só o estado `.open` muda (toggle por clique).
+   Rápido (0.12s) + um fade leve no conteúdo, juntos — sem cascata item-a-item. */
+.sb-sub-wrap {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.12s var(--easing);
+}
+.sb-sub-wrap.open {
+  grid-template-rows: 1fr;
+}
+.sb-sub {
+  /* min-height:0 + overflow:hidden são essenciais pro grid-rows colapsar o conteúdo. */
+  min-height: 0;
+  overflow: hidden;
+  padding: 2px 0 6px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  opacity: 0;
+  transition: opacity 0.1s var(--easing);
+}
+.sb-sub-wrap.open .sb-sub {
+  opacity: 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  .sb-sub-wrap {
+    transition: none;
+  }
+  .sb-sub {
+    transition: none;
+  }
+}
+.sb-subitem {
+  display: block;
+  background: transparent;
+  border: 0;
+  padding: 6px 10px;
+  border-radius: var(--r-sm);
+  color: var(--text-2);
+  font-size: var(--fs-13);
+  font-weight: var(--fw-medium);
+  cursor: pointer;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-family: var(--font);
+}
+.sb-subitem:hover {
+  color: var(--text);
+  background: var(--surface-2);
+}
+.sb-subitem.disabled,
+.sb-subitem.disabled:hover {
+  opacity: 0.4;
+  cursor: not-allowed;
+  color: var(--text-3);
+  background: transparent;
+}
+.sb-subitem.active {
+  color: var(--brand-700);
+  background: var(--brand-50);
+  font-weight: var(--fw-semibold);
+}
+[data-theme="dark"] .sb-subitem.active {
+  color: var(--brand);
+  background: rgba(241, 136, 77, 0.1);
+}
+
+.sb-divider {
+  height: 1px;
+  background: var(--border);
+  margin: var(--s-3) var(--s-2);
+}
+
+.sb-footer {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  padding: var(--s-3) var(--s-4);
+  border-top: 1px solid var(--border);
+}
+.sb-me {
+  flex: 1;
+  min-width: 0;
+}
+.sb-me-name {
+  font-size: var(--fs-14);
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sb-me-plan {
+  font-size: var(--fs-12);
+  color: var(--text-3);
+}
+
+/* Highlights — destaque visual no item (ex.: "CORAÇÃO" no Módulo 2) */
+.sb-item-tag {
+  font-size: 9px;
+  font-weight: var(--fw-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 2px 6px;
+  border-radius: var(--r-sm);
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+[data-theme="dark"] .sb-item-tag {
+  background: rgba(209, 67, 67, 0.18);
+}
+
+/* Indicador "key" em sub-itens destacados (ex.: RMA, Gerador de Claim) */
+.sb-subitem.key::after {
+  content: "";
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--brand);
+  margin-left: 6px;
+  vertical-align: middle;
+}

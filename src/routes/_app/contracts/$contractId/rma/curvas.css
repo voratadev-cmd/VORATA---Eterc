@@ -1,0 +1,440 @@
+/* RMA · Aba Aderência das Curvas (C.8) — co-localizado. Fiel ao mockup C08_Curvas, tokens-only. */
+
+.cur-main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+}
+
+/* ── Header ────────────────────────────────────────────────────── */
+
+.cur-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--s-3);
+  flex-wrap: wrap;
+}
+.cur-titulo {
+  font-size: var(--fs-28);
+  font-weight: var(--fw-bold);
+  color: var(--text);
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+.cur-sub {
+  font-size: var(--fs-13);
+  color: var(--text-3);
+  line-height: 1.5;
+  margin: 6px 0 0 0;
+  max-width: 92ch;
+}
+.cur-sub strong {
+  color: var(--text-2);
+  font-weight: var(--fw-semibold);
+}
+
+/* ── Banner de aviso (BM estimado) ─────────────────────────────── */
+
+.cur-warn {
+  background: var(--warning-bg);
+  border: 1px solid color-mix(in srgb, var(--warning) 30%, var(--surface));
+  border-radius: var(--r-md);
+  padding: var(--s-3) var(--s-4);
+  font-size: var(--fs-12);
+  color: var(--text-2);
+  line-height: 1.5;
+}
+.cur-warn strong {
+  color: color-mix(in srgb, var(--warning) 70%, var(--text));
+  font-weight: var(--fw-semibold);
+}
+
+/* ── Rótulo de seção (uppercase) ───────────────────────────────── */
+
+.cur-sec {
+  font-size: 11px;
+  font-weight: var(--fw-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-3);
+  margin: var(--s-3) 2px calc(-1 * var(--s-1)) 2px;
+}
+.cur-section-sub {
+  font-size: var(--fs-12);
+  color: var(--text-3);
+  margin: 0;
+}
+
+/* ── 4 KPIs (dot da curva · sem tarja de borda) ────────────────── */
+
+.cur-kpis-4 {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--s-3);
+}
+@media (max-width: 1100px) {
+  .cur-kpis-4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 720px) {
+  .cur-kpis-4 {
+    grid-template-columns: 1fr;
+  }
+}
+.cur-kpi {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: var(--s-3) var(--s-4);
+  transition:
+    transform 0.15s var(--easing),
+    border-color 0.15s var(--easing),
+    box-shadow 0.15s var(--easing);
+}
+.cur-kpi:hover {
+  transform: translateY(-2px);
+  border-color: var(--border-strong);
+  box-shadow: var(--sh-sm);
+}
+.cur-kpi-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  font-weight: var(--fw-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-3);
+}
+.cur-kpi-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.cur-kpi-valor {
+  font-size: var(--fs-24);
+  font-weight: var(--fw-bold);
+  color: var(--text);
+  line-height: 1.1;
+  margin-top: 6px;
+}
+.cur-kpi-unit {
+  font-size: var(--fs-13);
+  font-weight: var(--fw-medium);
+  color: var(--text-4);
+}
+.cur-kpi-sub {
+  font-size: 10.5px;
+  color: var(--text-4);
+  margin-top: 3px;
+  font-variant-numeric: tabular-nums; /* o sub agora carrega o % vs contratado */
+}
+
+/* ── Gráfico ───────────────────────────────────────────────────── */
+
+.cur-chart-card {
+  padding: var(--s-4);
+}
+.cur-chart-titulo {
+  font-size: var(--fs-13);
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+  margin-bottom: var(--s-2);
+}
+.cur-cleg {
+  display: flex;
+  gap: var(--s-4);
+  flex-wrap: wrap;
+  margin-bottom: var(--s-3);
+}
+.cur-cleg-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--fs-12);
+  color: var(--text-2);
+}
+.cur-cleg-ln {
+  display: inline-block;
+  width: 18px;
+  height: 3px;
+  border-radius: var(--r-pill);
+}
+/* amostra da série de referência fina (Previsto Serviços) */
+.cur-cleg-ln-fina {
+  height: 2px;
+}
+.cur-cleg-nota {
+  font-size: var(--fs-12);
+  color: var(--text-4);
+}
+/* amostra tracejada da legenda (substitui o glifo ┊ textual) */
+.cur-cleg-dash {
+  display: inline-block;
+  width: 18px;
+  border-top: 2px dashed var(--text-4);
+  vertical-align: middle;
+  margin-right: 2px;
+}
+.cur-chart-toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  flex-wrap: wrap;
+  margin-bottom: var(--s-3);
+}
+.cur-chart-hint {
+  max-width: 64ch;
+}
+
+/* ── 3 cards de gap (tinta semântica · sem tarja de borda) ─────── */
+
+.cur-gapgrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--s-3);
+}
+@media (max-width: 880px) {
+  .cur-gapgrid {
+    grid-template-columns: 1fr;
+  }
+}
+.cur-gap {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: var(--s-4);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.cur-gap-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.cur-gap-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: var(--r-sm);
+  font-size: var(--fs-13);
+  font-weight: var(--fw-bold);
+  flex-shrink: 0;
+}
+.cur-gap-titulo {
+  font-size: var(--fs-12);
+  font-weight: var(--fw-bold);
+  color: var(--text);
+}
+.cur-gap-valor {
+  font-size: var(--fs-24);
+  font-weight: var(--fw-bold);
+  line-height: 1;
+  margin-top: 2px;
+}
+.cur-gap-valor.cur-gap-zero {
+  color: var(--success);
+}
+.cur-gap-resp {
+  font-size: 10.5px;
+  font-weight: var(--fw-semibold);
+}
+.cur-gap-desc {
+  font-size: var(--fs-12);
+  color: var(--text-3);
+  line-height: 1.45;
+}
+/* variantes — fundo tingido leve + chip + rótulos na cor (substitui a tarja banida) */
+.cur-gap-contratante {
+  background: color-mix(in srgb, var(--success) 5%, var(--surface));
+  border-color: color-mix(in srgb, var(--success) 22%, var(--border));
+}
+.cur-gap-contratante .cur-gap-num {
+  background: color-mix(in srgb, var(--success) 16%, var(--surface));
+  color: var(--success);
+}
+.cur-gap-contratante .cur-gap-resp,
+.cur-gap-contratante .cur-gap-valor {
+  color: var(--success);
+}
+.cur-gap-contratada {
+  background: color-mix(in srgb, var(--warning) 6%, var(--surface));
+  border-color: color-mix(in srgb, var(--warning) 24%, var(--border));
+}
+.cur-gap-contratada .cur-gap-num {
+  background: color-mix(in srgb, var(--warning) 18%, var(--surface));
+  color: color-mix(in srgb, var(--warning) 80%, var(--text));
+}
+.cur-gap-contratada .cur-gap-resp,
+.cur-gap-contratada .cur-gap-valor {
+  color: color-mix(in srgb, var(--warning) 78%, var(--text));
+}
+.cur-gap-exec {
+  background: color-mix(in srgb, var(--info) 5%, var(--surface));
+  border-color: color-mix(in srgb, var(--info) 22%, var(--border));
+}
+.cur-gap-exec .cur-gap-num {
+  background: color-mix(in srgb, var(--info) 16%, var(--surface));
+  color: var(--info);
+}
+.cur-gap-exec .cur-gap-resp,
+.cur-gap-exec .cur-gap-valor {
+  color: var(--info);
+}
+/* destaque do gap dominante (maiorGapRs do read-model): borda/sombra NEUTRAS via color-mix
+   + Badge — nunca tinta do responsável (evita 3º eixo semântico) nem tarja de borda */
+.cur-gap-maior {
+  border-color: color-mix(in srgb, var(--text) 30%, var(--border));
+  box-shadow: var(--sh-sm);
+}
+.cur-gap-maior-badge {
+  margin-left: auto;
+}
+
+/* ── Tabelas em grid (frente · responsabilidade) ───────────────── */
+
+.cur-tab {
+  display: flex;
+  flex-direction: column;
+  font-size: var(--fs-12);
+}
+/* Frente · Responsável · Contratado · Possível · Real · R$/HH · Aderência */
+.cur-tab-frente {
+  --cols: minmax(0, 1.5fr) minmax(0, 1.1fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr)
+    minmax(0, 0.7fr) minmax(0, 1.4fr);
+}
+.cur-tab-resp {
+  --cols: minmax(0, 1fr) minmax(0, 2fr) minmax(0, 1fr) minmax(0, 0.8fr) minmax(0, 1.2fr);
+}
+.cur-tab-head,
+.cur-tab-row {
+  display: grid;
+  grid-template-columns: var(--cols);
+  gap: var(--s-3);
+  align-items: center;
+  padding: 9px var(--s-2);
+}
+.cur-tab-head {
+  font-size: 10px;
+  font-weight: var(--fw-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-3);
+  border-bottom: 2px solid var(--border);
+}
+.cur-tab-row {
+  border-bottom: 1px solid var(--border);
+}
+.cur-tab-row:last-child {
+  border-bottom: 0;
+}
+.cur-tab-r {
+  text-align: right;
+  justify-self: end;
+}
+.cur-tab-nome {
+  color: var(--text);
+  font-weight: var(--fw-semibold);
+}
+.cur-tab-total {
+  border-top: 2px solid var(--border-strong);
+  border-bottom: 0;
+  background: var(--surface-2);
+  border-radius: 0 0 var(--r-sm) var(--r-sm);
+}
+.cur-tab-total .cur-tab-nome,
+.cur-tab-total .cur-tab-r {
+  font-weight: var(--fw-bold);
+  color: var(--text);
+}
+.cur-cell-origem {
+  color: var(--text-3);
+  font-size: 11px;
+}
+/* célula do Badge de responsável na tabela de frentes — clipa vereditos longos (title = texto cheio) */
+.cur-cell-resp {
+  min-width: 0;
+  overflow: hidden;
+}
+.cur-cell-resp .badge {
+  max-width: 100%;
+  overflow: hidden;
+}
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* barra de aderência / participação */
+.cur-ader {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.cur-ader-bar {
+  display: inline-block;
+  width: 84px;
+  height: 7px;
+  border-radius: var(--r-pill);
+  background: var(--surface-3);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.cur-ader-fl {
+  display: block;
+  height: 100%;
+  border-radius: var(--r-pill);
+}
+.cur-ader-pct {
+  font-weight: var(--fw-semibold);
+  color: var(--text-2);
+}
+
+/* nota explicativa sob a tabela */
+.cur-note {
+  margin: var(--s-3) var(--s-1) 0 var(--s-1);
+  font-size: var(--fs-12);
+  color: var(--text-3);
+  line-height: 1.5;
+}
+.cur-note strong {
+  color: var(--text-2);
+  font-weight: var(--fw-semibold);
+}
+
+/* ── Card escuro: leitura das curvas ───────────────────────────── */
+
+.cur-diagdark {
+  background: var(--ink);
+  border-radius: var(--r-md);
+  padding: var(--s-4) var(--s-5);
+  margin-top: var(--s-2);
+}
+.cur-diagdark-head {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: var(--fs-13);
+  font-weight: var(--fw-bold);
+  color: var(--on-accent);
+  margin-bottom: 7px;
+}
+.cur-diagdark-texto {
+  font-size: var(--fs-13);
+  line-height: 1.65;
+  color: color-mix(in srgb, var(--on-accent) 80%, transparent);
+  margin: 0;
+}
+.cur-diagdark-texto strong {
+  color: var(--on-accent);
+  font-weight: var(--fw-semibold);
+}
+
+.cur-pendente {
+  color: var(--text-4);
+}

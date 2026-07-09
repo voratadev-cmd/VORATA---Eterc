@@ -1,0 +1,733 @@
+/* RMA · Aba Recursos (5.3.3) — dado real (obra_recursos + obra_recursos_meses). Tokens-only. */
+
+.rec-main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+}
+
+/* ── Header local ──────────────────────────────────────────────── */
+
+.rec-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--s-4);
+  flex-wrap: wrap;
+}
+.rec-titulo {
+  font-size: var(--fs-18);
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+  margin: 0;
+}
+.rec-sub {
+  font-size: var(--fs-13);
+  color: var(--text-3);
+  margin: 2px 0 0 0;
+}
+.rec-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  flex-wrap: wrap;
+}
+
+/* ── Banner honesto (eixo real ausente · pré-execução) ─────────── */
+
+.rec-aviso {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-2);
+  background: var(--info-bg);
+  color: var(--text-2);
+  border-radius: var(--r-md);
+  padding: var(--s-3) var(--s-4);
+  font-size: var(--fs-13);
+  line-height: 1.45;
+}
+.rec-aviso svg {
+  color: var(--info);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.rec-aviso strong {
+  color: var(--text);
+  font-weight: var(--fw-semibold);
+}
+
+/* ── Ressalvas de conservação (derivadas · honestas) ─────────────
+   Collapsible discreto (<details>): fechado ocupa 1 linha; aberto lista as ressalvas. */
+
+.rec-ressalvas {
+  background: var(--info-bg);
+  border-radius: var(--r-md);
+  padding: var(--s-2) var(--s-4);
+}
+.rec-ressalvas-head {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  font-weight: var(--fw-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--info);
+  cursor: pointer;
+  user-select: none;
+  list-style: none;
+}
+.rec-ressalvas-head::-webkit-details-marker {
+  display: none;
+}
+.rec-ressalvas-head:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+  border-radius: var(--r-sm);
+}
+.rec-ressalvas-chev {
+  flex-shrink: 0;
+  transition: transform 0.15s var(--easing);
+}
+.rec-ressalvas[open] .rec-ressalvas-chev {
+  transform: rotate(90deg);
+}
+@media (prefers-reduced-motion: reduce) {
+  .rec-ressalvas-chev {
+    transition: none;
+  }
+}
+.rec-ressalvas-list {
+  margin: var(--s-2) 0 0 0;
+  padding-left: var(--s-4);
+  font-size: var(--fs-13);
+  color: var(--text-2);
+  line-height: 1.5;
+}
+
+/* Nota de rodapé da tabela (R$ por item ausente, etc.) */
+.rec-tabela-nota {
+  margin: var(--s-3) 0 0 0;
+  font-size: var(--fs-12);
+  color: var(--text-3);
+  line-height: 1.45;
+}
+
+/* ── Cruzamento faturamento × recursos (banner analítico) ──────── */
+
+.rec-cruz {
+  border-radius: var(--r-md);
+  padding: var(--s-3) var(--s-4);
+}
+.rec-cruz-info {
+  background: var(--info-bg);
+}
+.rec-cruz-warning {
+  background: var(--warning-bg);
+}
+.rec-cruz-head {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  font-weight: var(--fw-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: var(--s-2);
+}
+.rec-cruz-info .rec-cruz-head {
+  color: var(--info);
+}
+.rec-cruz-warning .rec-cruz-head {
+  color: var(--warning);
+}
+/* Camada 1: pares rótulo→valor (os números do JTBD, tabular-nums) */
+.rec-cruz-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2) var(--s-6);
+  margin: 0 0 var(--s-2) 0;
+}
+.rec-cruz-stat dt {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: var(--fw-semibold);
+  color: var(--text-3);
+}
+.rec-cruz-stat dd {
+  margin: 0;
+  font-size: var(--fs-16);
+  font-weight: var(--fw-bold);
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+.rec-cruz-stat-hero dd {
+  font-size: var(--fs-18);
+}
+.rec-cruz-body {
+  margin: 0;
+  font-size: var(--fs-13);
+  line-height: 1.55;
+  color: var(--text-2);
+}
+.rec-cruz-body strong {
+  color: var(--text);
+  font-weight: var(--fw-semibold);
+}
+/* Camada 3: método + ponteiro pro M3 */
+.rec-cruz-m3 {
+  margin: var(--s-2) 0 0 0;
+  font-size: var(--fs-12);
+  line-height: 1.5;
+  color: var(--text-3);
+}
+.rec-cruz-m3 strong {
+  color: var(--text-2);
+  font-weight: var(--fw-semibold);
+}
+
+/* ── Total Cost + ajuste pelo avanço (tabela) ──────────────────── */
+
+.rec-tc-wrap {
+  overflow-x: auto;
+}
+.rec-tc {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-13);
+}
+.rec-tc th {
+  text-align: right;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-3);
+  font-weight: var(--fw-bold);
+  padding: var(--s-2) var(--s-3);
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+.rec-tc th:first-child,
+.rec-tc td:first-child {
+  text-align: left;
+}
+.rec-tc td {
+  text-align: right;
+  padding: var(--s-2) var(--s-3);
+  border-bottom: 1px solid var(--border);
+  color: var(--text-2);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.rec-tc-grupo {
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+}
+.rec-tc-total td {
+  border-top: 2px solid var(--border-strong);
+  border-bottom: 0;
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+  background: var(--surface-2);
+}
+.rec-tc-neg {
+  color: var(--danger);
+  font-weight: var(--fw-semibold);
+}
+.rec-tc-pend {
+  color: var(--text-4);
+}
+.rec-tc-farol {
+  text-align: right;
+}
+.rec-tc-nota {
+  margin: var(--s-3) 0 0 0;
+  font-size: var(--fs-12);
+  color: var(--text-3);
+  line-height: 1.5;
+}
+.rec-tc-nota strong {
+  color: var(--text-2);
+  font-weight: var(--fw-semibold);
+}
+
+/* 2 colunas (Total Cost · Composição) — empilha em ≤1100 (alinha com o reflow do .rec-c04-kpis) */
+.rec-grid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--s-4);
+  align-items: start;
+}
+@media (max-width: 1100px) {
+  .rec-grid2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Skeletons (forma do conteúdo final: KPIs → histograma+side → bloco largo) ── */
+
+.rec-skel-kpi {
+  height: 188px;
+  border-radius: var(--r-md);
+}
+.rec-skel-chart {
+  height: 396px;
+  border-radius: var(--r-md);
+}
+.rec-skel-side {
+  height: 190px;
+  border-radius: var(--r-md);
+}
+.rec-skel-block {
+  height: 200px;
+  border-radius: var(--r-md);
+}
+
+/* ── Gráfico (curva de efetivo) ────────────────────────────────── */
+
+.rec-chart {
+  margin-top: var(--s-2);
+  margin-left: -10px;
+}
+
+/* legenda do gráfico — swatches via ChartLegend (DS); aqui só a linha com o hint à direita */
+.rec-legend-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--s-3);
+  margin-top: calc(-1 * var(--s-2));
+}
+.rec-legend-hint {
+  margin-left: auto;
+  font-size: var(--fs-12);
+  color: var(--text-3);
+  font-style: italic;
+}
+
+/* ── Células da tabela ─────────────────────────────────────────── */
+
+.rec-cell-nome {
+  font-size: var(--fs-14);
+  font-weight: var(--fw-medium);
+  color: var(--text);
+  line-height: 1.2;
+}
+.rec-cell-pend {
+  color: var(--text-4);
+}
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Sub-tabs da aba (snapshot fixo em cima · painéis sob demanda) ── */
+
+.rec-tabs {
+  margin-top: var(--s-2);
+}
+.rec-tab-painel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+  min-width: 0;
+}
+
+/* ── C04 single-page · seções, KPIs cross-cat, IA, Valor Agregado ─────────────── */
+
+.rec-sec {
+  font-size: var(--fs-12);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-3);
+  font-weight: var(--fw-bold);
+  margin: 0 0 var(--s-3) 0;
+}
+.rec-sec-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-3);
+  margin-bottom: var(--s-3);
+  flex-wrap: wrap;
+}
+.rec-sec-head .rec-sec {
+  margin: 0;
+}
+.rec-nota {
+  font-size: var(--fs-12);
+  color: var(--text-3);
+  font-style: italic;
+  line-height: 1.5;
+  margin: var(--s-3) 0 0 0;
+}
+
+/* 3 KPIs cross-cat */
+.rec-c04-kpis {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--s-3);
+}
+@media (max-width: 1100px) {
+  .rec-c04-kpis {
+    grid-template-columns: 1fr;
+  }
+}
+.rec-c04-kpi {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: var(--s-4);
+  transition:
+    transform 0.15s var(--easing),
+    border-color 0.15s var(--easing),
+    box-shadow 0.15s var(--easing);
+}
+.rec-c04-kpi:hover {
+  transform: translateY(-2px);
+  border-color: var(--border-strong);
+  box-shadow: var(--sh-sm);
+}
+@media (prefers-reduced-motion: reduce) {
+  .rec-c04-kpi {
+    transition: none;
+  }
+  .rec-c04-kpi:hover {
+    transform: none;
+  }
+}
+.rec-c04-kpi-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-2);
+  margin-bottom: var(--s-2);
+}
+.rec-c04-kpi-nm {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--fs-13);
+  font-weight: var(--fw-bold);
+  color: var(--text);
+}
+/* Chip do ícone — padrão canônico de KPI card (chip quadrado --surface-2 / --r-sm) */
+.rec-c04-kpi-ic {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: var(--r-sm);
+  background: var(--surface-2);
+  color: var(--text-3);
+  flex-shrink: 0;
+}
+.rec-c04-pill {
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: var(--fs-12);
+  white-space: nowrap;
+}
+.rec-c04-kpi-big {
+  font-size: var(--fs-24);
+  font-weight: var(--fw-bold);
+  color: var(--text);
+  line-height: 1.05;
+  font-variant-numeric: tabular-nums;
+}
+.rec-c04-kpi-hint {
+  font-size: var(--fs-12);
+  color: var(--text-3);
+  margin: 2px 0 var(--s-3);
+}
+.rec-c04-kpi-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3px var(--s-4);
+  margin: 0;
+  border-top: 1px solid var(--border);
+  padding-top: var(--s-2);
+}
+.rec-c04-kpi-stats > div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  font-size: var(--fs-12);
+}
+.rec-c04-kpi-stats > div.wide {
+  grid-column: 1 / -1;
+}
+.rec-c04-kpi-stats dt {
+  color: var(--text-3);
+}
+.rec-c04-kpi-stats dd {
+  margin: 0;
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+.rec-c04-kpi-stats dd.rec-c04-neg {
+  color: var(--danger);
+}
+
+/* Análise IA (pendente) */
+.rec-ia {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: var(--s-4);
+}
+.rec-ia-head {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  margin-bottom: var(--s-2);
+}
+.rec-ia-badge {
+  font-weight: var(--fw-bold);
+}
+.rec-ia-title {
+  font-size: var(--fs-13);
+  font-weight: var(--fw-bold);
+  color: var(--text);
+}
+.rec-ia-pend {
+  font-size: var(--fs-13);
+  color: var(--text-3);
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* Valor Agregado */
+.rec-va {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: var(--s-4);
+}
+.rec-va-pill {
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: var(--fs-12);
+}
+.rec-va-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+  gap: var(--s-4);
+  align-items: start;
+}
+@media (max-width: 1100px) {
+  .rec-va-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.rec-va-legend-row {
+  margin-bottom: var(--s-2);
+}
+/* VA por serviço medido — lista com nome completo (title) + qtde tabular */
+.rec-va-serv {
+  margin-top: var(--s-3);
+}
+.rec-va-serv-head {
+  font-size: 10px;
+  font-weight: var(--fw-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-3);
+  margin-bottom: var(--s-1);
+}
+.rec-va-serv-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.rec-va-serv-list li {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s-3);
+  font-size: var(--fs-12);
+  color: var(--text-2);
+  min-width: 0;
+}
+.rec-va-serv-nm {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+.rec-va-serv-qt {
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.rec-va-tab {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-12);
+}
+.rec-va-tab th,
+.rec-va-tab td {
+  padding: 6px 4px;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  color: var(--text-2);
+}
+.rec-va-tab th.v,
+.rec-va-tab td.v {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.rec-va-tab thead th {
+  font-size: var(--fs-12);
+  color: var(--text-3);
+  font-weight: var(--fw-semibold);
+}
+.rec-va-tab td.v {
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+}
+.rec-va-tab tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* ── C04 · histograma + Resumo/Maiores-desvios ao lado · composição em barras ──── */
+
+.rec-histo-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
+  gap: var(--s-4);
+  align-items: start;
+}
+@media (max-width: 1100px) {
+  .rec-histo-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.rec-histo-side {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+  min-width: 0;
+}
+
+.rec-resumo-tab,
+.rec-md-tab {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-12);
+}
+.rec-resumo-tab th,
+.rec-resumo-tab td,
+.rec-md-tab th,
+.rec-md-tab td {
+  padding: 5px 4px;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  color: var(--text-2);
+}
+.rec-resumo-tab th.v,
+.rec-resumo-tab td.v,
+.rec-md-tab th.v,
+.rec-md-tab td.v {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.rec-resumo-tab thead th,
+.rec-md-tab thead th {
+  color: var(--text-3);
+  font-weight: var(--fw-semibold);
+}
+.rec-resumo-tab td.v,
+.rec-md-tab td.v {
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+}
+.rec-resumo-tab tbody tr:last-child td,
+.rec-md-tab tbody tr:last-child td {
+  border-bottom: none;
+}
+.rec-md-rec {
+  max-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text);
+}
+.rec-md-pos {
+  color: var(--danger);
+}
+
+/* Composição da equipe em barras (Contratado → Real) */
+.rec-comp-bars {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+}
+.rec-comp-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  font-size: var(--fs-12);
+  margin-bottom: 4px;
+}
+.rec-comp-cat {
+  font-weight: var(--fw-bold);
+  color: var(--text);
+}
+.rec-comp-val {
+  color: var(--text-2);
+  font-variant-numeric: tabular-nums;
+}
+.rec-comp-track {
+  height: 11px;
+  background: var(--surface-3);
+  border-radius: 5px;
+  overflow: hidden;
+  margin-bottom: 4px;
+}
+.rec-comp-bar {
+  display: block;
+  height: 100%;
+  border-radius: 5px;
+}
+.rec-comp-bar-c {
+  background: color-mix(in srgb, var(--info) 38%, transparent);
+}
+.rec-comp-bar-r {
+  background: var(--info);
+}
+.rec-comp-pend {
+  font-size: 10px;
+  color: var(--text-3);
+  font-style: italic;
+}
+.rec-comp-leg {
+  display: flex;
+  gap: var(--s-3);
+  margin-top: var(--s-3);
+}
+.rec-comp-leg span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px;
+  color: var(--text-3);
+}
+.rec-comp-sw {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+}
+.rec-comp-sw-c {
+  background: color-mix(in srgb, var(--info) 38%, transparent);
+}
+.rec-comp-sw-r {
+  background: var(--info);
+}

@@ -1,0 +1,434 @@
+/* RMA · Aba Análise de Responsabilidade (5.3.8) — co-localizado. */
+
+.rsp-main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+}
+
+/* ── Header ────────────────────────────────────────────────────── */
+
+.rsp-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--s-3);
+  flex-wrap: wrap;
+}
+.rsp-titulo {
+  font-size: var(--fs-28);
+  font-weight: var(--fw-bold);
+  color: var(--text);
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+.rsp-sub {
+  font-size: var(--fs-13);
+  color: var(--text-3);
+  margin: 4px 0 0 0;
+}
+.rsp-head-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  flex-shrink: 0;
+}
+
+/* ── 4 KPIs hero usam FarolCard do DS ───────────────────────────── */
+
+.rsp-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--s-3);
+}
+@media (max-width: 1280px) {
+  .rsp-kpis {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 720px) {
+  .rsp-kpis {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Section card ──────────────────────────────────────────────── */
+
+.rsp-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: var(--s-4);
+}
+.rsp-section-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--s-3);
+  margin-bottom: var(--s-3);
+  flex-wrap: wrap;
+}
+.rsp-section-title {
+  font-size: var(--fs-15);
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+  margin: 0;
+}
+.rsp-section-sub {
+  font-size: var(--fs-12);
+  color: var(--text-3);
+  margin-top: 2px;
+}
+
+/* ── Barra empilhada ───────────────────────────────────────────── */
+
+.rsp-bar-stack {
+  display: flex;
+  width: 100%;
+  height: 36px;
+  border-radius: var(--r-sm);
+  overflow: hidden;
+  margin-bottom: var(--s-3);
+}
+.rsp-bar-seg {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* 4px = proporção honesta — segmento pequeno não é esticado (legenda carrega o resto). */
+  min-width: 4px;
+  color: var(--surface);
+  font-size: var(--fs-12);
+  font-weight: var(--fw-bold);
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+  overflow: hidden;
+  padding: 0 4px;
+}
+.rsp-bar-label {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Legenda persistente da barra — dot 8px + responsável + valor + % + nº de eventos. */
+.rsp-bar-legend {
+  list-style: none;
+  margin: 0 0 var(--s-3) 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: var(--s-5);
+  row-gap: var(--s-2);
+}
+.rsp-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--fs-12);
+}
+.rsp-legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.rsp-legend-nome {
+  font-weight: var(--fw-bold);
+  letter-spacing: 0.04em;
+  font-size: 10px;
+  color: var(--text-2);
+}
+.rsp-legend-valor {
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+.rsp-legend-meta {
+  color: var(--text-3);
+  font-variant-numeric: tabular-nums;
+}
+.rsp-empty-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px;
+  background: var(--success-bg);
+  border-radius: var(--r-sm);
+  margin-bottom: var(--s-3);
+}
+.rsp-empty-text {
+  color: var(--success);
+  font-size: var(--fs-12);
+  font-weight: var(--fw-semibold);
+}
+
+/* Observação da distribuição — tom derivado do conteúdo: neutro por default,
+   tingido de danger (color-mix, padrão canônico) só quando a Contratante domina. */
+.rsp-obs {
+  padding: var(--s-3);
+  background: var(--surface-2);
+  border-radius: var(--r-sm);
+  font-size: var(--fs-12);
+  color: var(--text);
+  line-height: 1.55;
+}
+.rsp-obs strong {
+  color: var(--text);
+  font-weight: var(--fw-bold);
+}
+.rsp-obs-alerta {
+  background: color-mix(in srgb, var(--danger) 8%, var(--surface));
+}
+.rsp-obs-alerta strong {
+  color: var(--danger);
+}
+
+/* ── Grid 2 col ────────────────────────────────────────────────── */
+
+.rsp-grid {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: var(--s-4);
+  align-items: start;
+}
+.rsp-col-dir {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+  min-width: 0;
+}
+@media (max-width: 1100px) {
+  .rsp-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Matriz de eventos (tabela) ─────────────────────────────────── */
+
+/* Chips de filtro por responsável (slot `extra` da ColToolbar). */
+.rsp-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+}
+
+.rsp-tabela-wrap {
+  overflow-x: auto;
+}
+.rsp-tabela {
+  display: flex;
+  flex-direction: column;
+  font-size: var(--fs-13);
+  min-width: 620px;
+  --cols: 80px minmax(0, 1.5fr) 80px 100px 120px 70px;
+}
+/* Variante da view real — eventos de prazo (C.13). */
+.rsp-tabela-prazo {
+  --cols: 64px minmax(0, 1.6fr) 110px 130px 80px minmax(0, 1fr);
+}
+.rsp-tabela-head,
+.rsp-tabela-row {
+  display: grid;
+  grid-template-columns: var(--cols);
+  gap: var(--s-2);
+  align-items: center;
+  padding: 10px var(--s-2);
+}
+.rsp-tabela-head {
+  font-size: 10px;
+  font-weight: var(--fw-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-3);
+  border-bottom: 1px solid var(--border);
+}
+.rsp-tabela-row {
+  border-bottom: 1px solid var(--border);
+}
+.rsp-tabela-row:last-child {
+  border-bottom: 0;
+}
+.rsp-tabela .center {
+  display: flex;
+  justify-content: center;
+}
+.rsp-cell-id {
+  font-family: var(--font-mono);
+  font-size: var(--fs-12);
+  color: var(--text-2);
+  font-weight: var(--fw-medium);
+}
+.rsp-cell-evento {
+  color: var(--text);
+  font-weight: var(--fw-medium);
+}
+.rsp-cell-data {
+  color: var(--text-3);
+  font-size: var(--fs-12);
+  font-variant-numeric: tabular-nums;
+}
+.rsp-cell-docs {
+  font-size: var(--fs-12);
+  color: var(--text-3);
+}
+/* Impacto R$: neutro semibold — a pill é a única portadora da cor do responsável
+   (evita colisão com a semântica de farol). */
+.rsp-cell-impacto {
+  color: var(--text);
+}
+.rsp-cell-evento-prazo {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  flex-wrap: wrap;
+}
+.rsp-cell-fonte {
+  font-size: var(--fs-12);
+  color: var(--text-3);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.rsp-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  font-size: 10px;
+  font-weight: var(--fw-bold);
+  letter-spacing: 0.04em;
+  border-radius: var(--r-pill);
+  text-transform: uppercase;
+}
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+.fw-semibold {
+  font-weight: var(--fw-semibold);
+}
+
+.rsp-tabela-foot {
+  margin: var(--s-3) 0 0 0;
+  font-size: var(--fs-12);
+  color: var(--text-3);
+  text-align: center;
+}
+
+.rsp-empty-matrix {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s-2);
+  padding: var(--s-6) var(--s-4);
+  color: var(--success);
+  text-align: center;
+}
+.rsp-empty-matrix p {
+  margin: 0;
+  font-size: var(--fs-13);
+  color: var(--text-2);
+}
+
+/* ── Interpretação ─────────────────────────────────────────────── */
+
+.rsp-interp-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  font-weight: var(--fw-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--brand);
+  margin-bottom: var(--s-2);
+}
+.rsp-interp-texto {
+  font-size: var(--fs-13);
+  color: var(--text-2);
+  line-height: 1.6;
+  margin: 0 0 var(--s-3) 0;
+}
+.rsp-interp-texto:last-child {
+  margin-bottom: 0;
+}
+.rsp-interp-texto strong {
+  color: var(--text);
+  font-weight: var(--fw-semibold);
+}
+/* Citação do chat com a Adm Contratual IA — border-left é permitida AQUI por ser
+   citação/quote (única exceção do veto a bordas coloridas; cf. CLAUDE.md). */
+.rsp-interp-quote {
+  margin: var(--s-2) 0 0 0;
+  padding: var(--s-2) var(--s-3);
+  border-left: 3px solid var(--brand);
+  background: var(--surface-2);
+  border-radius: 0 var(--r-sm) var(--r-sm) 0;
+  font-size: var(--fs-12);
+  color: var(--text-2);
+  line-height: 1.55;
+  font-style: italic;
+}
+.rsp-interp-quote strong {
+  color: var(--text);
+  font-weight: var(--fw-semibold);
+}
+.rsp-interp-quote-ic {
+  display: inline-flex;
+  vertical-align: -2px;
+  margin-right: 6px;
+  color: var(--brand);
+}
+
+/* ── Quantificação por tipo ────────────────────────────────────── */
+
+.rsp-quant-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+.rsp-quant-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--s-3);
+  align-items: center;
+  padding: 10px;
+  background: var(--surface-2);
+  border-radius: var(--r-sm);
+}
+.rsp-quant-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.rsp-quant-cat {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--fs-13);
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+}
+/* Dot de farol 8px (Regra do Farol §7) — substitui a tarja lateral banida. */
+.rsp-quant-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.rsp-quant-desc {
+  font-size: 11px;
+  color: var(--text-3);
+  line-height: 1.4;
+}
+.rsp-quant-valor {
+  font-size: var(--fs-15);
+  white-space: nowrap;
+}
+.rsp-quant-empty {
+  font-size: var(--fs-13);
+  color: var(--text-3);
+  text-align: center;
+  padding: var(--s-4);
+  margin: 0;
+}

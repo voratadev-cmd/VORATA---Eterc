@@ -1,0 +1,181 @@
+/* Stepper · progresso em sequência. Cada fase é um bloco compacto [nó + texto];
+ * conectores flexíveis entre as fases preenchem a largura (verde = concluído).
+ * Estados: done (✓ verde) · current (brand + halo) · upcoming (número cinza).
+ */
+
+.stepper {
+  width: 100%;
+}
+
+.stepper-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+}
+
+/* ── Conector entre fases (cresce pra preencher a largura) ──────────── */
+.stepper-conn {
+  flex: 1 1 auto;
+  min-width: var(--s-6);
+  height: 2px;
+  border-radius: 1px;
+  background: var(--border);
+  margin: 0 var(--s-3);
+  align-self: center;
+  transition: background 0.35s var(--easing);
+}
+.stepper-conn.is-filled {
+  background: var(--success);
+}
+@media (prefers-reduced-motion: reduce) {
+  .stepper-conn {
+    transition: none;
+  }
+}
+
+/* ── Bloco da fase ─────────────────────────────────────────────────── */
+.stepper-item {
+  flex: 0 0 auto;
+  min-width: 0;
+  display: flex;
+}
+.stepper-trigger {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  padding: var(--s-2);
+  margin: 0;
+  background: transparent;
+  border: 0;
+  border-radius: var(--r-md);
+  appearance: none;
+  font-family: var(--font);
+  text-align: left;
+  position: relative;
+  transition: background 0.18s var(--easing);
+}
+button.stepper-trigger {
+  cursor: pointer;
+}
+
+/* ── Nó ────────────────────────────────────────────────────────────── */
+.stepper-node {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--r-pill);
+  border: 1.5px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--text-3);
+  font-size: var(--fs-13);
+  font-weight: var(--fw-bold);
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+  transition:
+    background 0.18s var(--easing),
+    border-color 0.18s var(--easing),
+    color 0.18s var(--easing),
+    box-shadow 0.18s var(--easing),
+    transform 0.18s var(--easing);
+}
+.stepper-check {
+  width: 15px;
+  height: 15px;
+}
+
+.stepper-item.is-done .stepper-node {
+  background: var(--success);
+  border-color: var(--success);
+  color: #fff;
+}
+.stepper-item.is-current .stepper-node {
+  background: var(--brand);
+  border-color: var(--brand);
+  color: #fff;
+  box-shadow: 0 0 0 4px var(--brand-50);
+}
+.stepper-item.is-upcoming .stepper-node {
+  background: var(--surface);
+  border-color: var(--border-strong);
+  color: var(--text-3);
+}
+
+/* ── Texto ─────────────────────────────────────────────────────────── */
+.stepper-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+.stepper-label {
+  font-size: var(--fs-14);
+  font-weight: var(--fw-semibold);
+  color: var(--text-2);
+  line-height: 1.2;
+  white-space: nowrap;
+  transition: color 0.18s var(--easing);
+}
+.stepper-hint {
+  font-size: var(--fs-12);
+  color: var(--text-4);
+  line-height: 1.2;
+  white-space: nowrap;
+}
+.stepper-item.is-done .stepper-hint {
+  color: var(--success);
+  font-weight: var(--fw-medium);
+}
+.stepper-item.is-current .stepper-label {
+  color: var(--text);
+  font-weight: var(--fw-bold);
+}
+.stepper-item.is-current .stepper-hint {
+  color: var(--brand-600);
+  font-weight: var(--fw-medium);
+}
+.stepper-item.is-upcoming .stepper-label {
+  color: var(--text-3);
+}
+
+/* ── Interação (só quando clicável) ────────────────────────────────── */
+button.stepper-trigger:hover {
+  background: var(--surface-2);
+}
+button.stepper-trigger:hover .stepper-label {
+  color: var(--text);
+}
+.stepper-item.is-upcoming button.stepper-trigger:hover .stepper-node {
+  border-color: var(--brand);
+  color: var(--brand);
+}
+button.stepper-trigger:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+
+/* ── Dark · halo/hint da fase atual ────────────────────────────────── */
+[data-theme="dark"] .stepper-item.is-current .stepper-node {
+  box-shadow: 0 0 0 4px rgba(241, 136, 77, 0.18);
+}
+[data-theme="dark"] .stepper-item.is-current .stepper-hint {
+  color: var(--brand);
+}
+
+/* ── Responsivo · empilha em telas estreitas ───────────────────────── */
+@media (max-width: 640px) {
+  .stepper-list {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--s-2);
+  }
+  .stepper-conn {
+    display: none;
+  }
+  .stepper-trigger {
+    width: 100%;
+  }
+}

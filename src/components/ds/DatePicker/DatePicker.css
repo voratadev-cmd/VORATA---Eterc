@@ -1,0 +1,313 @@
+.dpk {
+  position: relative;
+  display: inline-block;
+  min-width: 200px;
+  font-family: var(--font);
+}
+
+/* ── Trigger ──────────────────────────────────────────────────────── */
+.dpk-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  width: 100%;
+  padding: 8px 10px 8px 12px;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-sm);
+  color: var(--text);
+  font-size: var(--fs-14);
+  font-weight: var(--fw-medium);
+  cursor: pointer;
+  font-variant-numeric: tabular-nums;
+  font-family: var(--font);
+  transition:
+    border-color 120ms var(--easing),
+    box-shadow 120ms var(--easing);
+}
+.dpk-trigger:hover:not(:disabled) {
+  border-color: var(--brand);
+}
+.dpk-trigger.open,
+.dpk-trigger:focus-visible {
+  border-color: var(--brand);
+  box-shadow: var(--ring);
+  outline: none;
+}
+.dpk-trigger:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+.dpk-trigger[aria-invalid="true"] {
+  border-color: var(--danger);
+}
+.dpk-trigger.dpk-placeholder .dpk-text {
+  color: var(--text-3);
+  font-weight: var(--fw-regular);
+}
+
+.dpk-icon {
+  display: grid;
+  place-items: center;
+  color: var(--text-3);
+}
+.dpk-trigger:hover .dpk-icon,
+.dpk-trigger.open .dpk-icon {
+  color: var(--brand);
+}
+.dpk-text {
+  flex: 1;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.dpk-caret {
+  display: grid;
+  place-items: center;
+  color: var(--text-3);
+  transition: transform 180ms var(--easing);
+}
+.dpk-caret.open {
+  transform: rotate(180deg);
+  color: var(--brand);
+}
+
+/* ── Panel ────────────────────────────────────────────────────────── */
+.dpk-panel {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 20;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  box-shadow: var(--sh-lg);
+  padding: var(--s-3);
+  animation: dpk-fade 140ms var(--easing);
+}
+@keyframes dpk-fade {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── react-day-picker overrides (classes via prop `classNames`) ───── */
+.dpk-rdp {
+  --rdp-cell-size: 36px;
+  margin: 0;
+}
+.dpk-rdp-months {
+  display: flex;
+}
+.dpk-rdp-caption {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0 0 var(--s-2);
+  position: relative;
+}
+.dpk-rdp-caption-label {
+  font-size: var(--fs-14);
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+  text-transform: capitalize;
+}
+.dpk-rdp-dropdowns {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+}
+.dpk-rdp-dropdown-root {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+.dpk-rdp-dropdown {
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--r-sm);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: var(--fs-13);
+  font-weight: var(--fw-semibold);
+  padding: 4px 22px 4px 8px;
+  cursor: pointer;
+  text-transform: capitalize;
+  transition: background 120ms var(--easing);
+}
+.dpk-rdp-dropdown:hover {
+  background: var(--surface-2);
+}
+.dpk-rdp-dropdown:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+
+/* Nav (setas anterior/próximo) */
+.dpk-rdp-nav {
+  display: flex;
+  gap: 4px;
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+.dpk-rdp-nav-btn {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  background: transparent;
+  color: var(--text-3);
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  transition:
+    background 120ms var(--easing),
+    color 120ms var(--easing);
+}
+.dpk-rdp-nav-btn:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+.dpk-rdp-nav-btn:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+.dpk-rdp-chevron {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+}
+
+/* Grid de dias */
+.dpk-rdp-grid {
+  border-collapse: separate;
+  border-spacing: 2px;
+}
+.dpk-rdp-weekdays {
+  display: table-row;
+}
+.dpk-rdp-weekday {
+  width: 36px;
+  height: 28px;
+  text-align: center;
+  font-size: 10px;
+  font-weight: var(--fw-bold);
+  color: var(--text-4);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0;
+}
+.dpk-rdp-week {
+  display: table-row;
+}
+.dpk-rdp-day {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  text-align: center;
+}
+
+.dpk-rdp-day-button {
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent;
+  background: transparent;
+  border-radius: var(--r-sm);
+  color: var(--text-2);
+  font-size: var(--fs-13);
+  font-weight: var(--fw-medium);
+  cursor: pointer;
+  font-variant-numeric: tabular-nums;
+  font-family: var(--font);
+  transition:
+    background 120ms var(--easing),
+    color 120ms var(--easing),
+    border-color 120ms var(--easing);
+}
+.dpk-rdp-day-button:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+.dpk-rdp-day-button:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+
+.dpk-rdp-today .dpk-rdp-day-button {
+  border-color: var(--border-strong);
+  color: var(--text);
+  font-weight: var(--fw-semibold);
+}
+
+.dpk-rdp-selected .dpk-rdp-day-button {
+  background: var(--brand);
+  color: white;
+  border-color: var(--brand);
+}
+.dpk-rdp-selected .dpk-rdp-day-button:hover {
+  background: var(--brand-700);
+}
+
+.dpk-rdp-outside .dpk-rdp-day-button {
+  color: var(--text-4);
+}
+
+.dpk-rdp-disabled .dpk-rdp-day-button {
+  color: var(--text-4);
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.dpk-rdp-hidden {
+  visibility: hidden;
+}
+
+[data-theme="dark"] .dpk-rdp-day-button:hover {
+  background: var(--surface-3);
+}
+
+/* ── Footer ──────────────────────────────────────────────────────── */
+.dpk-foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--s-2) var(--s-1) 0;
+  margin-top: var(--s-2);
+  border-top: 1px solid var(--border);
+}
+.dpk-link {
+  font-size: var(--fs-12);
+  font-weight: var(--fw-semibold);
+  color: var(--brand);
+  background: transparent;
+  border: 0;
+  padding: 4px 6px;
+  cursor: pointer;
+  border-radius: var(--r-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  transition: background 120ms var(--easing);
+  font-family: var(--font);
+}
+.dpk-link:hover {
+  background: var(--brand-50);
+}
+.dpk-link:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+[data-theme="dark"] .dpk-link:hover {
+  background: rgba(241, 136, 77, 0.14);
+}

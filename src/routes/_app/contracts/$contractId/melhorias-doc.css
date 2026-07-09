@@ -1,0 +1,389 @@
+/* C.15 — Melhorias Documentais. Tokens-only. Cards SEM tarja de borda colorida; farol via Badge;
+   marcadores de lista = ícones lucide coloridos por tom. */
+
+.md-page {
+  padding: var(--s-6) var(--s-8);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+  /* enche a largura (padrão do app) — sem cap nem sobra lateral em telas grandes. */
+}
+
+/* ── Cabeçalho ─────────────────────────────────────────────────────────────── */
+.md-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--s-4);
+}
+.md-title {
+  font-size: var(--fs-28);
+  font-weight: var(--fw-bold);
+  color: var(--text);
+  line-height: var(--lh-tight);
+}
+.md-sub {
+  margin-top: var(--s-1);
+  font-size: var(--fs-13);
+  color: var(--text-3);
+  max-width: 880px;
+  line-height: var(--lh-normal);
+}
+
+/* ── KPIs (chip de ícone, sem tarja) ───────────────────────────────────────── */
+.md-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--s-3);
+}
+.md-kpc {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: var(--s-4);
+  transition:
+    transform 0.15s var(--easing),
+    border-color 0.15s var(--easing),
+    box-shadow 0.15s var(--easing);
+}
+.md-kpc:hover {
+  transform: translateY(-2px);
+  border-color: var(--border-strong);
+  box-shadow: var(--sh-sm);
+}
+.md-kpc-hd {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+}
+.md-kpc-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--r-sm);
+  background: var(--surface-2);
+  color: var(--text-2);
+  flex: none;
+}
+.md-kpc-l {
+  font-size: var(--fs-11);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  color: var(--text-3);
+  font-weight: var(--fw-semibold);
+}
+.md-kpc-v {
+  margin-top: var(--s-3);
+  font-size: var(--fs-16);
+  font-weight: var(--fw-bold);
+  color: var(--text);
+  line-height: 1.15;
+  min-height: 22px;
+  display: flex;
+  align-items: center;
+  font-variant-numeric: tabular-nums;
+}
+.md-kpc-s {
+  margin-top: var(--s-2);
+  font-size: var(--fs-11);
+  color: var(--text-3);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Faixa de seção (① ② ⚠) ───────────────────────────────────────────────── */
+.md-secband {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  margin: var(--s-4) 0 calc(var(--s-1) * -1);
+}
+.md-secn {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--r-pill);
+  background: var(--ink);
+  color: var(--on-accent);
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-14);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+}
+.md-secn-danger {
+  background: var(--danger);
+}
+.md-sect {
+  font-size: var(--fs-16);
+  font-weight: var(--fw-bold);
+  color: var(--text);
+}
+
+/* ── Painel ────────────────────────────────────────────────────────────────── */
+.md-pan {
+  padding: var(--s-5);
+}
+.md-panhd {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-3);
+  margin-bottom: var(--s-3);
+}
+.md-pt {
+  font-size: var(--fs-15);
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+}
+.md-pt-ic {
+  display: inline-flex;
+  color: var(--text-3);
+}
+
+/* ── Grids de colunas ──────────────────────────────────────────────────────── */
+.md-grid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--s-4);
+}
+.md-grid3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--s-4);
+}
+.md-col {
+  min-width: 0;
+}
+.md-colhd {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  font-size: var(--fs-12);
+  font-weight: var(--fw-semibold);
+  margin-bottom: var(--s-2);
+}
+.md-colhd-danger {
+  color: var(--danger);
+}
+.md-colhd-success {
+  color: var(--success);
+}
+.md-colhd-warning {
+  color: var(--warning);
+}
+.md-colhd-info {
+  color: var(--info);
+}
+.md-colhd-neutral {
+  color: var(--text-3);
+}
+
+/* ── Listas ────────────────────────────────────────────────────────────────── */
+.md-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-1);
+}
+.md-li {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-2);
+  font-size: var(--fs-12);
+  color: var(--text-2);
+  line-height: var(--lh-normal);
+}
+.md-mk {
+  flex: none;
+  margin-top: 2px;
+}
+.md-mk-danger {
+  color: var(--danger);
+}
+.md-mk-success {
+  color: var(--success);
+}
+.md-mk-warning {
+  color: var(--warning);
+}
+.md-mk-info {
+  color: var(--info);
+}
+.md-mk-neutral {
+  color: var(--text-4);
+}
+
+/* ── Exemplo (como está / como deveria) ────────────────────────────────────── */
+.md-ex {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  margin-top: var(--s-4);
+}
+.md-exbox {
+  border-radius: var(--r-md);
+  padding: var(--s-3) var(--s-4);
+  font-size: var(--fs-12);
+  line-height: var(--lh-normal);
+}
+.md-exbox-bad {
+  background: var(--danger-bg);
+  border: 1px solid color-mix(in srgb, var(--danger) 28%, var(--surface));
+  color: color-mix(in srgb, var(--danger) 88%, var(--text));
+}
+.md-exbox-good {
+  background: var(--success-bg);
+  border: 1px solid color-mix(in srgb, var(--success) 28%, var(--surface));
+  color: color-mix(in srgb, var(--success) 86%, var(--text));
+}
+.md-extag {
+  display: block;
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-11);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  margin-bottom: var(--s-1);
+}
+
+/* ── Síntese IA (card escuro) ──────────────────────────────────────────────── */
+.md-ia {
+  background: var(--ink);
+  border: none;
+  border-radius: var(--r-lg);
+  padding: var(--s-5);
+}
+.md-ia .md-pt {
+  color: var(--on-accent);
+}
+.md-ia-h {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  margin-bottom: var(--s-2);
+}
+.md-ia-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--fs-11);
+  font-weight: var(--fw-bold);
+  letter-spacing: 0.5px;
+  color: var(--ink);
+  background: var(--on-accent);
+  border-radius: var(--r-sm);
+  padding: 2px var(--s-2);
+}
+.md-ia p {
+  font-size: var(--fs-13);
+  line-height: var(--lh-normal);
+  color: color-mix(in srgb, var(--on-accent) 86%, transparent);
+  max-width: 78ch;
+}
+
+/* ── Desvios ───────────────────────────────────────────────────────────────── */
+.md-cff {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+.md-cff-line {
+  font-size: var(--fs-13);
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+  max-width: 78ch;
+}
+.md-cff-nota {
+  font-size: var(--fs-12);
+  color: var(--text-3);
+  line-height: var(--lh-normal);
+  max-width: 78ch;
+}
+.md-desvios {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+}
+.md-dv {
+  padding: var(--s-4);
+}
+.md-dvhd {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  flex-wrap: wrap;
+  margin-bottom: var(--s-3);
+}
+.md-dvt {
+  font-size: var(--fs-13);
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+}
+.md-dvfonte {
+  margin-left: auto;
+  font-size: var(--fs-11);
+  color: var(--text-3);
+  background: var(--surface-2);
+  padding: 2px var(--s-2);
+  border-radius: var(--r-pill);
+}
+.md-dvgrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--s-2) var(--s-5);
+  font-size: var(--fs-12);
+  color: var(--text-2);
+  line-height: var(--lh-normal);
+  font-variant-numeric: tabular-nums;
+  max-width: 960px;
+}
+.md-dvgrid .md-wide {
+  grid-column: 1 / -1;
+}
+.md-k {
+  color: var(--text-3);
+  font-weight: var(--fw-semibold);
+}
+.md-ressalva {
+  font-size: var(--fs-12);
+  color: var(--text-3);
+  font-style: italic;
+  line-height: var(--lh-normal);
+  background: var(--surface-2);
+  border-radius: var(--r-md);
+  padding: var(--s-3) var(--s-4);
+  max-width: 78ch;
+}
+
+/* ── Responsivo ────────────────────────────────────────────────────────────── */
+@media (max-width: 1100px) {
+  .md-kpis {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .md-grid3 {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 880px) {
+  .md-grid2 {
+    grid-template-columns: 1fr;
+  }
+  .md-dvgrid {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 720px) {
+  .md-page {
+    padding: var(--s-5) var(--s-4);
+  }
+  .md-kpis {
+    grid-template-columns: 1fr;
+  }
+  .md-head {
+    flex-direction: column;
+  }
+}

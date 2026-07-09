@@ -1,0 +1,88 @@
+# Deploy do agente "Adm Contratual IA" num Droplet (VPS · DigitalOcean) via Docker Compose.
+# ─────────────────────────────────────────────────────────────────────────────
+# Uma imagem (./Dockerfile), 3 processos + reverse-proxy:
+#   · api       — o CHAT (FastAPI/uvicorn, :8000) · exposto SÓ via Caddy (TLS)
+#   · mapper    — drena obra_arquivos status='raw'            (1 instância!)
+#   · extractor — drena status='ready_to_extract'             (1 instância!)
+#   · caddy     — reverse-proxy + HTTPS automático (Let's Encrypt) p/ AGENT_DOMAIN
+#
+# Auth do Claude (escolha no .env):
+#   · oauth_cli (assinatura): ANTHROPIC_API_KEY vazio + `docker compose exec api claude login`
+#       (uma vez). Persiste no volume claude_config — POR ISSO defina CLAUDE_CONFIG_DIR no .env
+#       (=/home/agent/.claude) ANTES do login, p/ .credentials.json E .claude.json caírem no volume.
+#   · api_key (cobra por token): preencha ANTHROPIC_API_KEY no .env.
+#
+# Subir:  docker compose up -d --build      ·  Logs: docker compose logs -f api
+# ⚠️ NÃO rodar 2 instâncias de mapper/extractor (dois pegam da mesma fila).
+# ⚠️ O .env NÃO vai pro git (service key + segredos). Veja .env.vps.example.
+
+# Base comum aos 3 processos (mesma imagem buildada localmente · sem pull de registry).
+x-agent: &agent
+  build:
+    context: .
+    dockerfile: Dockerfile
+  image: rdm-ia-agent
+  pull_policy: build # nunca tenta puxar de registry — sempre usa/builda a imagem local
+  restart: unless-stopped
+  env_file: .env
+  logging: # rotação — sem isto o json-file cresce sem teto no disco
+    driver: json-file
+    options: { max-size: "10m", max-file: "3" }
+  volumes:
+    - claude_config:/home/agent/.claude # persiste o `claude login` (oauth) entre restarts
+
+services:
+  api:
+    <<: *agent
+    mem_limit: 1200m # teto de RAM (cgroup): runaway = OOM do container (restart), não da caixa
+    expose:
+      - "8000" # só dentro da rede do compose — o host não abre a 8000 (entra via Caddy)
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:8000/api/health').getcode()==200 else 1)",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+  mapper:
+    <<: *agent
+    mem_limit: 500m
+    command: python -m agents.mapeamento.job
+    depends_on:
+      - api
+
+  extractor:
+    <<: *agent
+    mem_limit: 700m # extração é mais pesada (PyMuPDF/pandas) · EXTRACTOR_CONCURRENCY=1 no .env
+    command: python -m agents.extracao.job
+    depends_on:
+      - api
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    mem_limit: 128m
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "3" }
+    env_file: .env # lê AGENT_DOMAIN
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data # certificados TLS (persistir!)
+      - caddy_config:/config
+    depends_on:
+      - api
+
+volumes:
+  claude_config: # ~/.claude do agente (login OAuth + config da CLI)
+  caddy_data: # certs Let's Encrypt
+  caddy_config:

@@ -1,0 +1,25 @@
+/* ErroCard — estado de ERRO (≠ pendência). Co-localizado, tokens-only.
+   Overrides escopados em .erro-card por cima do EmptyState (não edita EmptyState.css). */
+
+/* Ilustração tingida de danger (o default do EmptyState é brand = tom de pendência/vazio). */
+.erro-card .empty-illu {
+  background: var(--danger-bg);
+  color: var(--danger);
+  box-shadow: none;
+}
+
+.erro-card-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s-3);
+}
+
+/* Mensagem técnica discreta — nunca compete com o título. */
+.erro-card-msg {
+  color: var(--text-4);
+  font-size: var(--fs-12);
+  line-height: var(--lh-normal);
+  max-width: 480px;
+  overflow-wrap: break-word;
+}

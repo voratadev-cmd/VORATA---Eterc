@@ -1,0 +1,555 @@
+/* Tela `/contracts/$id/mapeamento` — Fase 1 do pipeline.
+ * Stepper no topo · Sumário com ProgressBar · Tabs por tipo · Grid de cards.
+ */
+
+/* ── Stepper · espaço dedicado no topo ─────────────────────────── */
+.map-stepper {
+  margin: var(--s-4) 0 var(--s-5);
+}
+
+/* ── Sumário · anel (%) + contadores + ação ────────────────────── */
+.map-summary {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: var(--s-6);
+  align-items: center;
+  margin-bottom: var(--s-4);
+  padding: var(--s-6);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+}
+.map-summary-ring {
+  flex-shrink: 0;
+}
+.map-summary-text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+  min-width: 0;
+}
+.map-summary-headline {
+  font-size: var(--fs-18);
+  color: var(--text-2);
+  line-height: 1.25;
+}
+.map-summary-headline strong {
+  color: var(--text);
+  font-weight: var(--fw-bold);
+  font-variant-numeric: tabular-nums;
+}
+.map-summary-sub {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  flex-wrap: wrap;
+}
+.map-summary-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: var(--r-pill);
+  background: var(--surface-2);
+  color: var(--text-2);
+  font-size: var(--fs-12);
+  font-weight: var(--fw-medium);
+  font-variant-numeric: tabular-nums;
+}
+.map-summary-chip.chip-info {
+  background: var(--info-bg);
+  color: var(--info);
+}
+.map-summary-chip.chip-danger {
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+.map-summary-chip.chip-warning {
+  background: var(--warning-bg);
+  color: var(--warning);
+}
+.map-summary-chip.chip-success {
+  background: var(--success-bg);
+  color: var(--success);
+}
+.map-summary-chip.chip-success-strong {
+  background: var(--success);
+  color: white;
+  font-weight: var(--fw-semibold);
+}
+.map-summary-action {
+  flex-shrink: 0;
+}
+
+/* ── Dots de status (8px) ──────────────────────────────────────── */
+.map-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: var(--r-pill);
+  background: var(--text-3);
+  flex-shrink: 0;
+}
+.map-dot.dot-neutral {
+  background: var(--text-3);
+}
+.map-dot.dot-info {
+  background: var(--info);
+}
+.map-dot.dot-success {
+  background: var(--success);
+}
+.map-dot.dot-warning {
+  background: var(--warning);
+}
+.map-dot.dot-danger {
+  background: var(--danger);
+}
+.map-dot.dot-pulse {
+  position: relative;
+  box-shadow: 0 0 0 0 currentColor;
+  animation: map-dot-pulse 1.6s ease-out infinite;
+}
+@keyframes map-dot-pulse {
+  0% {
+    box-shadow: 0 0 0 0 var(--info);
+  }
+  70% {
+    box-shadow: 0 0 0 6px transparent;
+  }
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .map-dot.dot-pulse {
+    animation: none;
+  }
+}
+
+/* ── Tabs por tipo de documento ────────────────────────────────── */
+.map-tabs {
+  margin-bottom: var(--s-4);
+  overflow-x: auto;
+}
+.map-tab-count {
+  display: inline-block;
+  min-width: 18px;
+  padding: 0 5px;
+  margin-left: 2px;
+  border-radius: var(--r-pill);
+  background: var(--surface-3);
+  color: var(--text-3);
+  font-size: 11px;
+  font-weight: var(--fw-semibold);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  line-height: 1.5;
+}
+.tabs-item.active .map-tab-count {
+  background: var(--brand);
+  color: white;
+}
+
+/* ── Grid de cards ─────────────────────────────────────────────── */
+.map-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: var(--s-4);
+}
+
+.map-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+  padding: var(--s-4);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  transition:
+    border-color 0.15s var(--easing),
+    box-shadow 0.15s var(--easing),
+    transform 0.15s var(--easing);
+}
+.map-card:hover {
+  border-color: var(--border-strong);
+  box-shadow: var(--sh-md);
+  transform: translateY(-2px);
+}
+@media (prefers-reduced-motion: reduce) {
+  .map-card:hover {
+    transform: none;
+  }
+}
+
+/* Topo · badge de formato + status pill */
+.map-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-2);
+}
+
+/* Anel sutil no badge conforme o status (porta do layout antigo) */
+.map-card-status-mapping .map-item-ext,
+.map-card-status-extracting .map-item-ext {
+  box-shadow: 0 0 0 2px var(--info-bg);
+}
+.map-card-status-mapped .map-item-ext,
+.map-card-status-verified .map-item-ext {
+  box-shadow: 0 0 0 2px var(--success-bg);
+}
+.map-card-status-mapping_error .map-item-ext,
+.map-card-status-extraction_error .map-item-ext,
+.map-card-status-error .map-item-ext {
+  box-shadow: 0 0 0 2px var(--danger-bg);
+}
+
+/* Badge da extensão · reusado da lista antiga */
+.map-item-ext {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 48px;
+  height: 32px;
+  padding: 0 6px;
+  border-radius: var(--r-sm);
+  background: var(--surface-2);
+  color: var(--text-3);
+  font-size: 10px;
+  font-weight: var(--fw-bold);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  flex-shrink: 0;
+  font-family: var(--font);
+}
+.map-item-ext.tone-pdf {
+  background: var(--danger);
+  color: white;
+}
+.map-item-ext.tone-excel {
+  background: var(--success);
+  color: white;
+}
+.map-item-ext.tone-csv {
+  background: var(--success-bg);
+  color: var(--success);
+}
+.map-item-ext.tone-word {
+  background: var(--info);
+  color: white;
+}
+.map-item-ext.tone-mpp {
+  background: var(--vault);
+  color: white;
+}
+.map-item-ext.tone-markdown {
+  background: var(--ink);
+  color: white;
+}
+.map-item-ext.tone-other {
+  background: var(--surface-2);
+  color: var(--text-3);
+}
+
+/* Status como pill colorido por tom · reusado */
+.map-item-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: var(--r-pill);
+  font-size: var(--fs-12);
+  font-weight: var(--fw-semibold);
+  white-space: nowrap;
+  background: var(--surface-2);
+  color: var(--text-3);
+}
+.map-item-status-pill.tone-info {
+  background: var(--info-bg);
+  color: var(--info);
+}
+.map-item-status-pill.tone-success {
+  background: var(--success-bg);
+  color: var(--success);
+}
+.map-item-status-pill.tone-warning {
+  background: var(--warning-bg);
+  color: var(--warning);
+}
+.map-item-status-pill.tone-danger {
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+.map-item-status-pill.tone-neutral {
+  background: var(--surface-2);
+  color: var(--text-3);
+}
+
+/* Nome · renomeável (line-clamp 2) + lápis que aparece no hover */
+.map-card-name-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--s-2);
+}
+.map-card-name {
+  margin: 0;
+  font-size: var(--fs-15);
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+  line-height: var(--lh-snug);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  word-break: break-word;
+}
+.map-card-rename-btn {
+  opacity: 0;
+  flex-shrink: 0;
+  transition: opacity 0.15s var(--easing);
+}
+.map-card:hover .map-card-rename-btn,
+.map-card:focus-within .map-card-rename-btn {
+  opacity: 1;
+}
+@media (hover: none) {
+  .map-card-rename-btn {
+    opacity: 1;
+  }
+}
+
+/* Edição inline do apelido */
+.map-card-rename {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+}
+.map-card-rename > :first-child {
+  flex: 1;
+  min-width: 0;
+}
+.map-card-rename-actions {
+  display: flex;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+/* Nome original (quando há apelido custom) */
+.map-card-original {
+  margin-top: calc(-1 * var(--s-2));
+  font-size: var(--fs-12);
+  color: var(--text-4);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Chips · tipo detectado + confiança */
+.map-card-chips {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  flex-wrap: wrap;
+}
+.map-card-doctype {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: var(--r-pill);
+  background: var(--brand-50);
+  color: var(--brand-700);
+  font-size: var(--fs-12);
+  font-weight: var(--fw-medium);
+  line-height: 1.4;
+}
+.map-card-conf {
+  font-size: var(--fs-12);
+  color: var(--text-3);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Sugestão de nome do mapeador · banner sutil com aplicar/dispensar */
+.map-card-suggest {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  padding: var(--s-2) var(--s-3);
+  border-radius: var(--r-md);
+  background: var(--brand-50);
+  border: 1px solid var(--brand-100);
+  transition: border-color 0.15s var(--easing);
+}
+.map-card-suggest-icon {
+  display: inline-flex;
+  align-items: center;
+  color: var(--brand-600);
+  flex-shrink: 0;
+}
+.map-card-suggest-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0; /* habilita ellipsis do nome */
+  flex: 1;
+}
+.map-card-suggest-label {
+  font-size: var(--fs-12);
+  font-weight: var(--fw-semibold);
+  color: var(--brand-700);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.map-card-suggest-name {
+  font-size: var(--fs-13);
+  font-weight: var(--fw-medium);
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.map-card-suggest-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--s-1);
+  flex-shrink: 0;
+}
+
+/* Meta · tamanho · tempo · versão (reusa .map-item-size/time/dot) */
+.map-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--fs-12);
+  color: var(--text-3);
+}
+.map-item-dot {
+  color: var(--text-4);
+  user-select: none;
+}
+.map-item-size {
+  font-variant-numeric: tabular-nums;
+  color: var(--text-3);
+}
+.map-item-time {
+  color: var(--text-3);
+}
+
+.map-card-err {
+  font-size: var(--fs-12);
+  color: var(--danger);
+  background: var(--danger-bg);
+  padding: 6px 10px;
+  border-radius: var(--r-sm);
+  word-break: break-word;
+}
+
+/* Rodapé · ações (cola no fundo do card) */
+.map-card-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-2);
+  margin-top: auto;
+  padding-top: var(--s-2);
+  border-top: 1px solid var(--border);
+}
+.map-card-foot-hint {
+  font-size: var(--fs-12);
+  color: var(--text-4);
+}
+
+/* ── Preview do contexto (expand) ─────────────────────────────── */
+.map-card-context {
+  border-top: 1px solid var(--border);
+  padding-top: var(--s-3);
+  animation: map-expand-in 200ms var(--easing);
+}
+@keyframes map-expand-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .map-card-context {
+    animation: none;
+  }
+}
+.map-context-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s-3);
+  margin-bottom: var(--s-2);
+}
+.map-context-label {
+  font-size: var(--fs-13);
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+}
+.map-context-sub {
+  font-size: var(--fs-12);
+  color: var(--text-3);
+  font-variant-numeric: tabular-nums;
+}
+.map-context-md {
+  margin: 0;
+  padding: var(--s-3) var(--s-4);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  font-family: var(--font-mono);
+  font-size: var(--fs-12);
+  line-height: var(--lh-normal);
+  color: var(--text);
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 520px;
+  overflow-y: auto;
+}
+
+/* ── Skeletons ────────────────────────────────────────────────── */
+.map-stepper-skeleton {
+  height: 80px;
+  border-radius: var(--r-md);
+  margin: var(--s-5) 0 var(--s-4);
+}
+.map-summary-skeleton {
+  height: 96px;
+  border-radius: var(--r-md);
+  margin-bottom: var(--s-4);
+}
+.map-card-skeleton {
+  height: 220px;
+  border-radius: var(--r-lg);
+}
+
+/* ── Responsivo ───────────────────────────────────────────────── */
+@media (max-width: 880px) {
+  .map-summary {
+    grid-template-columns: auto 1fr;
+    gap: var(--s-3) var(--s-4);
+  }
+  .map-summary-action {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+  .map-summary-action > * {
+    width: 100%;
+  }
+}
+
+@media (max-width: 720px) {
+  .map-cards {
+    grid-template-columns: 1fr;
+  }
+}

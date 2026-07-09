@@ -1,0 +1,221 @@
+/* ── KPIs do hero (FarolCard do DS) ─────────────────────────── */
+
+.dash-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--s-3);
+}
+@media (max-width: 1100px) {
+  .dash-kpis {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 720px) {
+  .dash-kpis {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Skeletons de carregamento (forma do conteúdo final) */
+.dash-skeleton-kpi {
+  height: 92px;
+  border-radius: var(--r-md);
+}
+.dash-skeleton-block {
+  height: 420px;
+  border-radius: var(--r-md);
+}
+
+/* ── BrazilMap ──────────────────────────────────────────────── */
+
+.brmap {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: var(--s-3);
+  display: block;
+  position: relative;
+}
+
+.brmap-svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Hover dos estados — colorindo o path no hover via grupo */
+.brmap-states path {
+  transition:
+    fill 0.15s var(--easing),
+    stroke 0.15s var(--easing);
+  cursor: pointer;
+}
+.brmap-states path:hover {
+  fill: var(--brand-50) !important;
+  stroke: var(--brand) !important;
+  stroke-width: 1.25 !important;
+}
+
+.brmap-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 320px;
+  color: var(--text-3);
+  font-size: var(--fs-13);
+}
+
+.brmap-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-4);
+  margin-top: var(--s-3);
+  font-size: var(--fs-12);
+  color: var(--text-2);
+}
+.brmap-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.brmap-legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* Contagem dentro do pin (quando >1 obra na mesma UF) */
+.brmap-pin-count {
+  fill: #ffffff;
+  font-family: var(--font);
+  font-size: 11px;
+  font-weight: var(--fw-bold);
+  pointer-events: none;
+}
+
+/* Nota abaixo do mapa (obras localizadas / sem localização) */
+.dash-map-note {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-4);
+  margin-top: var(--s-3);
+  font-size: var(--fs-12);
+  color: var(--text-2);
+  font-variant-numeric: tabular-nums;
+}
+.dash-map-note-muted {
+  color: var(--text-3);
+}
+
+/* ── AlertaItem ─────────────────────────────────────────────── */
+
+.alert-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+
+.alert-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: 0;
+  background: var(--surface-2);
+  padding: var(--s-3);
+  border-radius: var(--r-md);
+  cursor: pointer;
+  font-family: var(--font);
+  transition: background 0.12s var(--easing);
+}
+.alert-item:hover {
+  background: var(--surface-3);
+}
+
+.alert-item.critico {
+  background: var(--danger-bg);
+}
+.alert-item.risco {
+  background: var(--warning-bg);
+}
+.alert-item.observacao {
+  background: var(--info-bg);
+}
+.alert-item.conforme {
+  background: var(--success-bg);
+}
+
+.alert-head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--s-2);
+  margin-bottom: 4px;
+}
+.alert-level {
+  font-size: 10px;
+  font-weight: var(--fw-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.alert-item.critico .alert-level {
+  color: var(--danger);
+}
+.alert-item.risco .alert-level {
+  color: var(--warning);
+}
+.alert-item.observacao .alert-level {
+  color: var(--info);
+}
+.alert-item.conforme .alert-level {
+  color: var(--success);
+}
+
+.alert-contract {
+  font-size: var(--fs-13);
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+}
+.alert-title {
+  font-size: var(--fs-13);
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+  margin-bottom: 4px;
+}
+.alert-desc {
+  font-size: var(--fs-12);
+  color: var(--text-2);
+  line-height: 1.45;
+  margin-bottom: 6px;
+}
+.alert-meta {
+  font-size: 11px;
+  color: var(--text-3);
+}
+
+/* ── Resumo dos Contratos ───────────────────────────────────── */
+
+.contract-cell-title {
+  font-size: var(--fs-14);
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+  line-height: 1.2;
+}
+.contract-cell-sub {
+  font-size: var(--fs-12);
+  color: var(--text-3);
+  margin-top: 2px;
+}
+
+/* Link da obra na tabela-resumo do Dashboard */
+.dash-obra-link {
+  display: block;
+  text-decoration: none;
+}
+.dash-obra-link:hover .contract-cell-title {
+  color: var(--brand);
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}

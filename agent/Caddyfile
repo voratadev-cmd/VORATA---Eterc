@@ -1,0 +1,11 @@
+# Reverse-proxy + HTTPS automático (Let's Encrypt) para o agente.
+# AGENT_DOMAIN vem do .env (ex.: agent.seudominio.com) e DEVE apontar (DNS A) pro IP do Droplet.
+# O front (Vercel · HTTPS) só consegue chamar o agente por HTTPS — por isso o domínio + TLS.
+{$AGENT_DOMAIN} {
+	encode gzip
+	reverse_proxy api:8000
+	# trava o tamanho do corpo (defesa básica); o /ask manda só texto.
+	request_body {
+		max_size 1MB
+	}
+}

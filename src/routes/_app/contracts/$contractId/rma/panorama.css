@@ -1,0 +1,468 @@
+/* RMA · Aba Panorama do Contrato (C.10) — co-localizado. Fiel ao mockup C10_Panorama, tokens-only,
+   sem tarja de borda (farol por dot + Badge + tinta leve). */
+
+.pan-main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+}
+
+/* ── Header ─────────────────────────────────────────────────────── */
+.pan-head {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.pan-titulo {
+  font-size: var(--fs-28);
+  font-weight: var(--fw-bold);
+  color: var(--text);
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+.pan-sub {
+  font-size: var(--fs-13);
+  color: var(--text-3);
+  line-height: 1.5;
+  margin: 0;
+  max-width: 96ch;
+}
+.pan-sub strong {
+  color: var(--text-2);
+  font-weight: var(--fw-semibold);
+}
+
+/* ── Snapshot de KPIs (obra_panorama) ───────────────────────────── */
+.pan-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--s-3);
+}
+@media (max-width: 1100px) {
+  .pan-kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 720px) {
+  .pan-kpis {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Rótulo de seção ────────────────────────────────────────────── */
+.pan-sec {
+  font-size: 11px;
+  font-weight: var(--fw-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-3);
+  margin: var(--s-3) 2px calc(-1 * var(--s-1)) 2px;
+}
+/* rótulo + resumo da distribuição do farol na mesma linha */
+.pan-sec-flex {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-3);
+  flex-wrap: wrap;
+}
+.pan-sec-resumo {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: var(--fs-12);
+  font-weight: var(--fw-semibold);
+  color: var(--text-3);
+  font-variant-numeric: tabular-nums;
+}
+.pan-resumo-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.pan-resumo-sep {
+  color: var(--text-4);
+  margin-right: 1px;
+}
+.pan-note {
+  font-size: var(--fs-12);
+  color: var(--text-3);
+  line-height: 1.5;
+  margin: 0 2px;
+}
+.pan-note strong {
+  color: var(--text-2);
+  font-weight: var(--fw-semibold);
+}
+
+/* ── Farol multidimensional consolidado ─────────────────────────── */
+.pan-farolrow {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr)) 1.3fr;
+  gap: var(--s-2);
+}
+@media (max-width: 1100px) {
+  .pan-farolrow {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (max-width: 720px) {
+  .pan-farolrow {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.pan-fcell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: var(--s-3) var(--s-2);
+  text-align: center;
+  cursor: pointer;
+  font-family: inherit;
+  transition:
+    transform 0.15s var(--easing),
+    border-color 0.15s var(--easing),
+    box-shadow 0.15s var(--easing);
+}
+.pan-fcell:hover {
+  transform: translateY(-2px);
+  border-color: var(--border-strong);
+  box-shadow: var(--sh-sm);
+}
+.pan-fcell:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+.pan-fcell-ic {
+  color: var(--text-2);
+}
+.pan-fcell-nm {
+  font-size: 10px;
+  font-weight: var(--fw-semibold);
+  color: var(--text-2);
+  line-height: 1.2;
+  min-height: 24px;
+  display: flex;
+  align-items: center;
+}
+.pan-fcell-fl {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px;
+  font-weight: var(--fw-bold);
+  color: var(--text-3);
+}
+.pan-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--text-4);
+  flex-shrink: 0;
+}
+/* cor do farol por nível (dot + rótulo) — sem tarja */
+.pan-f-conforme .pan-dot {
+  background: var(--success);
+}
+.pan-f-conforme .pan-fcell-fl {
+  color: var(--success);
+}
+.pan-f-risco .pan-dot {
+  background: var(--warning);
+}
+.pan-f-risco .pan-fcell-fl {
+  color: color-mix(in srgb, var(--warning) 82%, var(--text));
+}
+.pan-f-observacao .pan-dot {
+  background: var(--info);
+}
+.pan-f-observacao .pan-fcell-fl {
+  color: var(--info);
+}
+.pan-f-critico .pan-dot {
+  background: var(--danger);
+}
+.pan-f-critico .pan-fcell-fl {
+  color: var(--danger);
+}
+.pan-f-semdado .pan-dot {
+  background: var(--text-4);
+}
+
+/* cell consolidado (ink) */
+.pan-fcell-consol {
+  background: var(--ink);
+  border-color: var(--ink);
+  cursor: default;
+  gap: 4px;
+}
+.pan-fcell-consol:hover {
+  transform: none;
+  box-shadow: none;
+  border-color: var(--ink);
+}
+.pan-fcell-consol .pan-fcell-ic {
+  color: color-mix(in srgb, var(--on-accent) 70%, transparent);
+}
+.pan-fcell-consol .pan-fcell-nm {
+  color: color-mix(in srgb, var(--on-accent) 65%, transparent);
+}
+.pan-fcell-big {
+  font-size: var(--fs-13);
+  font-weight: var(--fw-bold);
+  color: var(--on-accent);
+}
+/* tinta do nível sobre o ink — sempre via var(--on-accent), nunca `white` cru (tokens-only);
+   4 níveis fixos do farol, todos cobertos (Conforme · Observação · Risco · Crítico). */
+.pan-fcell-consol.pan-f-conforme .pan-fcell-big {
+  color: color-mix(in srgb, var(--success) 70%, var(--on-accent));
+}
+.pan-fcell-consol.pan-f-observacao .pan-fcell-big {
+  color: color-mix(in srgb, var(--info) 70%, var(--on-accent));
+}
+.pan-fcell-consol.pan-f-risco .pan-fcell-big {
+  color: color-mix(in srgb, var(--warning) 75%, var(--on-accent));
+}
+.pan-fcell-consol.pan-f-critico .pan-fcell-big {
+  color: color-mix(in srgb, var(--danger) 70%, var(--on-accent));
+}
+.pan-fcell-consol-sub {
+  font-size: 10.5px;
+  color: color-mix(in srgb, var(--on-accent) 60%, transparent);
+}
+
+/* ── Cards de dimensão ──────────────────────────────────────────── */
+/* 2 colunas: encurta o poço de scroll até a matriz de nexo (clímax da aba); 1 coluna ≤1100. */
+.pan-dimlist {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  gap: var(--s-3);
+}
+@media (max-width: 1100px) {
+  .pan-dimlist {
+    grid-template-columns: 1fr;
+  }
+}
+.pan-dim {
+  padding: var(--s-4);
+  transition:
+    background 0.6s var(--easing),
+    border-color 0.6s var(--easing);
+}
+/* feedback de chegada do scroll farol → card (classe transitória via JS) */
+.pan-dim-alvo {
+  background: color-mix(in srgb, var(--brand) 6%, var(--surface));
+  border-color: color-mix(in srgb, var(--brand) 35%, var(--border));
+}
+@media (prefers-reduced-motion: reduce) {
+  .pan-dim {
+    transition: none;
+  }
+}
+.pan-dim-semdado {
+  background: var(--surface-2);
+}
+.pan-dim-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-3);
+}
+.pan-dim-titulo {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--fs-15);
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+}
+.pan-dim-titulo svg {
+  color: var(--text-2);
+}
+.pan-dim-kpis {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--s-2);
+  margin-top: var(--s-3);
+}
+@media (max-width: 880px) {
+  .pan-dim-kpis {
+    grid-template-columns: 1fr;
+  }
+}
+.pan-dk {
+  background: var(--surface-2);
+  border-radius: var(--r-sm);
+  padding: 9px 11px;
+}
+.pan-dim-semdado .pan-dk {
+  background: var(--surface);
+}
+.pan-dk-l {
+  font-size: 10px;
+  font-weight: var(--fw-semibold);
+  color: var(--text-3);
+}
+.pan-dk-v {
+  font-size: var(--fs-14);
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+  margin-top: 3px;
+  line-height: 1.25;
+  font-variant-numeric: tabular-nums;
+}
+/* proveniência do dado = informação de confiança — legível (≥10.5px), sem itálico */
+.pan-dk-f {
+  font-size: 10.5px;
+  color: var(--text-4);
+  margin-top: 3px;
+}
+.pan-dim-analise {
+  font-size: var(--fs-12);
+  color: var(--text-2);
+  line-height: 1.55;
+  margin-top: var(--s-3);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 10px 12px;
+  max-width: 90ch; /* medida interna de prosa (convenção full-width) */
+}
+.pan-dim-semdado .pan-dim-analise {
+  background: var(--surface);
+}
+/* texto do crosslink em --text-3 (sem fingir link); só as refs C.x/D.x com rota viram <Link> brand */
+.pan-dim-links {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: var(--text-3);
+  margin-top: var(--s-2);
+  max-width: 90ch;
+}
+.pan-dim-links svg {
+  flex-shrink: 0;
+  color: var(--text-4);
+}
+.pan-dim-link {
+  color: var(--brand);
+  font-weight: var(--fw-semibold);
+  text-decoration: none;
+  border-radius: 3px;
+}
+.pan-dim-link:hover {
+  text-decoration: underline;
+  color: var(--brand-600);
+}
+.pan-dim-link:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+.pan-dim-clausula {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10.5px;
+  color: var(--text-4);
+  margin-top: 5px;
+  max-width: 90ch;
+}
+.pan-dim-clausula svg {
+  flex-shrink: 0;
+}
+
+/* ── Matriz de Nexo Causal ──────────────────────────────────────── */
+.pan-nexo-bloco {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+}
+.pan-nexo {
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  /* scroll horizontal HONESTO em telas estreitas — overflow:hidden decepava Hipótese/Farol */
+  overflow-x: auto;
+  font-size: var(--fs-12);
+  --cols: minmax(120px, 1.3fr) minmax(80px, 0.9fr) minmax(150px, 1.8fr) minmax(110px, 1fr)
+    minmax(130px, 1.4fr) minmax(120px, 1.2fr) minmax(80px, 0.9fr);
+}
+.pan-nexo-head,
+.pan-nexo-row {
+  display: grid;
+  grid-template-columns: var(--cols);
+  gap: var(--s-3);
+  padding: 10px var(--s-3);
+  align-items: start;
+  min-width: 900px; /* ≥ soma dos mins das 7 colunas + gaps + padding — nada é cortado */
+}
+.pan-nexo-head {
+  background: var(--ink);
+  color: color-mix(in srgb, var(--on-accent) 85%, transparent);
+  font-size: 10px;
+  font-weight: var(--fw-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.pan-nexo-row {
+  border-bottom: 1px solid var(--border);
+}
+.pan-nexo-row:last-child {
+  border-bottom: 0;
+}
+.pan-nexo-row span {
+  color: var(--text-2);
+  line-height: 1.4;
+}
+.pan-nexo-frente {
+  color: var(--text);
+  font-weight: var(--fw-semibold);
+}
+.pan-nexo-doc {
+  font-size: 10.5px;
+  color: var(--text-3) !important;
+}
+.pan-nexo-chips {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+/* ── Diagnóstico (card escuro) ──────────────────────────────────── */
+.pan-diag {
+  background: var(--ink);
+  border-radius: var(--r-md);
+  padding: var(--s-4) var(--s-5);
+  margin-top: var(--s-3);
+}
+.pan-diag-head {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: var(--fs-13);
+  font-weight: var(--fw-bold);
+  color: var(--on-accent);
+  margin-bottom: 7px;
+}
+.pan-diag-texto {
+  font-size: var(--fs-13);
+  line-height: 1.65;
+  color: color-mix(in srgb, var(--on-accent) 80%, transparent);
+  margin: 0;
+}
+.pan-diag-texto strong {
+  color: var(--on-accent);
+  font-weight: var(--fw-semibold);
+}

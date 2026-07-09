@@ -1,0 +1,232 @@
+/* Bases do Negócio (M1.2) — co-localizado.
+ * Reutiliza padrões já existentes em revisao.css:
+ *   .crumb, .rev-hero
+ * Só define os elementos novos: tabelas, lista BDI, card de premissas frágeis.
+ */
+
+/* ── Tabela ────────────────────────────────────────────────────── */
+
+.bases-tabela {
+  display: flex;
+  flex-direction: column;
+  font-size: var(--fs-13);
+}
+
+.bases-tabela-precos {
+  /* Item | Und | Qtde | Preço prop | Referência | Fonte | Desvio | Farol */
+  --cols: minmax(0, 1.8fr) 56px 96px 110px 110px 100px 84px 56px;
+}
+.bases-tabela-premissas {
+  /* Premissa | Valor prop | Referência | Análise | Farol */
+  --cols: minmax(0, 1.4fr) 1fr 1fr minmax(0, 1.4fr) 56px;
+}
+
+.bases-tabela-head,
+.bases-tabela-row {
+  display: grid;
+  grid-template-columns: var(--cols);
+  gap: var(--s-3);
+  align-items: center;
+  padding: 10px var(--s-3);
+}
+.bases-tabela-head {
+  font-size: 10px;
+  font-weight: var(--fw-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-3);
+  border-bottom: 1px solid var(--border);
+}
+.bases-tabela-row {
+  border-bottom: 1px solid var(--border);
+}
+.bases-tabela-row:last-child {
+  border-bottom: 0;
+}
+.bases-tabela-row:hover {
+  background: var(--surface-2);
+}
+
+.bases-tabela .num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.bases-tabela .center {
+  display: flex;
+  justify-content: center;
+}
+.bases-tabela .tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+.bases-cell-item {
+  color: var(--text);
+  font-weight: var(--fw-medium);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.bases-cell-und {
+  color: var(--text-3);
+}
+.bases-cell-ref {
+  color: var(--text-3);
+}
+.bases-cell-fonte {
+  color: var(--text-3);
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.bases-cell-desvio {
+  font-weight: var(--fw-semibold);
+}
+
+.bases-farol-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.bases-tabela-foot {
+  font-size: var(--fs-12);
+  color: var(--text-3);
+  margin-top: var(--s-3);
+  padding-top: var(--s-3);
+  border-top: 1px solid var(--border);
+}
+
+/* ── Composição do BDI ─────────────────────────────────────────── */
+
+.bdi-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+.bdi-item {
+  display: grid;
+  grid-template-columns: 3px 1fr auto;
+  gap: var(--s-3);
+  align-items: center;
+  padding: 8px 4px;
+}
+.bdi-bar {
+  width: 3px;
+  height: 32px;
+  border-radius: var(--r-pill);
+}
+.bdi-text {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  line-height: 1.3;
+}
+.bdi-name {
+  font-size: var(--fs-13);
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.bdi-status {
+  font-size: 11px;
+  color: var(--text-3);
+}
+.bdi-tag {
+  font-size: 10px;
+  font-weight: var(--fw-bold);
+  letter-spacing: 0.06em;
+  padding: 2px 8px;
+  line-height: 1.2;
+}
+
+/* ── Premissas Frágeis (card warning) ──────────────────────────── */
+
+.frageis {
+  background: var(--warning-bg);
+  border: 1px solid var(--warning);
+  border-radius: var(--r-lg);
+  padding: var(--s-5);
+  margin-top: var(--s-5);
+}
+.frageis-head {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-3);
+  margin-bottom: var(--s-4);
+}
+.frageis-icon {
+  display: grid;
+  place-items: center;
+  color: var(--warning);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.frageis-title {
+  font-size: var(--fs-15);
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+}
+.frageis-sub {
+  font-size: var(--fs-12);
+  color: var(--text-2);
+  margin-top: 2px;
+}
+.frageis-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--s-3);
+}
+.frageis-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: var(--s-3) var(--s-4);
+}
+.frageis-item-title {
+  font-size: var(--fs-13);
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+  margin-bottom: 4px;
+}
+.frageis-item-desc {
+  font-size: var(--fs-12);
+  color: var(--text-2);
+  line-height: 1.45;
+}
+.frageis-item-more {
+  border-style: dashed;
+}
+.frageis-item-more .frageis-item-title {
+  color: var(--brand-700);
+}
+[data-theme="dark"] .frageis-item-more .frageis-item-title {
+  color: var(--brand);
+}
+
+/* ── Responsivo ─────────────────────────────────────────────────── */
+
+@media (max-width: 1100px) {
+  .frageis-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 720px) {
+  .frageis-grid {
+    grid-template-columns: 1fr;
+  }
+  .bases-tabela-head {
+    display: none;
+  }
+  .bases-tabela-row {
+    grid-template-columns: 1fr auto;
+    gap: 2px var(--s-3);
+  }
+}

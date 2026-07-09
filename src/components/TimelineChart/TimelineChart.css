@@ -1,0 +1,14 @@
+/* TimelineChart · estilos co-localizados. SVG inline; aqui só wrapper. */
+
+.tlc-wrap {
+  width: 100%;
+  overflow-x: auto;
+  background: var(--surface);
+  border-radius: var(--r-sm);
+}
+.tlc-svg {
+  display: block;
+}
+.tlc-dot-g:hover circle {
+  filter: brightness(1.15);
+}

@@ -1,0 +1,29 @@
+.field-row {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: var(--s-6);
+  padding: var(--s-4) 0;
+  align-items: flex-start;
+}
+.field-row + .field-row {
+  border-top: 1px solid var(--border);
+}
+.field-label-main {
+  font-size: var(--fs-14);
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+}
+.field-label-hint {
+  font-size: var(--fs-13);
+  color: var(--text-3);
+  margin-top: 2px;
+}
+.field-control {
+  min-width: 0;
+}
+@media (max-width: 720px) {
+  .field-row {
+    grid-template-columns: 1fr;
+    gap: var(--s-2);
+  }
+}

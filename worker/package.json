@@ -1,0 +1,14 @@
+{
+  "name": "@rdm-ia/migration-tools",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "description": "Tooling de migrations do Supabase (apply/verify via Session pooler). O pipeline de extração/mapeamento vive em agent/ (Python).",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "apply": "node scripts/apply-migration.mjs",
+    "verify": "node scripts/verify-migration.mjs"
+  }
+}

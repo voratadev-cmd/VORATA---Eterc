@@ -1,0 +1,506 @@
+/* D.6 Análises Pontuais — eventos de paralisação/ociosidade. Cards expansíveis com ficha por tipo
+   (chuva / impedimento / prazo). Tokens-only; sem border-left de farol em card (regra do projeto). */
+
+.pnt-main {
+  padding: var(--s-6) var(--s-8);
+  /* enche a largura (padrão do app) — sem cap nem sobra lateral em telas grandes. */
+}
+
+/* ── Header ─────────────────────────────────────────────────────────── */
+.pnt-head {
+  margin-bottom: var(--s-5);
+}
+.pnt-head-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--s-4);
+}
+.pnt-titulo {
+  font-size: var(--fs-28);
+  font-weight: var(--fw-bold);
+  color: var(--text);
+  line-height: var(--lh-tight);
+}
+.pnt-sub {
+  margin-top: var(--s-1);
+  font-size: var(--fs-13);
+  color: var(--text-3);
+  max-width: 760px;
+  line-height: var(--lh-normal);
+}
+.pnt-sub strong {
+  color: var(--text-2);
+  font-weight: var(--fw-semibold);
+}
+.pnt-fontes {
+  margin-top: var(--s-3);
+  font-size: var(--fs-12);
+  color: var(--text-4);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Section label ──────────────────────────────────────────────────── */
+.pnt-sec {
+  font-size: var(--fs-11);
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+  color: var(--text-4);
+  font-weight: var(--fw-bold);
+  margin: var(--s-6) 0 var(--s-3);
+}
+
+/* ── KPIs ───────────────────────────────────────────────────────────── */
+.pnt-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--s-3);
+}
+
+/* ── Eventos (cards expansíveis) ────────────────────────────────────── */
+.pnt-evts {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+}
+.pnt-evt {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  transition:
+    border-color 0.16s var(--easing),
+    box-shadow 0.16s var(--easing);
+}
+.pnt-evt:hover {
+  border-color: var(--border-strong);
+}
+.pnt-evt.aberto {
+  border-color: var(--border-strong);
+  box-shadow: var(--sh-sm);
+}
+.pnt-evt-hd {
+  display: flex;
+  align-items: center;
+  gap: var(--s-4);
+  width: 100%;
+  padding: var(--s-3) var(--s-4);
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+}
+.pnt-evt-hd:hover {
+  background: var(--surface-2);
+}
+.pnt-evt-hd:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+
+.pnt-cat {
+  flex-shrink: 0;
+  font-size: var(--fs-12);
+  font-weight: var(--fw-bold);
+  color: var(--on-accent);
+  padding: 3px 10px;
+  border-radius: var(--r-sm);
+  white-space: nowrap;
+}
+.pnt-cat-info {
+  background: var(--info);
+}
+.pnt-cat-warning {
+  background: var(--warning);
+}
+.pnt-cat-vault {
+  background: var(--vault);
+}
+.pnt-cat-slate {
+  background: var(--text-3);
+}
+
+.pnt-evt-ti {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.pnt-evt-d {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  flex-wrap: wrap;
+  font-size: var(--fs-13);
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+.pnt-evt-badge {
+  flex-shrink: 0;
+}
+.pnt-evt-p {
+  font-size: var(--fs-12);
+  color: var(--text-4);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.pnt-evt-vv {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+.pnt-evt-pv {
+  font-size: var(--fs-16);
+  font-weight: var(--fw-bold);
+  color: var(--warning);
+  font-variant-numeric: tabular-nums;
+}
+.pnt-evt-pend {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--fs-11);
+  font-weight: var(--fw-semibold);
+  background: var(--warning-bg);
+  color: var(--warning);
+  padding: 2px 8px;
+  border-radius: var(--r-pill);
+  white-space: nowrap;
+}
+.pnt-evt-tog {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--fs-12);
+  color: var(--brand);
+  font-weight: var(--fw-semibold);
+  white-space: nowrap;
+}
+
+/* ── Ficha ──────────────────────────────────────────────────────────── */
+.pnt-ficha {
+  border-top: 1px dashed var(--border);
+  background: var(--surface-2);
+  padding: var(--s-1) var(--s-4) var(--s-4);
+  animation: pnt-ficha-in 0.18s var(--easing);
+}
+@keyframes pnt-ficha-in {
+  from {
+    opacity: 0;
+    transform: translateY(-3px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pnt-ficha {
+    animation: none;
+  }
+}
+.pnt-fsec {
+  margin-top: var(--s-4);
+}
+.pnt-fsec-h {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--fs-11);
+  font-weight: var(--fw-bold);
+  color: var(--text);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  margin-bottom: var(--s-2);
+}
+
+/* equipe afetada (boxes) */
+.pnt-equip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+}
+.pnt-eq {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: var(--s-2) var(--s-3);
+  min-width: 124px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.pnt-eq-l {
+  font-size: var(--fs-11);
+  color: var(--text-4);
+  font-weight: var(--fw-medium);
+}
+.pnt-eq-v {
+  font-size: var(--fs-15);
+  font-weight: var(--fw-bold);
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+.pnt-eq.afet {
+  border-color: color-mix(in srgb, var(--danger) 40%, var(--border));
+  background: var(--danger-bg);
+}
+.pnt-eq.afet .pnt-eq-v {
+  color: var(--danger);
+}
+
+/* gráficos da ficha (mm diário · dias/mês) — complementam as tabelas, nada removido */
+.pnt-chart {
+  max-width: 920px;
+  margin: var(--s-1) 0 var(--s-3);
+}
+.pnt-chart .chart-legend {
+  margin-top: var(--s-2);
+}
+.pnt-tip-extra {
+  display: block;
+  margin-top: 2px;
+  font-size: var(--fs-11);
+  font-weight: var(--fw-regular);
+  color: var(--text-4);
+  font-variant-numeric: tabular-nums;
+}
+
+/* wrapper de tabela (evita estouro horizontal em telas estreitas) */
+.pnt-ft-wrap {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+/* tabela da ficha */
+.pnt-ft {
+  width: 100%;
+  max-width: 920px;
+  border-collapse: collapse;
+  font-size: var(--fs-12);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  overflow: hidden;
+  font-variant-numeric: tabular-nums;
+}
+.pnt-ft th {
+  background: var(--ink);
+  color: var(--on-accent);
+  text-align: right;
+  padding: var(--s-1) var(--s-2);
+  font-size: var(--fs-11);
+  font-weight: var(--fw-medium);
+}
+.pnt-ft th:first-child {
+  text-align: left;
+}
+.pnt-ft td {
+  padding: 5px var(--s-2);
+  border-bottom: 1px solid var(--border);
+  text-align: right;
+  color: var(--text-2);
+}
+.pnt-ft td:first-child {
+  text-align: left;
+  color: var(--text);
+}
+.pnt-ft tr:last-child td {
+  border-bottom: none;
+}
+.pnt-ft-z td {
+  color: var(--text-4);
+}
+.pnt-ft-tot td {
+  font-weight: var(--fw-bold);
+  color: var(--text);
+  background: var(--surface-2);
+  border-top: 1.5px solid var(--border-strong);
+}
+.pnt-ft-pl {
+  color: var(--success);
+  font-weight: var(--fw-semibold);
+}
+/* mm acima do critério > 5 mm (a prova documental do dia impeditivo) */
+.pnt-ft td.pnt-ft-hot {
+  color: var(--danger);
+  font-weight: var(--fw-semibold);
+}
+
+/* memo (memória de cálculo) — fundo tingido em vez de tarja lateral (regra do projeto) */
+.pnt-memo {
+  margin-top: var(--s-2);
+  max-width: 80ch;
+  background: color-mix(in srgb, var(--brand) 4%, var(--surface));
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: var(--s-3) var(--s-3);
+  font-size: var(--fs-12);
+  color: var(--text-2);
+  line-height: 1.7;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* aviso discreto de reconciliação (só aparece quando a Σ diverge do canônico) */
+.pnt-rec-warn {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  max-width: 80ch;
+  margin-top: var(--s-2);
+  padding: var(--s-2) var(--s-3);
+  border-radius: var(--r-sm);
+  background: var(--danger-bg);
+  border: 1px solid color-mix(in srgb, var(--danger) 30%, transparent);
+  color: var(--danger);
+  font-size: var(--fs-12);
+  font-weight: var(--fw-medium);
+  font-variant-numeric: tabular-nums;
+}
+.pnt-rec-warn svg {
+  flex-shrink: 0;
+}
+.pnt-memo strong {
+  color: var(--text);
+  font-weight: var(--fw-bold);
+}
+.pnt-memo-res {
+  color: var(--warning);
+  font-weight: var(--fw-bold);
+}
+
+/* anotação RDO/ATA */
+.pnt-rdo {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: var(--s-2) var(--s-3);
+  font-size: var(--fs-12);
+  color: var(--text-3);
+  line-height: var(--lh-normal);
+}
+.pnt-rdo strong {
+  color: var(--text-2);
+  font-weight: var(--fw-semibold);
+}
+.pnt-rdo-tag {
+  display: inline-block;
+  font-size: var(--fs-11);
+  font-weight: var(--fw-semibold);
+  background: var(--info-bg);
+  color: var(--info);
+  padding: 1px 7px;
+  border-radius: var(--r-sm);
+  margin-right: var(--s-2);
+}
+
+/* ── Aviso dupla contagem ───────────────────────────────────────────── */
+.pnt-warn {
+  background: var(--danger-bg);
+  border: 1.5px solid color-mix(in srgb, var(--danger) 40%, var(--border));
+  border-radius: var(--r-lg);
+  padding: var(--s-4) var(--s-5);
+  margin-top: var(--s-5);
+}
+.pnt-warn-h {
+  font-size: var(--fs-13);
+  font-weight: var(--fw-bold);
+  color: var(--danger);
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+}
+.pnt-warn p {
+  font-size: var(--fs-12);
+  color: var(--text-2);
+  line-height: var(--lh-normal);
+  margin-top: var(--s-2);
+  max-width: 80ch;
+}
+.pnt-warn strong {
+  color: var(--text);
+  font-weight: var(--fw-semibold);
+}
+
+/* ── Leitura IA ─────────────────────────────────────────────────────── */
+.pnt-ia {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: var(--s-5);
+  margin-top: var(--s-5);
+}
+.pnt-ia-h {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  margin-bottom: var(--s-3);
+}
+.pnt-ia-badge {
+  background: var(--brand-50);
+  color: var(--brand);
+  font-size: var(--fs-11);
+  font-weight: var(--fw-bold);
+  padding: 3px 9px;
+  border-radius: var(--r-pill);
+}
+.pnt-ia-t {
+  font-size: var(--fs-13);
+  font-weight: var(--fw-bold);
+  color: var(--text);
+}
+.pnt-ia p {
+  font-size: var(--fs-13);
+  color: var(--text-2);
+  line-height: var(--lh-normal);
+  margin-bottom: var(--s-2);
+  max-width: 80ch;
+}
+.pnt-ia p:last-child {
+  margin-bottom: 0;
+}
+.pnt-ia strong {
+  color: var(--text);
+  font-weight: var(--fw-semibold);
+}
+
+/* ── Skeleton ───────────────────────────────────────────────────────── */
+.pnt-sk-kpi {
+  height: 104px;
+  border-radius: var(--r-lg);
+}
+.pnt-sk-evt {
+  height: 62px;
+  border-radius: var(--r-lg);
+}
+
+/* ── Responsivo ─────────────────────────────────────────────────────── */
+@media (max-width: 1100px) {
+  .pnt-kpis {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 720px) {
+  .pnt-main {
+    padding: var(--s-5) var(--s-4);
+  }
+  .pnt-kpis {
+    grid-template-columns: 1fr;
+  }
+  .pnt-evt-hd {
+    flex-wrap: wrap;
+  }
+  .pnt-evt-ti {
+    order: 3;
+    flex-basis: 100%;
+  }
+}

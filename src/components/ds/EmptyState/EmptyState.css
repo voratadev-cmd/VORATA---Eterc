@@ -1,0 +1,107 @@
+.empty {
+  text-align: center;
+  padding: var(--s-10) var(--s-5);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+/* Variante "framed" — destaque visual quando é o conteúdo principal da página. */
+.empty-framed {
+  padding: var(--s-14) var(--s-6);
+  min-height: 420px;
+  background: var(--surface);
+  border: 1px dashed var(--border);
+  border-radius: var(--r-xl);
+}
+[data-theme="dark"] .empty-framed {
+  background: var(--surface-2);
+}
+.empty-illu {
+  width: 96px;
+  height: 96px;
+  margin: 0 auto var(--s-5);
+  border-radius: var(--r-xl);
+  background: var(--brand-50);
+  color: var(--brand);
+  display: grid;
+  place-items: center;
+  box-shadow: 0 1px 2px rgba(20, 41, 72, 0.04);
+}
+.empty-framed .empty-illu {
+  width: 112px;
+  height: 112px;
+  margin-bottom: var(--s-6);
+}
+[data-theme="dark"] .empty-illu {
+  background: rgba(241, 136, 77, 0.14);
+  box-shadow: none;
+}
+.empty-title {
+  font-size: var(--fs-18);
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+  margin-bottom: var(--s-2);
+  letter-spacing: -0.005em;
+}
+.empty-framed .empty-title {
+  font-size: var(--fs-22);
+}
+.empty-text {
+  color: var(--text-3);
+  font-size: var(--fs-14);
+  line-height: var(--lh-normal);
+  margin: 0 auto var(--s-4);
+  max-width: 420px;
+}
+.empty-framed .empty-text {
+  max-width: 480px;
+  font-size: var(--fs-15);
+}
+.empty-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  padding: 4px 10px;
+  border-radius: var(--r-pill);
+  background: var(--brand-50);
+  color: var(--brand-700);
+  font-size: var(--fs-12);
+  font-weight: var(--fw-medium);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+[data-theme="dark"] .empty-hint {
+  background: rgba(241, 136, 77, 0.14);
+  color: var(--brand);
+}
+.empty-hint::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.7;
+  animation: empty-hint-pulse 2.2s ease-in-out infinite;
+}
+@keyframes empty-hint-pulse {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(0.9);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(1.15);
+  }
+}
+.empty-action {
+  margin-top: var(--s-5);
+  display: flex;
+  gap: var(--s-3);
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.empty-framed .empty-action {
+  margin-top: var(--s-6);
+}

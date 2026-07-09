@@ -1,0 +1,104 @@
+/* ChartKit — tooltip + legenda compartilhados p/ Recharts. Tokens-only.
+   --rma-navy = cor canônica da série Real/Executado: --ink no claro, --text no escuro
+   (mesmo padrão do --c6-navy da C.6, agora disponível pra qualquer gráfico). */
+:root {
+  --rma-navy: var(--ink);
+}
+[data-theme="dark"] {
+  --rma-navy: var(--text);
+}
+
+/* ── Tooltip ─────────────────────────────────────────────────────────── */
+.chart-tip {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  box-shadow: var(--sh-pop);
+  padding: var(--s-3);
+  min-width: 168px;
+  font-size: var(--fs-12);
+  line-height: var(--lh-snug);
+}
+.chart-tip-title {
+  font-size: var(--fs-12);
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+  margin-bottom: var(--s-2);
+}
+.chart-tip-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 0;
+}
+.chart-tip-sw {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  background: currentColor;
+}
+/* série tracejada (projeção) → swatch de linha tracejada, não quadrado cheio */
+.chart-tip-sw-tracejada {
+  width: 14px;
+  height: 0;
+  border-radius: 0;
+  background: none;
+  border-top: 2px dashed currentColor;
+}
+.chart-tip-k {
+  color: var(--text-3);
+  margin-right: auto;
+  padding-right: var(--s-3);
+}
+.chart-tip-v {
+  color: var(--text);
+  font-weight: var(--fw-semibold);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* ── Legenda ─────────────────────────────────────────────────────────── */
+.chart-legend {
+  display: flex;
+  align-items: center;
+  gap: var(--s-4);
+  flex-wrap: wrap;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.chart-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.chart-legend-label {
+  font-size: var(--fs-12);
+  color: var(--text-2);
+}
+.chart-legend-sw {
+  flex: none;
+}
+.chart-legend-sw-linha {
+  width: 16px;
+  height: 0;
+  border-top: 2px solid currentColor;
+}
+.chart-legend-sw-tracejada {
+  width: 16px;
+  height: 0;
+  border-top: 2px dashed currentColor;
+}
+.chart-legend-sw-barra {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  background: currentColor;
+}
+.chart-legend-sw-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+}

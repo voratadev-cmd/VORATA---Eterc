@@ -1,0 +1,320 @@
+/* Aba Chuvas (C.9) — dias >5 mm proposta × real · "dias a cobrar". Tokens-only, dark-aware. */
+
+.chv-main {
+  padding: var(--s-6) var(--s-8);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-5);
+  /* enche a largura (igual às demais telas do RMA) — sem cap lopsided à direita. */
+
+  /* Paleta SEQUENCIAL dos calendários CAL 1–6 (Gráfico D): navy escuro → claro por sensibilidade.
+     Base = --rma-navy (ChartKit: --ink no claro, --text no escuro) → o ramp adapta no dark sozinho.
+     Sem tons de farol como cor categórica (nesta tela danger/warning/success JÁ significam status). */
+  --c9-cal1: var(--rma-navy);
+  --c9-cal2: color-mix(in srgb, var(--rma-navy) 84%, var(--surface));
+  --c9-cal3: color-mix(in srgb, var(--rma-navy) 70%, var(--surface));
+  --c9-cal4: color-mix(in srgb, var(--rma-navy) 56%, var(--surface));
+  --c9-cal5: color-mix(in srgb, var(--rma-navy) 44%, var(--surface));
+  --c9-cal6: color-mix(in srgb, var(--rma-navy) 32%, var(--surface));
+}
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Header ─────────────────────────────────────────────────────────────── */
+.chv-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--s-4);
+  flex-wrap: wrap;
+}
+.chv-titulo {
+  font-size: var(--fs-24);
+  font-weight: var(--fw-bold);
+  color: var(--text);
+  letter-spacing: -0.01em;
+}
+.chv-sub {
+  font-size: var(--fs-12);
+  color: var(--text-3);
+  line-height: var(--lh-snug);
+  margin-top: 2px;
+}
+
+/* ── KPIs ───────────────────────────────────────────────────────────────── */
+.chv-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--s-4);
+}
+
+/* ── Seções / grow ──────────────────────────────────────────────────────── */
+.chv-grow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--s-4);
+  align-items: start;
+}
+.chv-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: var(--s-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+}
+.chv-section-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--s-3);
+}
+.chv-section-title {
+  font-size: var(--fs-15);
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+}
+.chv-section-sub {
+  font-size: 11px;
+  color: var(--text-3);
+  margin-top: 2px;
+  line-height: var(--lh-snug);
+}
+.chv-chart {
+  width: 100%;
+}
+.chv-chart-foot {
+  font-size: 11.5px;
+  color: var(--text-3);
+  line-height: var(--lh-snug);
+  border-top: 1px solid var(--border);
+  padding-top: var(--s-3);
+  max-width: 80ch;
+}
+.chv-chart-foot strong {
+  color: var(--text);
+  font-weight: var(--fw-semibold);
+}
+
+/* Linha extra do título do tooltip (Δ do mês · a cobrar acum.) — padrão .fat-tip-extra. */
+.chv-tip-extra {
+  display: block;
+  margin-top: 2px;
+  font-weight: var(--fw-regular);
+  color: var(--text-3);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Micro-título de agrupamento dos gráficos de baseline (C+D) — dados de contrato, não de RDO. */
+.chv-group-head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--s-3);
+  flex-wrap: wrap;
+  margin-bottom: calc(var(--s-2) * -1);
+}
+.chv-group-title {
+  font-size: 11px;
+  font-weight: var(--fw-bold);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+.chv-group-sub {
+  font-size: 11px;
+  color: var(--text-4);
+}
+
+/* ── Chips de ano ───────────────────────────────────────────────────────── */
+.chv-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+  flex-shrink: 0;
+}
+.chv-chip {
+  font-size: var(--fs-12);
+  font-weight: var(--fw-medium);
+  padding: 4px var(--s-3);
+  border-radius: var(--r-pill);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-2);
+  cursor: pointer;
+  font-variant-numeric: tabular-nums;
+  transition: all 0.15s var(--easing);
+}
+.chv-chip:hover {
+  border-color: var(--border-strong);
+  background: var(--surface-2);
+}
+.chv-chip.on {
+  background: var(--brand-50);
+  border-color: var(--brand);
+  color: var(--brand-700);
+}
+
+/* ── Veredito ───────────────────────────────────────────────────────────── */
+.chv-verd {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  font-size: var(--fs-13);
+  color: var(--text);
+  font-weight: var(--fw-medium);
+  background: var(--warning-bg);
+  border: 1px solid var(--warning);
+  border-radius: var(--r-md);
+  padding: var(--s-2) var(--s-3);
+}
+/* veredito conforme (dias a cobrar = 0) — a cor acompanha o Badge do header, não fica sempre amarela */
+.chv-verd.ok {
+  background: var(--success-bg);
+  border-color: var(--success);
+}
+
+/* ── Totais por CAL ─────────────────────────────────────────────────────── */
+.chv-caltot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2) var(--s-4);
+  font-size: 11px;
+  color: var(--text-3);
+  border-top: 1px solid var(--border);
+  padding-top: var(--s-3);
+}
+.chv-caltot span {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.chv-caltot b {
+  color: var(--text);
+  font-weight: var(--fw-semibold);
+}
+.chv-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: var(--r-pill);
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+/* ── Tabela apuração ────────────────────────────────────────────────────── */
+.chv-tabela {
+  display: flex;
+  flex-direction: column;
+  max-width: 920px;
+}
+.chv-tabela-head,
+.chv-tabela-row {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr 1fr 1.4fr;
+  align-items: center;
+  gap: var(--s-3);
+  padding: var(--s-2);
+}
+.chv-tabela-head {
+  font-size: 11px;
+  font-weight: var(--fw-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--text-3);
+  border-bottom: 1px solid var(--border);
+}
+.chv-tabela-row {
+  font-size: var(--fs-13);
+  color: var(--text-2);
+  border-bottom: 1px solid var(--border);
+}
+.chv-tabela-row:last-child {
+  border-bottom: none;
+}
+.chv-tabela .r {
+  text-align: right;
+  justify-self: end;
+}
+.chv-cell-forte {
+  color: var(--text);
+  font-weight: var(--fw-semibold);
+}
+.chv-exc {
+  color: var(--warning);
+  font-weight: var(--fw-semibold);
+}
+/* linha Σ (meses medidos) — fecha a coluna que os números somam, alinhada célula a célula */
+.chv-tabela-tot {
+  border-top: 1px solid var(--border-strong);
+  background: var(--surface-2);
+  color: var(--text);
+  font-weight: var(--fw-semibold);
+}
+/* composição do pleiteável (MOD + EQP · HH ociosas) — o argumento do Pleito, abaixo da tabela */
+.chv-tabela-comp {
+  font-size: var(--fs-12);
+  color: var(--text-2);
+  line-height: var(--lh-snug);
+  font-variant-numeric: tabular-nums;
+  max-width: 920px;
+}
+.chv-tabela-comp strong {
+  color: var(--text);
+  font-weight: var(--fw-semibold);
+}
+
+/* ── Legenda do farol ───────────────────────────────────────────────────── */
+.chv-farol-leg {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-2) var(--s-4);
+  font-size: 11px;
+  color: var(--text-3);
+  padding: var(--s-3) var(--s-4);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+}
+.chv-farol-leg-titulo {
+  font-weight: var(--fw-semibold);
+  color: var(--text-2);
+}
+.chv-farol-leg span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ── Leitura IA ─────────────────────────────────────────────────────────── */
+.chv-ia-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10.5px;
+  font-weight: var(--fw-bold);
+  letter-spacing: 0.06em;
+  color: var(--brand-700);
+}
+.chv-ia-texto {
+  font-size: var(--fs-13);
+  color: var(--text-2);
+  line-height: var(--lh-normal);
+  max-width: 80ch;
+}
+
+/* ── Responsivo ─────────────────────────────────────────────────────────── */
+@media (max-width: 1100px) {
+  .chv-kpis {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .chv-grow {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 880px) {
+  .chv-main {
+    padding: var(--s-5) var(--s-4);
+  }
+}

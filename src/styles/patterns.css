@@ -1,0 +1,301 @@
+/* Padrões de UI compartilhados entre telas de contrato.
+ * Carregado globalmente via __root.tsx (após tokens.css e base.css).
+ *
+ * O que está aqui: estruturas visuais que se repetem em mais de uma tela
+ * (breadcrumb, hero strip escuro com KPIs).
+ * NÃO colocar aqui: nada específico de uma tela (lista de docs da Revisão, tabela
+ * da Bases, etc.) — esses ficam no CSS co-localizado da rota.
+ */
+
+/* ── Breadcrumb ──────────────────────────────────────────────── */
+
+.crumb {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--fs-12);
+  color: var(--text-3);
+  margin-bottom: var(--s-3);
+  flex-wrap: wrap;
+}
+.crumb a,
+.crumb-link {
+  color: var(--text-3);
+  text-decoration: none;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+}
+.crumb a:hover,
+.crumb-link:hover {
+  color: var(--text);
+}
+.crumb-sep {
+  color: var(--text-4);
+}
+.crumb-current {
+  color: var(--text);
+  font-weight: var(--fw-semibold);
+}
+
+/* ── Hero strip (KPIs no card escuro) ────────────────────────── */
+
+.rev-hero {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr 1.2fr;
+  gap: 0;
+  background: var(--ink);
+  color: #fff;
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  margin-bottom: var(--s-5);
+}
+.rev-hero-cell {
+  padding: var(--s-4) var(--s-5);
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  position: relative;
+}
+.rev-hero-cell:last-child {
+  border-right: 0;
+  background: var(--danger);
+}
+.rev-hero-label {
+  font-size: 10px;
+  font-weight: var(--fw-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: rgba(255, 255, 255, 0.65);
+}
+.rev-hero-value {
+  font-size: var(--fs-32);
+  font-weight: var(--fw-bold);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  margin-top: var(--s-2);
+  font-variant-numeric: tabular-nums;
+}
+.rev-hero-sub {
+  font-size: var(--fs-12);
+  color: rgba(255, 255, 255, 0.6);
+  margin-top: var(--s-2);
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  flex-wrap: wrap;
+}
+.rev-hero-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  margin-right: 4px;
+}
+.rev-hero-action-title {
+  font-size: var(--fs-15);
+  font-weight: var(--fw-bold);
+  margin-top: var(--s-2);
+}
+.rev-hero-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: var(--s-3);
+  padding: 8px 14px;
+  background: #fff;
+  color: var(--danger);
+  border: 0;
+  border-radius: var(--r-sm);
+  font-size: var(--fs-13);
+  font-weight: var(--fw-semibold);
+  font-family: var(--font);
+  cursor: pointer;
+  transition: transform 0.12s var(--easing);
+}
+.rev-hero-action-btn:hover {
+  transform: translateY(-1px);
+}
+@media (max-width: 1100px) {
+  .rev-hero {
+    grid-template-columns: 1fr 1fr;
+  }
+  .rev-hero-cell:nth-child(2n) {
+    border-right: 0;
+  }
+}
+@media (max-width: 720px) {
+  .rev-hero {
+    grid-template-columns: 1fr;
+  }
+  .rev-hero-cell {
+    border-right: 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+}
+
+/* Hero · cell de ação (4ª) colorida por farol — usada por Visão Geral E Indicadores (global aqui
+   p/ não acoplar Indicadores ao CSS da Visão Geral · ver visao-geral.css). */
+.vg-hero-acao.vg-acao-critico {
+  background: var(--danger);
+}
+.vg-hero-acao.vg-acao-risco {
+  background: var(--warning);
+}
+.vg-hero-acao.vg-acao-observacao {
+  background: var(--info);
+}
+.vg-hero-acao.vg-acao-conforme {
+  background: var(--success);
+}
+
+/* ── Coleção: busca + ordenação + paginação (global · ver src/lib/rma/colecao.tsx) ──
+   Promovido p/ não duplicar por tela (Faturamento, Prazo, …). Tokens-only. */
+
+.col-toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  margin: var(--s-2) 0 var(--s-3);
+  flex-wrap: wrap;
+}
+.col-busca {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  flex: 1 1 200px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 0 var(--s-3);
+  height: 34px;
+  transition: border-color 0.15s var(--easing);
+}
+.col-busca:focus-within {
+  border-color: var(--brand);
+  box-shadow: var(--ring);
+}
+.col-busca-ic {
+  color: var(--text-3);
+  display: flex;
+}
+.col-busca-in {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font-family: var(--font);
+  font-size: var(--fs-13);
+  color: var(--text);
+}
+.col-busca-cl {
+  border: 0;
+  background: transparent;
+  color: var(--text-3);
+  cursor: pointer;
+  display: flex;
+  padding: 2px;
+}
+.col-busca-cl:hover {
+  color: var(--text);
+}
+
+.col-pag {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-3);
+  margin-top: var(--s-3);
+  flex-wrap: wrap;
+}
+.col-pag-st {
+  font-size: var(--fs-12);
+  color: var(--text-3);
+  font-variant-numeric: tabular-nums;
+}
+.col-pag-ct {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+}
+.col-pag-num {
+  font-size: var(--fs-12);
+  color: var(--text-2);
+  font-variant-numeric: tabular-nums;
+  min-width: 34px;
+  text-align: center;
+}
+.col-pag-bt {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  color: var(--text-2);
+  cursor: pointer;
+  transition:
+    background 0.15s var(--easing),
+    color 0.15s var(--easing);
+}
+.col-pag-bt:hover:not(:disabled) {
+  background: var(--surface-2);
+  color: var(--text);
+}
+.col-pag-bt:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.col-vazia {
+  padding: var(--s-4) var(--s-3);
+  font-size: var(--fs-13);
+  color: var(--text-3);
+  text-align: center;
+}
+.col-vazia-clear {
+  border: 0;
+  background: transparent;
+  color: var(--brand);
+  font-family: var(--font);
+  font-size: var(--fs-13);
+  font-weight: var(--fw-semibold);
+  cursor: pointer;
+  padding: 0;
+}
+.col-vazia-clear:hover {
+  text-decoration: underline;
+}
+
+/* ── Callout de nota (M3 · "Como ler esta tela" / método pendente) ── */
+.deseq-nota {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-3);
+  background: var(--info-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: var(--s-3) var(--s-4);
+}
+.deseq-nota-icon {
+  color: var(--info);
+  display: inline-flex;
+  margin-top: 1px;
+  flex-shrink: 0;
+}
+.deseq-nota-texto {
+  font-size: var(--fs-12);
+  color: var(--text-2);
+  line-height: 1.55;
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Número tabular — todo valor numérico (R$, %, contadores) usa esta classe; global porque
+   cada rota injeta só o próprio CSS e um deep-link não pode depender da rota irmã. */
+.tabular {
+  font-variant-numeric: tabular-nums;
+}

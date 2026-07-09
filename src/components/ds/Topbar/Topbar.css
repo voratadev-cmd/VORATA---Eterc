@@ -1,0 +1,97 @@
+.tb {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  padding: var(--s-3) var(--s-8);
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  height: 64px;
+}
+.app.is-mobile .tb {
+  padding: var(--s-3) var(--s-4);
+  height: 56px;
+}
+
+.tb-search {
+  flex: 1;
+  max-width: 480px;
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  height: 38px;
+  padding: 0 var(--s-3);
+  background: var(--surface-2);
+  border: 1px solid transparent;
+  border-radius: var(--r-pill);
+  cursor: text;
+  color: var(--text-3);
+  font-size: var(--fs-14);
+  font-family: var(--font);
+  transition: all 0.15s var(--easing);
+}
+.tb-search:hover {
+  border-color: var(--border);
+  background: var(--surface);
+}
+.tb-search-ph {
+  flex: 1;
+  text-align: left;
+}
+.tb-kbd {
+  font-size: var(--fs-12);
+  font-family: var(--font);
+  font-weight: var(--fw-semibold);
+  color: var(--text-3);
+  background: var(--surface);
+  padding: 2px 6px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--border);
+}
+.app.is-mobile .tb-kbd {
+  display: none;
+}
+
+.tb-right {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  margin-left: auto;
+}
+
+/* + Novo dropdown */
+.tb-novo {
+  position: relative;
+}
+.tb-novo-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 200px;
+  z-index: 30;
+  box-shadow: var(--sh-pop);
+}
+
+/* Sino com badge de notificações */
+.tb-bell {
+  position: relative;
+  display: inline-flex;
+}
+.tb-bell-badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: var(--r-pill);
+  background: var(--brand);
+  color: #fff;
+  font-size: 10px;
+  font-weight: var(--fw-bold);
+  line-height: 16px;
+  text-align: center;
+  pointer-events: none;
+}

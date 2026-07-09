@@ -1,0 +1,332 @@
+/* Diagnóstico do Contrato (M1.3) — co-localizado.
+ * Reutiliza padrões globais (.crumb, .rev-hero) de src/styles/patterns.css.
+ * Aqui só os elementos específicos: cell de recomendação, meta bar, preview, modelos.
+ */
+
+/* ── Hero · Cell de Recomendação (override do 1º cell) ─────────── */
+
+.diag-cell-recom .diag-recom-row {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  margin-top: var(--s-2);
+}
+.diag-recom-icon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+.diag-recom-text {
+  font-size: var(--fs-28);
+  font-weight: var(--fw-bold);
+  letter-spacing: 0.02em;
+  line-height: 1;
+}
+.diag-recom-sub {
+  font-size: var(--fs-12);
+  color: rgba(255, 255, 255, 0.6);
+  margin-top: var(--s-2);
+}
+
+.diag-stars {
+  display: inline-flex;
+  gap: 2px;
+  margin-left: 4px;
+  vertical-align: middle;
+}
+.diag-star {
+  color: rgba(255, 255, 255, 0.25);
+  font-size: var(--fs-13);
+}
+.diag-star.on {
+  color: var(--brand);
+}
+
+/* ── Meta bar (gerado em · versão · botões) ────────────────────── */
+
+.diag-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-4);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: var(--s-3) var(--s-4);
+  margin-bottom: var(--s-4);
+}
+.diag-meta-info {
+  min-width: 0;
+}
+.diag-meta-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--fs-13);
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+}
+.diag-meta-sub {
+  font-size: var(--fs-12);
+  color: var(--text-3);
+  margin-top: 2px;
+}
+.diag-meta-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.diag-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: var(--r-sm);
+  font-size: var(--fs-13);
+  font-weight: var(--fw-semibold);
+  font-family: var(--font);
+  cursor: pointer;
+  transition: background 0.12s var(--easing);
+}
+.diag-btn-outline {
+  background: transparent;
+  border: 1px solid var(--border-strong);
+  color: var(--text-2);
+}
+.diag-btn-outline:hover {
+  background: var(--surface-2);
+}
+.diag-btn-ink {
+  background: var(--ink);
+  border: 0;
+  color: #fff;
+}
+.diag-btn-ink:hover {
+  background: var(--ink-800);
+}
+.diag-btn-danger {
+  background: var(--danger);
+  border: 0;
+  color: #fff;
+}
+.diag-btn-danger:hover {
+  filter: brightness(1.05);
+}
+
+/* ── Preview do documento ──────────────────────────────────────── */
+
+.diag-preview-meta {
+  font-size: var(--fs-12);
+  color: var(--text-3);
+  font-variant-numeric: tabular-nums;
+}
+.diag-preview {
+  padding: var(--s-2) 0;
+}
+.diag-secao {
+  margin-bottom: var(--s-5);
+}
+.diag-secao:last-child {
+  margin-bottom: 0;
+}
+.diag-secao-titulo {
+  font-size: var(--fs-14);
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+  margin: 0 0 var(--s-2) 0;
+}
+.diag-secao-texto {
+  font-size: var(--fs-13);
+  color: var(--text-2);
+  line-height: 1.55;
+  margin: 0;
+}
+.diag-secao-texto strong {
+  color: var(--text);
+  font-weight: var(--fw-semibold);
+}
+
+/* Cláusulas */
+.diag-clausulas {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+.diag-clausula {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-3);
+  font-size: var(--fs-13);
+  color: var(--text-2);
+  line-height: 1.5;
+}
+.diag-clausula-codigo {
+  font-weight: var(--fw-bold);
+  color: var(--brand-700);
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+  min-width: 36px;
+}
+[data-theme="dark"] .diag-clausula-codigo {
+  color: var(--brand);
+}
+.diag-clausula-text {
+  flex: 1;
+  min-width: 0;
+}
+.diag-clausula-text strong {
+  color: var(--text);
+  font-weight: var(--fw-semibold);
+}
+.diag-clausula-sugestao {
+  color: var(--text-3);
+}
+.diag-clausula-mais {
+  font-size: var(--fs-13);
+  color: var(--text-3);
+  font-style: italic;
+  padding-left: 48px;
+}
+
+/* Cenários */
+.diag-cenarios {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.diag-cenarios li {
+  display: grid;
+  grid-template-columns: 130px 110px 1fr;
+  gap: var(--s-3);
+  align-items: baseline;
+  font-size: var(--fs-13);
+  padding: 4px 0;
+}
+.diag-cenario-rotulo {
+  font-weight: var(--fw-semibold);
+  color: var(--text-2);
+}
+.diag-cenario-valor {
+  font-weight: var(--fw-bold);
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+.diag-cenario-desc {
+  color: var(--text-3);
+  font-size: var(--fs-12);
+}
+
+/* Recomendação final (bloco amarelo) */
+.diag-recom-final {
+  background: var(--warning-bg);
+  border: 1px solid var(--warning);
+  border-radius: var(--r-md);
+  padding: var(--s-3) var(--s-4);
+  margin-top: var(--s-4);
+  font-size: var(--fs-13);
+  color: var(--text);
+  line-height: 1.55;
+}
+.diag-recom-final-label {
+  font-weight: var(--fw-bold);
+  color: var(--warning);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: var(--fs-12);
+}
+
+/* ── Modelos Recomendados (coluna direita) ─────────────────────── */
+
+.diag-modelos {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+.diag-modelo {
+  display: grid;
+  grid-template-columns: 28px 1fr auto;
+  gap: var(--s-2);
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+.diag-modelo:last-child {
+  border-bottom: 0;
+}
+.diag-modelo-icon {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  background: var(--surface-2);
+  border-radius: var(--r-sm);
+  color: var(--text-2);
+  flex-shrink: 0;
+}
+.diag-modelo-text {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  line-height: 1.25;
+}
+.diag-modelo-titulo {
+  font-size: var(--fs-13);
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+}
+.diag-modelo-desc {
+  font-size: 11px;
+  color: var(--text-3);
+}
+.diag-modelo-btn {
+  padding: 6px 10px;
+  background: var(--ink);
+  color: #fff;
+  border: 0;
+  border-radius: var(--r-sm);
+  font-size: 11px;
+  font-weight: var(--fw-semibold);
+  font-family: var(--font);
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.diag-modelo-btn:hover {
+  background: var(--ink-800);
+}
+
+/* ── Responsivo ─────────────────────────────────────────────────── */
+
+@media (max-width: 1100px) {
+  .diag-meta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--s-3);
+  }
+  .diag-meta-actions {
+    width: 100%;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+  }
+  .diag-cenarios li {
+    grid-template-columns: 130px 110px;
+  }
+  .diag-cenario-desc {
+    grid-column: 1 / -1;
+  }
+}
+@media (max-width: 720px) {
+  .diag-meta-actions {
+    justify-content: flex-start;
+  }
+}

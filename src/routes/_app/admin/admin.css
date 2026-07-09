@@ -1,0 +1,172 @@
+/* ── Admin · estilos compartilhados ─────────────────────────── */
+
+/* KPIs */
+.adm-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--s-3);
+  margin-bottom: var(--s-5);
+}
+@media (max-width: 1100px) {
+  .adm-kpis {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 720px) {
+  .adm-kpis {
+    grid-template-columns: 1fr;
+  }
+}
+
+.adm-kpi {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: var(--s-4);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+}
+.adm-kpi-label {
+  font-size: 10px;
+  font-weight: var(--fw-bold);
+  letter-spacing: 0.08em;
+  color: var(--text-3);
+  text-transform: uppercase;
+}
+.adm-kpi-value {
+  font-size: var(--fs-28);
+  font-weight: var(--fw-bold);
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+.adm-kpi-sub {
+  font-size: var(--fs-12);
+  color: var(--text-3);
+  line-height: 1.4;
+}
+
+/* Cards de atalho */
+.adm-cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--s-4);
+}
+@media (max-width: 880px) {
+  .adm-cards {
+    grid-template-columns: 1fr;
+  }
+}
+
+.adm-shortcut-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  margin: var(--s-3) 0 0;
+  padding: 0;
+  list-style: none;
+}
+.adm-shortcut-list li {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  font-size: var(--fs-13);
+  color: var(--text-2);
+}
+.adm-shortcut-list li svg {
+  color: var(--success);
+  flex-shrink: 0;
+}
+
+/* ── Toolbar (Users + Audit) ─────────────────────────────────── */
+
+.adm-toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  margin: var(--s-4) 0;
+  flex-wrap: wrap;
+}
+.adm-toolbar-search {
+  flex: 1;
+  min-width: 240px;
+}
+.adm-toolbar-count {
+  margin-left: auto;
+  font-size: var(--fs-12);
+  color: var(--text-3);
+}
+
+/* ── Linhas de tabela ─────────────────────────────────────────── */
+
+.adm-user-row {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+}
+.adm-user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--brand-50);
+  color: var(--brand);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--fs-12);
+  font-weight: var(--fw-semibold);
+  flex-shrink: 0;
+}
+.adm-user-meta {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.adm-user-name {
+  font-size: var(--fs-13);
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.adm-user-email {
+  font-size: 11px;
+  color: var(--text-3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Audit · descrição em duas linhas */
+.adm-audit-desc {
+  font-size: var(--fs-13);
+  color: var(--text-2);
+  line-height: 1.35;
+}
+.adm-audit-meta {
+  font-size: 11px;
+  color: var(--text-3);
+  margin-top: 2px;
+}
+
+/* Avatar pequeno usado na coluna usuário */
+.adm-audit-user {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.adm-audit-user-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--surface-2);
+  color: var(--text-2);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: var(--fw-semibold);
+  flex-shrink: 0;
+}

@@ -1,0 +1,538 @@
+/* Dashboard executivo por obra — tokens-only. Tom (farol) tinge fundo/borda/ícone via color-mix
+   (adapta no dark sozinho); NUNCA tarja de borda. Respeita prefers-reduced-motion no fim. */
+
+/* ── Síntese · faixa compacta de saúde (quieta, abaixo dos faróis) ────── */
+.dob-sintese {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  padding: var(--s-3) var(--s-4);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  margin-bottom: var(--s-5);
+}
+.dob-sintese-dot {
+  flex: none;
+  width: 9px;
+  height: 9px;
+  border-radius: var(--r-pill);
+  background: var(--text-4);
+}
+.dob-sintese.tom-conforme .dob-sintese-dot {
+  background: var(--success);
+}
+.dob-sintese.tom-observacao .dob-sintese-dot {
+  background: var(--info);
+}
+.dob-sintese.tom-risco .dob-sintese-dot {
+  background: var(--warning);
+}
+.dob-sintese.tom-critico .dob-sintese-dot {
+  background: var(--danger);
+}
+.dob-sintese-txt {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  font-size: var(--fs-13);
+  line-height: var(--lh-normal);
+  color: var(--text-2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.dob-sintese-label {
+  color: var(--text-3);
+}
+.dob-sintese-verdict {
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+}
+.dob-sintese.tom-conforme .dob-sintese-verdict {
+  color: var(--success);
+}
+.dob-sintese.tom-observacao .dob-sintese-verdict {
+  color: var(--info);
+}
+.dob-sintese.tom-risco .dob-sintese-verdict {
+  color: var(--warning);
+}
+.dob-sintese.tom-critico .dob-sintese-verdict {
+  color: var(--danger);
+}
+.dob-sintese-detalhe {
+  color: var(--text-3);
+}
+.dob-sintese-cov {
+  flex: none;
+  font-size: var(--fs-12);
+  color: var(--text-4);
+  text-align: right;
+}
+
+/* ── KPIs com farol (5 blocos clicáveis) ─────────────────────────────── */
+.dob-kpis {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: var(--s-3);
+  margin-bottom: var(--s-5);
+}
+.dob-kpi {
+  display: flex;
+  flex-direction: column;
+  padding: var(--s-4);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  text-decoration: none;
+  color: inherit;
+  transition:
+    border-color 0.15s var(--easing),
+    transform 0.15s var(--easing),
+    box-shadow 0.15s var(--easing);
+}
+.dob-kpi:hover {
+  border-color: var(--border-strong);
+  transform: translateY(-2px);
+  box-shadow: var(--sh-sm);
+}
+.dob-kpi-top {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+}
+.dob-kpi-ic {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--r-sm);
+  background: var(--surface-2);
+  color: var(--text-2);
+}
+.dob-kpi.tom-conforme .dob-kpi-ic {
+  background: var(--success-bg);
+  color: var(--success);
+}
+.dob-kpi.tom-observacao .dob-kpi-ic {
+  background: var(--info-bg);
+  color: var(--info);
+}
+.dob-kpi.tom-risco .dob-kpi-ic {
+  background: var(--warning-bg);
+  color: var(--warning);
+}
+.dob-kpi.tom-critico .dob-kpi-ic {
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+.dob-kpi-titulo {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--fs-13);
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+}
+.dob-kpi-farol {
+  flex: none;
+  font-size: var(--fs-12);
+  font-weight: var(--fw-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  color: var(--text-4);
+}
+.dob-kpi.tom-conforme .dob-kpi-farol {
+  color: var(--success);
+}
+.dob-kpi.tom-observacao .dob-kpi-farol {
+  color: var(--info);
+}
+.dob-kpi.tom-risco .dob-kpi-farol {
+  color: var(--warning);
+}
+.dob-kpi.tom-critico .dob-kpi-farol {
+  color: var(--danger);
+}
+.dob-kpi-valor {
+  margin-top: var(--s-3);
+  font-size: var(--fs-20);
+  font-weight: var(--fw-bold);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+  color: var(--text);
+}
+.dob-kpi-desc {
+  margin-top: 2px;
+  font-size: var(--fs-12);
+  line-height: var(--lh-snug);
+  color: var(--text-3);
+}
+.dob-kpi-go {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  margin-top: var(--s-3);
+  font-size: var(--fs-12);
+  color: var(--text-4);
+  opacity: 0;
+  transition:
+    opacity 0.15s var(--easing),
+    color 0.15s var(--easing);
+}
+.dob-kpi:hover .dob-kpi-go {
+  opacity: 1;
+  color: var(--brand);
+}
+
+/* ── Grid (Riscos + Atalhos) ─────────────────────────────────────────── */
+.dob-grid {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: var(--s-4);
+  align-items: start;
+}
+.dob-card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--s-3);
+  margin-bottom: var(--s-3);
+}
+.dob-card-title {
+  margin: 0;
+  font-size: var(--fs-15);
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+}
+.dob-card-sub {
+  font-size: var(--fs-12);
+  color: var(--text-3);
+}
+
+/* riscos */
+.dob-riscos {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+.dob-risco {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  padding: var(--s-3);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  text-decoration: none;
+  color: inherit;
+  transition:
+    border-color 0.15s var(--easing),
+    background 0.15s var(--easing),
+    transform 0.15s var(--easing);
+}
+.dob-risco:hover {
+  transform: translateX(2px);
+  border-color: var(--border-strong);
+}
+.dob-risco.tom-risco {
+  background: color-mix(in srgb, var(--warning) 6%, var(--surface));
+  border-color: color-mix(in srgb, var(--warning) 22%, var(--border));
+}
+.dob-risco.tom-critico {
+  background: color-mix(in srgb, var(--danger) 6%, var(--surface));
+  border-color: color-mix(in srgb, var(--danger) 22%, var(--border));
+}
+.dob-risco-dot {
+  flex: none;
+  width: 9px;
+  height: 9px;
+  border-radius: var(--r-pill);
+  background: var(--text-4);
+}
+.dob-risco.tom-risco .dob-risco-dot {
+  background: var(--warning);
+}
+.dob-risco.tom-critico .dob-risco-dot {
+  background: var(--danger);
+}
+.dob-risco-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.dob-risco-titulo {
+  font-size: var(--fs-13);
+  font-weight: var(--fw-medium);
+  color: var(--text);
+}
+.dob-risco-detalhe {
+  font-size: var(--fs-12);
+  color: var(--text-3);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.dob-risco-go {
+  flex: none;
+  color: var(--text-4);
+}
+.dob-risco:hover .dob-risco-go {
+  color: var(--brand);
+}
+.dob-empty-inline {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  padding: var(--s-4) var(--s-2);
+  font-size: var(--fs-13);
+  line-height: var(--lh-normal);
+  color: var(--text-2);
+}
+.dob-empty-ic {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--r-pill);
+}
+.dob-empty-ic.ok {
+  background: var(--success-bg);
+  color: var(--success);
+}
+
+/* atalhos */
+.dob-atalhos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+.dob-atalho {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  padding: var(--s-3);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  text-decoration: none;
+  color: inherit;
+  transition:
+    border-color 0.15s var(--easing),
+    background 0.15s var(--easing),
+    transform 0.15s var(--easing);
+}
+.dob-atalho:hover {
+  transform: translateX(2px);
+  border-color: var(--border-strong);
+  background: var(--surface-2);
+}
+.dob-atalho.key {
+  background: color-mix(in srgb, var(--brand) 6%, var(--surface));
+  border-color: color-mix(in srgb, var(--brand) 28%, var(--border));
+}
+.dob-atalho-ic {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--r-sm);
+  background: var(--brand-50);
+  color: var(--brand);
+}
+.dob-atalho-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.dob-atalho-titulo {
+  font-size: var(--fs-13);
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+}
+.dob-atalho-sub {
+  font-size: var(--fs-12);
+  color: var(--text-3);
+}
+.dob-atalho-go {
+  flex: none;
+  color: var(--text-4);
+}
+.dob-atalho:hover .dob-atalho-go {
+  color: var(--brand);
+}
+
+/* skeletons */
+.dob-skel-kpi {
+  height: 124px;
+  border-radius: var(--r-md);
+}
+.dob-skel-sintese {
+  height: 44px;
+  border-radius: var(--r-md);
+  margin-bottom: var(--s-5);
+}
+
+/* ── Gráficos premium ────────────────────────────────────────────────── */
+.dob-charts {
+  display: grid;
+  gap: var(--s-4);
+  margin-bottom: var(--s-4);
+  align-items: start;
+}
+.dob-charts-a {
+  grid-template-columns: 2fr 1fr;
+}
+.dob-charts-b {
+  grid-template-columns: 1.3fr 1fr;
+}
+.dob-chart-head {
+  margin-bottom: var(--s-3);
+}
+.dob-chart-titulo {
+  display: block;
+  font-size: var(--fs-15);
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+}
+.dob-chart-sub {
+  display: block;
+  margin-top: 1px;
+  font-size: var(--fs-12);
+  color: var(--text-3);
+}
+.dob-chart-pendente {
+  padding: var(--s-8) var(--s-2);
+  text-align: center;
+  font-size: var(--fs-13);
+  color: var(--text-3);
+}
+.dob-chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-3);
+  margin-top: var(--s-2);
+}
+.dob-legend-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--fs-12);
+  color: var(--text-3);
+}
+.dob-legend-pill::before {
+  content: "";
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  background: var(--text-4);
+}
+.dob-legend-pill.c::before {
+  background: var(--text-2);
+}
+.dob-legend-pill.r::before {
+  background: var(--brand);
+}
+.dob-legend-pill.p::before {
+  background: var(--brand);
+  opacity: 0.5;
+}
+.dob-donut {
+  position: relative;
+}
+.dob-donut-center {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  text-align: center;
+  pointer-events: none;
+}
+.dob-donut-pct {
+  display: block;
+  font-size: var(--fs-24);
+  font-weight: var(--fw-bold);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+}
+.dob-donut-label {
+  display: block;
+  margin-top: 2px;
+  font-size: var(--fs-12);
+  color: var(--text-3);
+}
+
+/* ── Ajustes da revisão (a11y · pendente · hero breakdown · números) ──── */
+/* foco visível nos cards-link (navegação por teclado) */
+.dob-kpi:focus-visible,
+.dob-risco:focus-visible,
+.dob-atalho:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+/* KPI/risco pendente — neutro, diferenciado dos faróis */
+.dob-kpi.tom-pendente .dob-kpi-ic {
+  background: var(--surface-3);
+  color: var(--text-3);
+}
+.dob-kpi.tom-pendente .dob-kpi-farol {
+  color: var(--text-4);
+}
+.dob-risco.tom-pendente .dob-risco-dot {
+  background: var(--text-4);
+}
+/* valor do KPI não estoura o card */
+.dob-kpi-valor {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+/* números tabulares em todo o gráfico (eixos/labels do Recharts herdam) */
+.dob-chart {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Responsivo ──────────────────────────────────────────────────────── */
+@media (max-width: 1100px) {
+  .dob-kpis {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 1000px) {
+  .dob-grid,
+  .dob-charts-a,
+  .dob-charts-b {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 720px) {
+  .dob-kpis {
+    grid-template-columns: 1fr;
+  }
+  .dob-sintese {
+    flex-wrap: wrap;
+  }
+  .dob-sintese-txt {
+    white-space: normal;
+  }
+  .dob-sintese-cov {
+    text-align: left;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dob-kpi,
+  .dob-risco,
+  .dob-atalho {
+    transition: none;
+  }
+}

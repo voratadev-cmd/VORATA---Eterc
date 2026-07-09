@@ -1,0 +1,106 @@
+.lst {
+  display: flex;
+  flex-direction: column;
+  margin: calc(-1 * var(--s-2));
+}
+.lst-item {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  padding: var(--s-3);
+  border-radius: var(--r-md);
+  cursor: pointer;
+  transition: background 0.12s var(--easing);
+  background: transparent;
+  border: 0;
+  text-align: left;
+  width: 100%;
+  font-family: var(--font);
+  color: inherit;
+}
+.lst-item:hover {
+  background: var(--surface-2);
+}
+.lst-item + .lst-item {
+  border-top: 1px solid var(--border);
+}
+.lst-item:hover + .lst-item,
+.lst-item:hover {
+  border-top-color: transparent;
+}
+
+.lst-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--r-md);
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  background: var(--surface-2);
+  color: var(--text-2);
+}
+.lst-icon.warning {
+  background: var(--warning-bg);
+  color: var(--warning);
+}
+.lst-icon.danger {
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+.lst-icon.success {
+  background: var(--success-bg);
+  color: var(--success);
+}
+.lst-icon.info {
+  background: var(--info-bg);
+  color: var(--info);
+}
+.lst-icon.brand {
+  background: var(--brand-50);
+  color: var(--brand);
+}
+.lst-icon.vault {
+  background: var(--vault-bg);
+  color: var(--vault);
+}
+
+.lst-main {
+  flex: 1;
+  min-width: 0;
+}
+.lst-title {
+  font-size: var(--fs-14);
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.lst-meta {
+  font-size: var(--fs-12);
+  color: var(--text-3);
+  margin-top: 2px;
+  display: flex;
+  gap: var(--s-2);
+  align-items: center;
+}
+.lst-meta .dot {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--text-4);
+}
+.lst-value {
+  font-size: var(--fs-14);
+  font-weight: var(--fw-semibold);
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+  text-align: right;
+  white-space: nowrap;
+}
+.lst-value.neg {
+  color: var(--danger);
+}
+.lst-value.pos {
+  color: var(--success);
+}

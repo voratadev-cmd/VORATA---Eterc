@@ -1,0 +1,224 @@
+/* M2.1.9 · Controle Documental · shell compartilhado (Header + KPIs + TabBar). */
+
+.cd-main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+}
+
+/* ── Header ────────────────────────────────────────────────────── */
+
+.cd-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--s-3);
+  flex-wrap: wrap;
+}
+.cd-head-titulo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+}
+.cd-titulo {
+  font-size: var(--fs-22);
+  font-weight: var(--fw-bold);
+  color: var(--text);
+  letter-spacing: -0.01em;
+  margin: 0;
+  line-height: 1.2;
+}
+.cd-sub {
+  font-size: var(--fs-13);
+  color: var(--text-3);
+  margin: 0;
+  max-width: 820px;
+}
+.cd-head-actions {
+  display: inline-flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.cd-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  font-size: var(--fs-12);
+  font-weight: var(--fw-bold);
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  font-family: var(--font);
+  border: 1px solid transparent;
+  line-height: 1.3;
+  white-space: nowrap;
+}
+.cd-btn-sec {
+  background: var(--surface);
+  border-color: var(--border);
+  color: var(--text);
+}
+.cd-btn-sec:hover {
+  background: var(--surface-2);
+}
+.cd-btn-ink {
+  background: var(--ink);
+  color: #fff;
+}
+.cd-btn-ink:hover {
+  background: var(--ink-700);
+}
+
+/* ── KPIs strip ───────────────────────────────────────────────── */
+
+.cd-kpis {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr) 1.2fr;
+  gap: var(--s-3);
+}
+@media (max-width: 1100px) {
+  .cd-kpis {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+@media (max-width: 720px) {
+  .cd-kpis {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Card de CTA — alinhado visualmente com FarolCard mas com botão de ação. */
+.cd-kpi-cta {
+  background: var(--danger);
+  border: 1px solid var(--danger);
+  border-radius: var(--r-md);
+  padding: var(--s-3) var(--s-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+.cd-kpi-cta-label {
+  font-size: 10px;
+  font-weight: var(--fw-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.75);
+}
+.cd-kpi-cta-valor {
+  font-size: var(--fs-22);
+  font-weight: var(--fw-bold);
+  color: #fff;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  margin-top: var(--s-1);
+}
+.cd-kpi-cta-btn {
+  margin-top: auto;
+  padding: 8px 12px;
+  background: #fff;
+  color: var(--danger);
+  border: 0;
+  border-radius: var(--r-sm);
+  font-size: 11px;
+  font-weight: var(--fw-bold);
+  cursor: pointer;
+  font-family: var(--font);
+  text-align: left;
+  transition: background 0.15s var(--easing);
+}
+.cd-kpi-cta-btn:hover {
+  background: var(--surface-2);
+}
+
+/* ── TabBar ────────────────────────────────────────────────────── */
+
+.cd-tabs {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  overflow: hidden;
+}
+@media (max-width: 720px) {
+  .cd-tabs {
+    grid-template-columns: 1fr;
+  }
+}
+.cd-tab {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--s-3) var(--s-4);
+  text-decoration: none;
+  color: var(--text-3);
+  border-right: 1px solid var(--border);
+  background: transparent;
+  transition:
+    background 0.12s var(--easing),
+    color 0.12s var(--easing);
+}
+.cd-tab:last-of-type {
+  border-right: 0;
+}
+@media (max-width: 720px) {
+  .cd-tab {
+    border-right: 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .cd-tab:last-of-type {
+    border-bottom: 0;
+  }
+}
+.cd-tab:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+.cd-tab-active {
+  background: var(--surface-2);
+  color: var(--text);
+  border-bottom: 2px solid var(--brand);
+}
+.cd-tab-label {
+  font-size: var(--fs-13);
+  font-weight: var(--fw-bold);
+  color: var(--text);
+}
+.cd-tab-active .cd-tab-label {
+  color: var(--brand);
+}
+.cd-tab-sub {
+  font-size: 10px;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* ── Empty state ───────────────────────────────────────────────── */
+
+.cd-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s-2);
+  padding: var(--s-10) var(--s-4);
+  color: var(--info);
+  text-align: center;
+  background: var(--info-bg);
+  border-radius: var(--r-md);
+}
+.cd-empty p {
+  margin: 0;
+  font-size: var(--fs-15);
+  color: var(--text-2);
+  font-weight: var(--fw-semibold);
+}
+.cd-empty-sub {
+  font-weight: var(--fw-regular) !important;
+  color: var(--text-3) !important;
+  font-size: var(--fs-13) !important;
+  max-width: 540px;
+  line-height: 1.55;
+}

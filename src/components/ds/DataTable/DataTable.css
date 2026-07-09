@@ -1,0 +1,81 @@
+.dt {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+}
+.dt-head {
+  display: grid;
+  grid-template-columns: var(--dt-cols);
+  align-items: center;
+  gap: var(--s-3);
+  padding: 12px var(--s-4);
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-3);
+  font-weight: var(--fw-bold);
+}
+.dt-row {
+  display: grid;
+  grid-template-columns: var(--dt-cols);
+  align-items: center;
+  gap: var(--s-3);
+  padding: 12px var(--s-4);
+  border-bottom: 1px solid var(--border);
+  transition: background 0.1s var(--easing);
+  background: transparent;
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  width: 100%;
+  text-align: left;
+  font-family: var(--font);
+  color: inherit;
+  font-size: var(--fs-14);
+  cursor: default;
+}
+.dt-row.clickable {
+  cursor: pointer;
+}
+.dt-row:last-child {
+  border-bottom: 0;
+}
+.dt-row.clickable:hover {
+  background: var(--surface-2);
+}
+.dt-row.selected {
+  background: var(--brand-50);
+}
+[data-theme="dark"] .dt-row.selected {
+  background: rgba(241, 136, 77, 0.08);
+}
+
+.dt-cell-right {
+  text-align: right;
+  justify-self: end;
+  font-variant-numeric: tabular-nums;
+}
+.dt-cell-center {
+  text-align: center;
+  justify-self: center;
+}
+
+.dt-empty {
+  padding: var(--s-8) var(--s-4);
+  text-align: center;
+  color: var(--text-3);
+  font-size: var(--fs-13);
+}
+
+@media (max-width: 720px) {
+  .dt-head {
+    display: none;
+  }
+  .dt-row {
+    grid-template-columns: 1fr;
+    gap: var(--s-2);
+  }
+}

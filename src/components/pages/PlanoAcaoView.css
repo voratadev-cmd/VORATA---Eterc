@@ -1,0 +1,487 @@
+/* Plano de Ação (C.12) — 5W2H. Tokens-only, sem tarja de borda de farol; status/urgência via Badge.
+   Full-width (convenção do app): sem cap no container; prosa (subtítulo, gatilho, leitura IA) ganha
+   medida interna. KPIs no padrão canônico (chip lucide + valor tabular + sub + hover lift). */
+
+.pa-main {
+  padding: var(--s-6) var(--s-8);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-5);
+}
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Header ─────────────────────────────────────────────────────────────── */
+.pa-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--s-4);
+  flex-wrap: wrap;
+}
+.pa-titulo {
+  font-size: var(--fs-24);
+  font-weight: var(--fw-bold);
+  color: var(--text);
+  letter-spacing: -0.01em;
+}
+.pa-sub {
+  font-size: var(--fs-12);
+  color: var(--text-3);
+  line-height: var(--lh-snug);
+  margin-top: 2px;
+  max-width: 70ch;
+}
+.pa-sub b {
+  color: var(--text);
+  font-weight: var(--fw-semibold);
+}
+.pa-farol {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+.pa-farol-crit {
+  font-size: 11px;
+  color: var(--text-4);
+  max-width: 34ch;
+  text-align: right;
+  line-height: var(--lh-snug);
+}
+
+/* ── 6 KPIs (padrão canônico: chip lucide + valor tabular · sem tarja) ──── */
+.pa-kpis {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: var(--s-3);
+}
+.pa-kpi {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: var(--s-3) var(--s-4);
+  text-align: left;
+  transition:
+    transform 0.15s var(--easing),
+    border-color 0.15s var(--easing),
+    box-shadow 0.15s var(--easing);
+}
+.pa-kpi:hover {
+  transform: translateY(-2px);
+  border-color: var(--border-strong);
+  box-shadow: var(--sh-sm);
+}
+@media (prefers-reduced-motion: reduce) {
+  .pa-kpi,
+  .pa-kpi:hover {
+    transition: none;
+    transform: none;
+  }
+}
+/* KPI-atalho de filtro (status): botão de verdade, com focus ring e estado ativo brand-tingido. */
+.pa-kpi-btn {
+  font-family: var(--font);
+  cursor: pointer;
+}
+.pa-kpi-btn:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+.pa-kpi-btn.ativo {
+  background: color-mix(in srgb, var(--brand) 6%, var(--surface));
+  border-color: color-mix(in srgb, var(--brand) 45%, var(--surface));
+}
+.pa-kpi-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.pa-kpi-chip {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
+  border-radius: var(--r-sm);
+  background: var(--surface-2);
+  color: var(--text-3);
+}
+.pa-kpi-chip.t-danger {
+  background: color-mix(in srgb, var(--danger) 10%, var(--surface-2));
+  color: var(--danger);
+}
+.pa-kpi-chip.t-warning {
+  background: color-mix(in srgb, var(--warning) 12%, var(--surface-2));
+  color: color-mix(in srgb, var(--warning) 82%, var(--text));
+}
+.pa-kpi-chip.t-info {
+  background: color-mix(in srgb, var(--info) 10%, var(--surface-2));
+  color: var(--info);
+}
+.pa-kpi-chip.t-success {
+  background: color-mix(in srgb, var(--success) 10%, var(--surface-2));
+  color: var(--success);
+}
+.pa-kpi-l {
+  font-size: 10px;
+  font-weight: var(--fw-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--text-3);
+}
+.pa-kpi-v {
+  font-size: var(--fs-28);
+  font-weight: var(--fw-bold);
+  color: var(--text);
+  line-height: 1;
+  margin-top: 8px;
+}
+.pa-kpi-s {
+  font-size: 10px;
+  color: var(--text-4);
+  margin-top: 3px;
+}
+
+/* ── Distribuição por status (barra empilhada · snapshot do Resumo) ─────── */
+.pa-dist {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 0 2px;
+}
+.pa-dist-bar {
+  display: flex;
+  gap: 2px;
+  height: 8px;
+  border-radius: var(--r-pill);
+  overflow: hidden;
+}
+.pa-dist-seg {
+  display: block;
+  min-width: 4px;
+  height: 100%;
+}
+.pa-dist-leg {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-3);
+  font-size: 11px;
+  color: var(--text-3);
+}
+.pa-dist-leg-it {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.pa-dist-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.pa-dist-pct {
+  margin-left: auto;
+  font-weight: var(--fw-semibold);
+  color: var(--text-2);
+}
+
+/* ── Seção ──────────────────────────────────────────────────────────────── */
+.pa-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: var(--s-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+}
+.pa-section-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--s-3);
+}
+.pa-section-title {
+  font-size: var(--fs-15);
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+}
+.pa-section-sub {
+  font-size: 11px;
+  color: var(--text-3);
+  margin-top: 2px;
+}
+
+/* Chips de status dentro da .col-toolbar */
+.pa-chips {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  flex-wrap: wrap;
+}
+
+/* ── Tabela 5W2H ────────────────────────────────────────────────────────── */
+.pa-tabela {
+  display: flex;
+  flex-direction: column;
+}
+.pa-tabela-head,
+.pa-tabela-row {
+  display: grid;
+  grid-template-columns: 56px 2.6fr 1.3fr 1.1fr 0.9fr 1.1fr 0.7fr;
+  align-items: center;
+  gap: var(--s-3);
+  padding: var(--s-3) var(--s-2);
+}
+.pa-tabela-head {
+  font-size: 11px;
+  font-weight: var(--fw-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--text-3);
+  border-bottom: 1px solid var(--border);
+}
+.pa-tabela-row {
+  font-size: var(--fs-13);
+  color: var(--text-2);
+  border-bottom: 1px solid var(--border);
+  transition: background 0.12s var(--easing);
+}
+.pa-tabela-row:hover {
+  background: var(--surface-2);
+}
+.pa-tabela-row:last-child {
+  border-bottom: none;
+}
+.pa-row-late {
+  background: var(--danger-bg);
+}
+.pa-row-late:hover {
+  background: var(--danger-bg);
+}
+.pa-cell-id {
+  font-family: var(--font-mono);
+  font-size: var(--fs-12);
+  font-weight: var(--fw-semibold);
+  color: var(--text-3);
+}
+.pa-cell-tarefa {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+.pa-tarefa-ttl {
+  color: var(--text);
+  font-weight: var(--fw-semibold);
+}
+.pa-tarefa-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-1);
+}
+.pa-pill {
+  display: inline-block;
+  width: fit-content;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--text-3);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-pill);
+  padding: 1px var(--s-2);
+  white-space: nowrap;
+}
+/* "Por quê" (5W2H): linha própria, legível; longo = clamp 2 linhas + expansor explícito. */
+.pa-pq-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+.pa-pq {
+  font-size: 11px;
+  color: var(--brand-700);
+  line-height: var(--lh-snug);
+}
+.pa-pq strong {
+  font-weight: var(--fw-semibold);
+  text-transform: uppercase;
+  font-size: 10px;
+  letter-spacing: 0.03em;
+}
+.pa-pq-clamp {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.pa-pq-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  font-family: var(--font);
+  font-size: 11px;
+  font-weight: var(--fw-semibold);
+  color: var(--brand);
+  cursor: pointer;
+}
+.pa-pq-toggle:hover {
+  color: var(--brand-600);
+  text-decoration: underline;
+}
+.pa-pq-toggle:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+  border-radius: var(--r-sm);
+}
+.pa-cell-resp {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.pa-resp-nome {
+  color: var(--text);
+}
+.pa-frt {
+  display: inline-block;
+  width: fit-content;
+  font-size: 10.5px;
+  color: var(--text-3);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-pill);
+  padding: 1px var(--s-2);
+}
+.pa-cell-prazo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  align-items: flex-start;
+}
+.pa-prazo-rel {
+  font-size: 11px;
+  color: var(--text-4);
+}
+.pa-flag {
+  font-size: 10px;
+  font-weight: var(--fw-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.pa-flag-late {
+  color: var(--danger);
+}
+.pa-cell-esf {
+  color: var(--text-2);
+}
+
+/* ── Gatilhos automáticos ───────────────────────────────────────────────── */
+.pa-gatilho {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  font-size: var(--fs-12);
+  color: var(--text-3);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: var(--s-3) var(--s-4);
+  line-height: var(--lh-snug);
+  max-width: 90ch;
+}
+.pa-gatilho strong {
+  color: var(--text-2);
+  font-weight: var(--fw-semibold);
+}
+.pa-gatilho svg {
+  flex-shrink: 0;
+}
+
+/* ── Leitura IA ─────────────────────────────────────────────────────────── */
+.pa-ia {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: var(--s-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+.pa-ia-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10.5px;
+  font-weight: var(--fw-bold);
+  letter-spacing: 0.06em;
+  color: var(--brand-700);
+}
+.pa-ia-texto {
+  font-size: var(--fs-13);
+  color: var(--text-2);
+  line-height: var(--lh-normal);
+  max-width: 90ch;
+}
+
+/* ── Responsivo ─────────────────────────────────────────────────────────── */
+@media (max-width: 1100px) {
+  .pa-kpis {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (max-width: 880px) {
+  .pa-main {
+    padding: var(--s-5) var(--s-4);
+  }
+  .pa-kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  /* Tabela → cards empilhados: header some, cada célula ganha rótulo inline (via data-l).
+     Toda coluna continua visível — só reorganizada. */
+  .pa-tabela-head {
+    display: none;
+  }
+  .pa-tabela-row {
+    grid-template-columns: minmax(0, 1fr);
+    align-items: start;
+    gap: var(--s-2);
+    padding: var(--s-3) var(--s-2);
+  }
+  .pa-tabela-row [data-l]::before {
+    content: attr(data-l);
+    display: inline-block;
+    min-width: 86px;
+    flex-shrink: 0;
+    font-size: 10px;
+    font-weight: var(--fw-semibold);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-4);
+  }
+  .pa-cell-resp,
+  .pa-cell-prazo {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--s-2);
+  }
+  .pa-cell-urg,
+  .pa-cell-status,
+  .pa-cell-esf {
+    display: flex;
+    align-items: center;
+    gap: var(--s-2);
+  }
+}
+@media (max-width: 720px) {
+  .pa-kpis {
+    grid-template-columns: 1fr;
+  }
+}

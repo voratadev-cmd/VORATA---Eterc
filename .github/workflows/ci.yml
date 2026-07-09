@@ -1,0 +1,76 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    name: Lint & Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: yarn
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Lint
+        run: yarn lint
+
+      - name: Typecheck
+        run: yarn typecheck
+
+      - name: Build
+        run: yarn build
+
+  kpis:
+    name: Refresh canonical KPIs (obra_kpis)
+    runs-on: ubuntu-latest
+    needs: ci # só após lint/typecheck/build passarem
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: yarn
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+
+      # Refresca obra_kpis (canônico das telas → o chat lê daí). Verifica BR-101 × oráculo ANTES de
+      # gravar. Pula em silêncio se os secrets não estiverem configurados (não quebra o CI).
+      - name: Refresh obra_kpis (Fase B)
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          if [ -z "$SUPABASE_DB_URL" ] || [ -z "$VITE_SUPABASE_URL" ]; then
+            echo "::warning::Secrets de KPIs ausentes (SUPABASE_DB_URL / VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY) — pulando refresh. Configure-os em Settings → Secrets para ligar a automação."
+            exit 0
+          fi
+          bash scripts/refresh_kpis.sh

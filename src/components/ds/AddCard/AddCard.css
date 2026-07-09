@@ -1,0 +1,58 @@
+.add-card {
+  background: transparent;
+  border: 2px dashed var(--border-strong);
+  border-radius: var(--r-lg);
+  color: var(--text-3);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-2);
+  padding: var(--s-6);
+  font-family: var(--font);
+  font-size: var(--fs-13);
+  font-weight: var(--fw-semibold);
+  transition: all 0.15s var(--easing);
+  width: 100%;
+  text-align: center;
+}
+.add-card:hover {
+  border-color: var(--brand);
+  color: var(--brand);
+  background: var(--brand-50);
+}
+[data-theme="dark"] .add-card:hover {
+  background: rgba(241, 136, 77, 0.08);
+}
+.add-card:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.add-card-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--surface-2);
+  display: grid;
+  place-items: center;
+  color: var(--text-3);
+  transition: all 0.15s var(--easing);
+}
+.add-card:hover .add-card-icon {
+  background: var(--brand);
+  color: #fff;
+}
+
+.add-card-compact {
+  padding: var(--s-4);
+  flex-direction: row;
+  gap: var(--s-3);
+  justify-content: flex-start;
+  text-align: left;
+}
+.add-card-compact .add-card-icon {
+  width: 32px;
+  height: 32px;
+}

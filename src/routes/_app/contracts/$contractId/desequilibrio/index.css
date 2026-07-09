@@ -1,0 +1,769 @@
+/* M3 · D.0 Painel de Desequilíbrio (tela-mãe) — tokens-only, dark-aware. */
+
+.dq-main {
+  padding: var(--s-6) var(--s-8);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-5);
+  /* enche a largura (padrão do app) — sem cap nem sobra lateral em telas grandes. */
+}
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Header ─────────────────────────────────────────────────────────────── */
+.dq-head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-1);
+}
+.dq-titulo {
+  font-size: var(--fs-24);
+  font-weight: var(--fw-bold);
+  color: var(--text);
+  letter-spacing: -0.01em;
+}
+.dq-sub {
+  font-size: var(--fs-13);
+  color: var(--text-3);
+  line-height: var(--lh-snug);
+}
+.dq-sec {
+  font-size: var(--fs-12);
+  font-weight: var(--fw-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-3);
+  margin-bottom: var(--s-3);
+}
+
+/* ── Hero ────────────────────────────────────────────────────────────────── */
+/* Header CLARO e elegante — número-herói em tinta forte + 3 indicadores limpos com divisor; o
+   "Resultado provável" (2º número-chave) destacado por tipografia. Sem bloco navy, sem barra/laranja. */
+.dq-hero {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--s-8);
+  align-items: center;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: var(--s-5) var(--s-6);
+  box-shadow: var(--sh-sm);
+  max-width: 1100px;
+}
+.dq-hero-primary {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-1);
+}
+.dq-hero-label {
+  font-size: var(--fs-12);
+  font-weight: var(--fw-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-3);
+}
+.dq-hero-total {
+  font-size: 40px;
+  font-weight: var(--fw-bold);
+  color: var(--ink);
+  line-height: 1.05;
+  letter-spacing: -0.015em;
+}
+.dq-hero-pct {
+  font-size: var(--fs-13);
+  color: var(--text-3);
+  font-variant-numeric: tabular-nums;
+}
+.dq-hero-stats {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0;
+}
+.dq-hero-stat {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-1);
+  padding: 0 var(--s-5);
+  border-left: 1px solid var(--border);
+}
+.dq-hero-stat:last-child {
+  padding-right: 0;
+}
+.dq-hero-stat-label {
+  font-size: var(--fs-12);
+  color: var(--text-3);
+}
+.dq-hero-stat-valor {
+  font-size: var(--fs-18);
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+.dq-hero-stat-meta {
+  font-size: var(--fs-12);
+  color: var(--text-4);
+}
+/* Resultado provável em destaque: valor maior/bold. */
+.dq-hero-stat-prov .dq-hero-stat-valor {
+  font-size: var(--fs-22);
+  font-weight: var(--fw-bold);
+  color: var(--ink);
+}
+@media (max-width: 880px) {
+  .dq-hero {
+    grid-template-columns: 1fr;
+    gap: var(--s-4);
+  }
+  .dq-hero-stats {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    gap: var(--s-2) 0;
+  }
+}
+
+/* ── Contexto de mérito (faixa clara, fora do navy) ────────────────────────── */
+.dq-merito {
+  margin-top: var(--s-3);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: var(--s-4) var(--s-5);
+}
+.dq-merito-label {
+  font-size: var(--fs-12);
+  font-weight: var(--fw-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-3);
+  margin-bottom: var(--s-3);
+}
+.dq-merito-chips {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 340px));
+  justify-content: start;
+  gap: var(--s-3);
+}
+.dq-merito-chip {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: var(--s-3) var(--s-4);
+}
+.dq-merito-chip-label {
+  font-size: var(--fs-12);
+  color: var(--text-3);
+}
+.dq-merito-chip-valor {
+  font-size: var(--fs-13);
+  font-weight: var(--fw-semibold);
+  color: var(--text-3);
+  margin-top: var(--s-1);
+}
+.dq-merito-chip-hint {
+  font-size: var(--fs-12);
+  color: var(--text-4);
+  margin-top: var(--s-1);
+}
+
+/* ── Composição ────────────────────────────────────────────────────────────── */
+.dq-barwrap {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: var(--s-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+}
+.dq-barrow {
+  display: grid;
+  grid-template-columns: 1.6fr 0.5fr 3fr 1.2fr 0.7fr;
+  align-items: center;
+  gap: var(--s-3);
+}
+.dq-bar-nome {
+  font-size: var(--fs-13);
+  font-weight: var(--fw-medium);
+  color: var(--text);
+}
+.dq-bar-tela {
+  font-size: var(--fs-12);
+  color: var(--text-4);
+  font-variant-numeric: tabular-nums;
+}
+.dq-bar-track {
+  height: var(--s-3);
+  background: var(--surface-2);
+  border-radius: var(--r-pill);
+  overflow: hidden;
+}
+.dq-bar-fill {
+  height: 100%;
+  border-radius: var(--r-pill);
+  transition: width 0.4s var(--easing);
+}
+.dq-bar-val {
+  font-size: var(--fs-13);
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+  text-align: right;
+}
+.dq-bar-pct {
+  font-size: var(--fs-12);
+  color: var(--text-3);
+  text-align: right;
+}
+/* Chuva pendente (D.6) — nota ancorada FORA do total, sempre visível. */
+.dq-pendrow {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  margin-top: var(--s-2);
+  padding-top: var(--s-3);
+  border-top: 1px dashed var(--border);
+}
+.dq-pendrow-txt {
+  font-size: var(--fs-12);
+  color: var(--text-3);
+}
+
+/* Categorias sem desequilíbrio apurado — recolhidas, recuadas (não somem). */
+.dq-sem-deseq {
+  border-top: 1px solid var(--border);
+  padding-top: var(--s-3);
+}
+.dq-sem-deseq-sum {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  font-size: var(--fs-12);
+  color: var(--text-3);
+  user-select: none;
+}
+.dq-sem-deseq-sum::-webkit-details-marker {
+  display: none;
+}
+.dq-sem-deseq-sum:hover {
+  color: var(--text-2);
+}
+.dq-sem-deseq-caret {
+  display: inline-block;
+  color: var(--text-4);
+  transition: transform 0.15s var(--easing);
+}
+.dq-sem-deseq[open] .dq-sem-deseq-caret {
+  transform: rotate(90deg);
+}
+.dq-sem-deseq-lista {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  margin-top: var(--s-3);
+  padding-left: var(--s-4);
+}
+.dq-sem-deseq-row {
+  display: grid;
+  grid-template-columns: 1.6fr 0.5fr auto;
+  align-items: center;
+  gap: var(--s-3);
+  font-size: var(--fs-12);
+  color: var(--text-4);
+}
+.dq-sem-deseq-nome {
+  color: var(--text-4);
+}
+.dq-sem-deseq-tela {
+  font-variant-numeric: tabular-nums;
+}
+.dq-sem-deseq-val {
+  margin-left: auto;
+  font-style: italic;
+}
+.dq-sem-deseq-badge {
+  margin-left: auto;
+}
+
+.dq-totrow {
+  display: grid;
+  grid-template-columns: 1.6fr 0.5fr 3fr 1.2fr 0.7fr;
+  align-items: center;
+  gap: var(--s-3);
+  border-top: 1px solid var(--border-strong);
+  padding-top: var(--s-3);
+  margin-top: var(--s-1);
+}
+.dq-totrow .dq-bar-nome {
+  font-weight: var(--fw-bold);
+}
+.dq-totrow .dq-bar-val {
+  grid-column: 4;
+  text-align: right;
+}
+.dq-totrow .dq-bar-pct {
+  grid-column: 5;
+}
+.dq-apart {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-3);
+  margin-top: var(--s-3);
+  padding: var(--s-3) var(--s-4);
+  border: 1px dashed var(--success);
+  border-radius: var(--r-md);
+  font-size: var(--fs-13);
+  color: var(--text-2);
+}
+.dq-apart > span:first-child {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  color: var(--success);
+}
+.dq-apart .tabular {
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+}
+.dq-apart-obs {
+  margin-top: var(--s-2);
+  font-size: var(--fs-12);
+  color: var(--text-3);
+  line-height: var(--lh-snug);
+  max-width: 90ch;
+}
+
+/* ── Cenários & métodos ───────────────────────────────────────────────────── */
+.dq-mgrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: var(--s-4);
+}
+.dq-mcard {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: var(--s-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-1);
+}
+.dq-mcard-apart {
+  border-style: dashed;
+}
+/* Recua (sem sumir) cards pendentes/fora-do-teto: fundo surface-2, valor text-4. */
+.dq-mcard-recuado {
+  background: var(--surface-2);
+}
+.dq-mcard-recuado .dq-mcard-valor {
+  color: var(--text-4);
+}
+.dq-mcard-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-2);
+}
+.dq-mcard-cat {
+  font-size: var(--fs-14);
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+}
+.dq-mcard-tela {
+  font-size: var(--fs-12);
+  color: var(--text-4);
+  font-variant-numeric: tabular-nums;
+}
+.dq-mcard-metodo {
+  font-size: var(--fs-12);
+  font-weight: var(--fw-semibold);
+  color: var(--brand-700);
+  margin-top: var(--s-1);
+}
+.dq-mcard-desc {
+  font-size: var(--fs-12);
+  color: var(--text-3);
+  line-height: var(--lh-snug);
+}
+.dq-mcard-valor {
+  font-size: var(--fs-20);
+  font-weight: var(--fw-bold);
+  color: var(--text);
+  margin-top: var(--s-1);
+}
+.dq-mcard-nota {
+  font-size: var(--fs-12);
+  color: var(--text-3);
+  font-variant-numeric: tabular-nums;
+}
+.dq-mcard-badge {
+  margin-top: var(--s-1);
+  align-self: flex-start;
+}
+.dq-mcard-link {
+  margin-top: var(--s-2);
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  width: fit-content;
+  font-size: var(--fs-12);
+  font-weight: var(--fw-medium);
+  color: var(--brand);
+  text-decoration: none;
+}
+.dq-mcard-link:hover {
+  text-decoration: underline;
+}
+
+/* ── Quitação trimestral ───────────────────────────────────────────────────── */
+.dq-rito {
+  display: flex;
+  gap: var(--s-2);
+  background: var(--info-bg);
+  border-radius: var(--r-md);
+  padding: var(--s-3) var(--s-4);
+  margin-bottom: var(--s-3);
+  flex-wrap: wrap;
+}
+.dq-rito-step {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  flex: 1;
+  min-width: 220px;
+}
+.dq-rito-n {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: var(--r-pill);
+  background: var(--info);
+  color: #fff;
+  font-size: var(--fs-12);
+  font-weight: var(--fw-bold);
+  display: grid;
+  place-items: center;
+}
+.dq-rito-t {
+  font-size: var(--fs-13);
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+}
+.dq-rito-s {
+  font-size: var(--fs-12);
+  color: var(--text-3);
+  line-height: var(--lh-snug);
+}
+
+/* Card do trimestre em aberto — "tenho ação agora?" acima do cronograma. */
+.dq-tab-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: var(--s-5);
+  margin-bottom: var(--s-3);
+}
+.dq-tab-card-head {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  flex-wrap: wrap;
+  margin-bottom: var(--s-4);
+}
+.dq-tab-card-trim {
+  font-size: var(--fs-15);
+  font-weight: var(--fw-bold);
+  color: var(--text);
+}
+.dq-tab-card-rotulo {
+  font-size: var(--fs-12);
+  font-weight: var(--fw-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-3);
+}
+.dq-tab-card-status {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  font-size: var(--fs-12);
+  font-weight: var(--fw-medium);
+  color: var(--warning);
+  background: var(--warning-bg);
+  border-radius: var(--r-pill);
+  padding: var(--s-1) var(--s-3);
+  font-variant-numeric: tabular-nums;
+}
+/* Ponto de status (farol) — 8px, padrão de dot do produto (substitui glifo ●). */
+.dq-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--r-pill);
+  background: var(--warning);
+  flex-shrink: 0;
+}
+/* Sub-linha discreta (BMs sob o período) — rastreabilidade do pleito. */
+.dq-cell-sub {
+  display: block;
+  margin-top: 2px;
+  font-size: var(--fs-12);
+  color: var(--text-4);
+}
+.dq-tab-card-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--s-4);
+}
+.dq-tab-card-k {
+  font-size: var(--fs-12);
+  color: var(--text-3);
+  margin-bottom: var(--s-1);
+}
+.dq-tab-card-v {
+  font-size: var(--fs-14);
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+}
+.dq-tab-card-ressalvas {
+  margin-top: var(--s-4);
+  padding-top: var(--s-3);
+  border-top: 1px solid var(--border);
+  font-size: var(--fs-12);
+  color: var(--text-3);
+  line-height: var(--lh-snug);
+  max-width: 90ch;
+}
+.dq-tab-card-ressalvas strong {
+  color: var(--text);
+  font-weight: var(--fw-semibold);
+}
+.dq-tab-card-linha {
+  margin-top: var(--s-2);
+}
+
+/* Cronograma completo — colapsado por padrão. */
+.dq-crono {
+  margin-top: var(--s-1);
+}
+.dq-crono-sum {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  font-size: var(--fs-12);
+  font-weight: var(--fw-medium);
+  color: var(--text-3);
+  user-select: none;
+  padding: var(--s-1) 0;
+}
+.dq-crono-sum::-webkit-details-marker {
+  display: none;
+}
+.dq-crono-sum:hover {
+  color: var(--text-2);
+}
+.dq-crono-caret {
+  display: inline-block;
+  color: var(--text-4);
+  transition: transform 0.15s var(--easing);
+}
+.dq-crono[open] .dq-crono-caret {
+  transform: rotate(90deg);
+}
+.dq-crono .dq-tabela {
+  margin-top: var(--s-3);
+}
+.dq-rito-arrow {
+  color: var(--info);
+  font-weight: var(--fw-bold);
+  margin-left: auto;
+}
+
+.dq-tabela {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+}
+.dq-tabela-head,
+.dq-tabela-row {
+  display: grid;
+  grid-template-columns: 0.5fr 1.6fr 1.1fr 1fr 1fr 1.5fr 1.5fr;
+  align-items: center;
+  gap: var(--s-3);
+  padding: var(--s-2) var(--s-4);
+}
+.dq-tabela-head {
+  font-size: var(--fs-12);
+  font-weight: var(--fw-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--text-3);
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-2);
+}
+.dq-tabela-row {
+  font-size: var(--fs-13);
+  color: var(--text-2);
+  border-bottom: 1px solid var(--border);
+}
+.dq-tabela-row:last-child {
+  border-bottom: none;
+}
+.dq-tabela .r {
+  text-align: right;
+}
+.dq-row-open {
+  background: var(--warning-bg);
+}
+.dq-cell-forte {
+  color: var(--text);
+  font-weight: var(--fw-semibold);
+}
+.dq-cell-pend {
+  color: var(--text-4);
+}
+.dq-badge-due {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  font-size: var(--fs-12);
+  font-weight: var(--fw-medium);
+  color: var(--warning);
+}
+
+.dq-tacita {
+  display: flex;
+  gap: var(--s-3);
+  border-radius: var(--r-md);
+  padding: var(--s-3) var(--s-4);
+  margin-top: var(--s-3);
+  font-size: var(--fs-13);
+  line-height: var(--lh-snug);
+  background: var(--danger-bg);
+  color: var(--text-2);
+}
+.dq-tacita strong {
+  color: var(--danger);
+}
+.dq-tacita > div {
+  max-width: 90ch;
+}
+
+/* ── Ações ─────────────────────────────────────────────────────────────────── */
+.dq-acoes {
+  display: flex;
+  gap: var(--s-3);
+  flex-wrap: wrap;
+}
+.dq-abtn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  font-size: var(--fs-13);
+  font-weight: var(--fw-medium);
+  padding: var(--s-2) var(--s-4);
+  border-radius: var(--r-md);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.15s var(--easing);
+}
+.dq-abtn:hover {
+  border-color: var(--border-strong);
+  background: var(--surface-2);
+}
+.dq-abtn-primary {
+  background: var(--brand);
+  border-color: var(--brand);
+  color: #fff;
+}
+.dq-abtn-primary:hover {
+  background: var(--brand-600);
+  border-color: var(--brand-600);
+}
+.dq-abtn-claim {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: #fff;
+}
+.dq-abtn-claim:hover {
+  background: var(--ink-700);
+  border-color: var(--ink-700);
+}
+
+/* ── Leitura IA ────────────────────────────────────────────────────────────── */
+.dq-ia {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: var(--s-5);
+}
+.dq-ia-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  font-size: var(--fs-12);
+  font-weight: var(--fw-bold);
+  letter-spacing: 0.06em;
+  color: var(--brand-700);
+  margin-bottom: var(--s-2);
+}
+.dq-ia-texto {
+  font-size: var(--fs-13);
+  color: var(--text-2);
+  line-height: var(--lh-normal);
+  max-width: 80ch;
+}
+
+/* ── Skeleton ──────────────────────────────────────────────────────────────── */
+.dq-sk-hero {
+  height: 220px;
+  border-radius: var(--r-lg);
+}
+.dq-sk-card {
+  height: 200px;
+  border-radius: var(--r-lg);
+}
+
+/* ── Responsivo ────────────────────────────────────────────────────────────── */
+@media (max-width: 1100px) {
+  .dq-mgrid {
+    grid-template-columns: 1fr;
+  }
+  .dq-merito-chips,
+  .dq-tab-card-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 880px) {
+  .dq-main {
+    padding: var(--s-5) var(--s-4);
+  }
+  .dq-barrow {
+    grid-template-columns: 1.4fr 2.5fr 1fr;
+  }
+  .dq-bar-tela,
+  .dq-bar-pct {
+    display: none;
+  }
+  .dq-merito-chips,
+  .dq-tab-card-grid {
+    grid-template-columns: 1fr;
+  }
+  .dq-tabela-head,
+  .dq-tabela-row {
+    grid-template-columns: 0.5fr 1.5fr 1.1fr 1.3fr;
+  }
+  .dq-tabela-head span:nth-child(n + 5),
+  .dq-tabela-row span:nth-child(n + 5) {
+    display: none;
+  }
+}

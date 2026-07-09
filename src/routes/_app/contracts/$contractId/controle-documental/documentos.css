@@ -1,0 +1,187 @@
+/* M2.1.9 · aba Documentos Esperados · tabela hierárquica de 28 docs */
+
+.cdd-secao {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: var(--s-3) var(--s-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+}
+.cdd-secao-head {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.cdd-secao-titulo {
+  font-size: var(--fs-15);
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+  margin: 0;
+}
+.cdd-secao-sub {
+  font-size: 11px;
+  color: var(--text-3);
+  margin: 0;
+}
+
+.cdd-tabela-wrap {
+  overflow-x: auto;
+}
+.cdd-tabela {
+  min-width: 1040px;
+  display: flex;
+  flex-direction: column;
+}
+
+.cdd-tabela-head {
+  display: grid;
+  grid-template-columns: 50px minmax(220px, 2.2fr) minmax(140px, 1fr) 90px 120px minmax(
+      180px,
+      1.8fr
+    ) 110px;
+  gap: var(--s-2);
+  align-items: center;
+  padding: 8px var(--s-2);
+  font-size: 10px;
+  font-weight: var(--fw-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-3);
+  border-bottom: 1px solid var(--border);
+}
+
+/* ── Cabeçalho de fase ────────────────────────────────────────── */
+
+.cdd-fase-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px var(--s-2);
+  margin-top: 4px;
+  border-left: 4px solid;
+  font-size: 11px;
+  font-weight: var(--fw-bold);
+  letter-spacing: 0.04em;
+}
+.cdd-fase-row-success {
+  background: var(--success-bg);
+  border-left-color: var(--success);
+  color: var(--success);
+}
+.cdd-fase-row-warning {
+  background: var(--warning-bg);
+  border-left-color: var(--warning);
+  color: var(--warning);
+}
+.cdd-fase-row-danger {
+  background: var(--danger-bg);
+  border-left-color: var(--danger);
+  color: var(--danger);
+}
+.cdd-fase-pill {
+  background: rgba(0, 0, 0, 0.06);
+  padding: 3px 8px;
+  border-radius: var(--r-sm);
+  font-weight: var(--fw-bold);
+  letter-spacing: 0.06em;
+}
+[data-theme="dark"] .cdd-fase-pill {
+  background: rgba(255, 255, 255, 0.08);
+}
+.cdd-fase-titulo {
+  letter-spacing: 0.06em;
+}
+
+/* ── Linha ─────────────────────────────────────────────────────── */
+
+.cdd-row {
+  display: grid;
+  grid-template-columns: 50px minmax(220px, 2.2fr) minmax(140px, 1fr) 90px 120px minmax(
+      180px,
+      1.8fr
+    ) 110px;
+  gap: var(--s-2);
+  align-items: center;
+  padding: 12px var(--s-2);
+  font-size: var(--fs-12);
+  border-bottom: 1px solid var(--border);
+}
+.cdd-row:last-of-type {
+  border-bottom: 0;
+}
+.cdd-row-critico {
+  background: rgba(231, 76, 60, 0.04);
+}
+[data-theme="dark"] .cdd-row-critico {
+  background: rgba(231, 76, 60, 0.08);
+}
+
+.cdd-row-id {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: var(--fw-bold);
+  color: var(--text-3);
+}
+.cdd-row-doc {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.cdd-row-doc-nome {
+  font-weight: var(--fw-bold);
+  color: var(--text);
+  font-size: var(--fs-13);
+  line-height: 1.35;
+}
+.cdd-row-doc-desc {
+  font-size: 11px;
+  color: var(--text-3);
+  line-height: 1.4;
+}
+.cdd-row-area {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.cdd-row-area-nome {
+  color: var(--text);
+  font-weight: var(--fw-medium);
+}
+.cdd-row-area-resp {
+  font-size: 10px;
+  color: var(--text-3);
+}
+.cdd-row-versao {
+  font-variant-numeric: tabular-nums;
+  color: var(--text-2);
+  font-size: 11px;
+}
+.cdd-status-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: var(--r-pill);
+  font-size: 11px;
+  font-weight: var(--fw-bold);
+  letter-spacing: 0.02em;
+}
+.cdd-row-obs {
+  color: var(--text-2);
+  font-size: 11px;
+  line-height: 1.4;
+}
+.cdd-row-conferido-pill {
+  display: inline-flex;
+  padding: 3px 8px;
+  background: var(--brand-50);
+  color: var(--brand);
+  font-weight: var(--fw-bold);
+  font-size: 10px;
+  border-radius: var(--r-pill);
+  letter-spacing: 0.02em;
+}
+[data-theme="dark"] .cdd-row-conferido-pill {
+  background: rgba(67, 124, 218, 0.12);
+}

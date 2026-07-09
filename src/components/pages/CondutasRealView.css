@@ -1,0 +1,360 @@
+/* Condutas reais (C.11) — fiel ao mockup C11_Condutas, tokens-only, sem tarja de borda.
+   Farol/prioridade: Badge + dot 8px; fundos neutros (a "parede amarela" de motivos foi
+   neutralizada — a cor voltou a carregar prioridade, não textura). */
+
+.cnd {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+}
+
+/* ── Header ─────────────────────────────────────────────────────── */
+.cnd-head-page {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.cnd-titulo-page {
+  font-size: var(--fs-28);
+  font-weight: var(--fw-bold);
+  color: var(--text);
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+.cnd-sub-page {
+  font-size: var(--fs-13);
+  color: var(--text-3);
+  line-height: 1.5;
+  margin: 0;
+  max-width: 100ch;
+}
+.cnd-sub-page strong {
+  color: var(--text-2);
+  font-weight: var(--fw-semibold);
+}
+
+/* ── Rótulo de seção (gap --s-3 do flex + --s-3 aqui = --s-6 entre seções) ── */
+.cnd-sec {
+  font-size: 11px;
+  font-weight: var(--fw-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-3);
+  margin: var(--s-3) 2px 0 2px;
+}
+
+/* ── KPIs (padrão canônico: chip lucide + valor tabular · sem tarja) ── */
+.cnd-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--s-3);
+}
+@media (max-width: 1100px) {
+  .cnd-kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 720px) {
+  .cnd-kpis {
+    grid-template-columns: 1fr;
+  }
+}
+.cnd-kpi {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: var(--s-3) var(--s-4);
+  transition:
+    transform 0.15s var(--easing),
+    border-color 0.15s var(--easing),
+    box-shadow 0.15s var(--easing);
+}
+.cnd-kpi:hover {
+  transform: translateY(-2px);
+  border-color: var(--border-strong);
+  box-shadow: var(--sh-sm);
+}
+@media (prefers-reduced-motion: reduce) {
+  .cnd-kpi,
+  .cnd-kpi:hover {
+    transition: none;
+    transform: none;
+  }
+}
+.cnd-kpi-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.cnd-kpi-chip {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
+  border-radius: var(--r-sm);
+  background: var(--surface-2);
+  color: var(--text-3);
+}
+.cnd-kpi-chip.t-danger {
+  background: color-mix(in srgb, var(--danger) 10%, var(--surface-2));
+  color: var(--danger);
+}
+.cnd-kpi-chip.t-warning {
+  background: color-mix(in srgb, var(--warning) 12%, var(--surface-2));
+  color: color-mix(in srgb, var(--warning) 82%, var(--text));
+}
+.cnd-kpi-chip.t-success {
+  background: color-mix(in srgb, var(--success) 10%, var(--surface-2));
+  color: var(--success);
+}
+.cnd-kpi-l {
+  font-size: 10px;
+  font-weight: var(--fw-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--text-3);
+}
+.cnd-kpi-v {
+  font-size: var(--fs-24);
+  font-weight: var(--fw-bold);
+  line-height: 1;
+  margin-top: 8px;
+}
+.cnd-kpi-s {
+  font-size: 10px;
+  color: var(--text-4);
+  margin-top: 3px;
+}
+
+/* ── Distribuição por prioridade (barra empilhada) ──────────────── */
+.cnd-dist {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 0 2px;
+}
+.cnd-dist-bar {
+  display: flex;
+  gap: 2px;
+  height: 8px;
+  border-radius: var(--r-pill);
+  overflow: hidden;
+}
+.cnd-dist-seg {
+  display: block;
+  min-width: 4px;
+  height: 100%;
+}
+.cnd-dist-leg {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-3);
+  font-size: var(--fs-11);
+  color: var(--text-3);
+}
+.cnd-dist-leg-it {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.cnd-dist-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* ── Toolbar da coleção (busca/ordenação = .col-* de patterns.css) ── */
+.cnd-filtros-cont {
+  font-size: var(--fs-12);
+  color: var(--text-4);
+  font-variant-numeric: tabular-nums;
+  margin-left: auto;
+  white-space: nowrap;
+}
+
+/* ── Lista de cards ─────────────────────────────────────────────── */
+.cnd-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+}
+.cnd-card {
+  padding: var(--s-4);
+}
+.cnd-card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--s-3);
+}
+.cnd-card-tit-wrap {
+  min-width: 0;
+}
+.cnd-card-titulo {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  font-size: var(--fs-15);
+  font-weight: var(--fw-bold);
+  color: var(--text);
+  line-height: 1.3;
+}
+/* dot de prioridade (Regra do Farol · ponto 8px — nunca tarja) */
+.cnd-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 5px;
+  background: var(--border-strong);
+}
+.cnd-dot.t-danger {
+  background: var(--danger);
+}
+.cnd-dot.t-warning {
+  background: var(--warning);
+}
+.cnd-dot.t-info {
+  background: var(--info);
+}
+.cnd-card-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 5px;
+  font-size: 10.5px;
+  color: var(--text-4);
+  margin-top: 3px;
+}
+.cnd-card-meta svg {
+  flex-shrink: 0;
+  color: var(--text-3);
+}
+
+.cnd-card-body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--s-3);
+  margin-top: var(--s-3);
+}
+@media (max-width: 720px) {
+  .cnd-card-body {
+    grid-template-columns: 1fr;
+  }
+}
+.cnd-field-l {
+  font-size: 9.5px;
+  font-weight: var(--fw-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--text-4);
+  margin-bottom: 2px;
+}
+.cnd-field-v {
+  font-size: var(--fs-12);
+  font-weight: var(--fw-semibold);
+  color: var(--text-2);
+}
+
+/* motivo / contexto — box NEUTRO (o tom de prioridade mora no Badge + dot;
+   15 boxes warning empilhados diluíam a semântica do farol) */
+.cnd-motivo {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 10px 12px;
+  margin-top: var(--s-3);
+  font-size: var(--fs-12);
+  color: var(--text-2);
+  line-height: 1.5;
+}
+.cnd-motivo-tit {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 9.5px;
+  font-weight: var(--fw-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--text-3);
+  margin-bottom: 4px;
+}
+
+.cnd-resultado {
+  font-size: 11px;
+  color: var(--text-2);
+  margin-top: var(--s-2);
+  line-height: 1.45;
+}
+.cnd-resultado-tit {
+  font-weight: var(--fw-bold);
+  text-transform: uppercase;
+  font-size: 9.5px;
+  letter-spacing: 0.03em;
+  color: var(--success);
+}
+
+.cnd-card-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-3);
+  flex-wrap: wrap;
+  margin-top: var(--s-3);
+  padding-top: var(--s-3);
+  border-top: 1px solid var(--border);
+}
+.cnd-prazo {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+  font-size: var(--fs-12);
+  color: var(--text-3);
+}
+.cnd-prazo strong {
+  color: var(--text);
+  font-weight: var(--fw-semibold);
+}
+.cnd-dias {
+  font-size: var(--fs-11);
+  color: var(--text-4);
+}
+.cnd-foot-acao {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-3);
+}
+.cnd-hint {
+  font-size: var(--fs-11);
+  color: var(--text-4);
+}
+
+/* ── Diagnóstico (card escuro) ──────────────────────────────────── */
+.cnd-diag {
+  background: var(--ink);
+  border-radius: var(--r-md);
+  padding: var(--s-4) var(--s-5);
+  margin-top: var(--s-3);
+}
+.cnd-diag-head {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: var(--fs-13);
+  font-weight: var(--fw-bold);
+  color: var(--on-accent);
+  margin-bottom: 7px;
+}
+.cnd-diag-texto {
+  font-size: var(--fs-13);
+  line-height: 1.65;
+  color: color-mix(in srgb, var(--on-accent) 80%, transparent);
+  margin: 0;
+}
+.cnd-diag-texto strong {
+  color: var(--on-accent);
+  font-weight: var(--fw-semibold);
+}

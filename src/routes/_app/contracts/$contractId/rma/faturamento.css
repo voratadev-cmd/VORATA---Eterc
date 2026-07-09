@@ -1,0 +1,669 @@
+/* RMA · Aba Faturamento (5.3.2) — co-localizado. */
+
+.fat-main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+}
+
+/* ── Header local (acima dos KPIs) ────────────────────────────── */
+
+.fat-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--s-3);
+  flex-wrap: wrap;
+}
+.fat-titulo {
+  font-size: var(--fs-28);
+  font-weight: var(--fw-bold);
+  color: var(--text);
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+/* Eco do farol oficial ao lado do título (Badge canônico + aderência em texto discreto). */
+.fat-titulo-row {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  flex-wrap: wrap;
+}
+.fat-titulo-farol {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--s-2);
+}
+.fat-titulo-farol-sub {
+  font-size: var(--fs-12);
+  color: var(--text-3);
+  font-variant-numeric: tabular-nums;
+}
+.fat-sub {
+  font-size: var(--fs-13);
+  color: var(--text-3);
+  margin: 4px 0 0 0;
+}
+/* ── 6 KPIs de acumulado (FarolCard do DS) ──────────────────────── */
+
+.fat-kpis {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: var(--s-3);
+}
+@media (max-width: 1280px) {
+  .fat-kpis {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+@media (max-width: 720px) {
+  .fat-kpis {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Barra de parâmetros: RmaParamBar compartilhado (slot direito do header) — a fat-param-bar
+   bespoke morreu na Onda 2 (o RmaParamBar nasceu dela). */
+
+/* ── Grid [Curva S | Resumo BM a BM] (E5 · resumo ao lado do gráfico) ── */
+.fat-grow {
+  display: grid;
+  grid-template-columns: minmax(0, 1.9fr) minmax(0, 1fr);
+  gap: var(--s-4);
+  align-items: stretch;
+}
+@media (max-width: 1100px) {
+  .fat-grow {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Deck 2 · 6 cards de período/projeção (abaixo do gráfico) ────── */
+
+.fat-proj-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: var(--s-3);
+}
+@media (max-width: 1280px) {
+  .fat-proj-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+@media (max-width: 720px) {
+  .fat-proj-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+/* FAROL oficial em posição de herói (1º card do deck): fundo + borda tingidos pelo TOM do farol
+   via color-mix sobre a --fc-color que o FarolCard já resolve por variante — nunca tarja de borda.
+   Adapta ao dark sozinho (a --fc-color segue o token semântico do tema). */
+.fat-proj-grid .fat-farol-hero {
+  background: color-mix(in srgb, var(--fc-color) 6%, var(--surface));
+  border-color: color-mix(in srgb, var(--fc-color) 30%, var(--surface));
+}
+
+/* Banner de prorrogação — só quando a projeção ultrapassa o prazo. Fundo (não border-left).
+   Sem margin-top: grid e banner são filhos diretos do flex .fat-main (gap já os separa). */
+.fat-proj-alerta {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  padding: var(--s-3) var(--s-4);
+  background: var(--warning-bg);
+  border-radius: var(--r-sm);
+  font-size: var(--fs-13);
+  line-height: 1.5;
+  color: var(--warning);
+}
+.fat-proj-alerta svg {
+  color: var(--warning);
+  flex-shrink: 0;
+}
+
+/* ── Curva S (card grande) ─────────────────────────────────────── */
+
+.fat-curvas-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: var(--s-4) var(--s-5);
+}
+.fat-section-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--s-3);
+  margin-bottom: var(--s-3);
+  flex-wrap: wrap;
+}
+.fat-section-title {
+  font-size: var(--fs-15);
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+  margin: 0;
+}
+.fat-section-sub {
+  font-size: var(--fs-12);
+  color: var(--text-3);
+  margin-top: 2px;
+}
+
+/* Legenda: ChartLegend do ChartKit (com mapa de eixos nos rótulos) + hint de hover ao lado. */
+.fat-legend-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--s-1);
+}
+.fat-legend-hint {
+  font-size: var(--fs-12);
+  color: var(--text-3);
+}
+/* Linha extra do título do ChartTooltip (aderência do mês + desvio acum. — derivados do ponto). */
+.fat-tip-extra {
+  display: block;
+  margin-top: 2px;
+  font-weight: var(--fw-regular);
+  color: var(--text-3);
+  font-variant-numeric: tabular-nums;
+}
+
+.fat-chart {
+  margin-top: var(--s-3);
+  margin-left: -10px; /* compensa padding do Recharts */
+}
+
+/* Card Δ vs prazo: o sinal É a mensagem — o valor herda a cor do accent (--fc-color), espelhando o
+   mockup ("+61 meses" vermelho). Não é farol fabricado: nenhum status/nível, só a cor derivada do sinal. */
+.fat-delta-card .farol-card-value {
+  color: var(--fc-color);
+}
+
+/* ── Section card genérico ─────────────────────────────────────── */
+
+.fat-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: var(--s-4);
+}
+.fat-analise-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  font-weight: var(--fw-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--brand);
+  margin-bottom: var(--s-2);
+}
+.fat-analise-texto {
+  font-size: var(--fs-13);
+  color: var(--text-2);
+  line-height: 1.6;
+  margin: 0;
+  max-width: 85ch;
+}
+.fat-analise-texto strong {
+  color: var(--text);
+  font-weight: var(--fw-semibold);
+}
+
+/* ── Tabelas (frentes + histórico) ─────────────────────────────── */
+
+.fat-tabela {
+  display: flex;
+  flex-direction: column;
+  font-size: var(--fs-13);
+}
+.fat-tabela-frentes {
+  /* 4 colunas (Disciplina · Contratado total · Contratado acum. · Real acum.) */
+  --cols: minmax(0, 1.6fr) 130px 130px 110px;
+}
+.fat-tabela-trechos {
+  --cols: minmax(0, 1.8fr) 120px 120px;
+}
+.fat-tabela-drill {
+  --cols: minmax(0, 1.4fr) 64px 110px 120px 110px 110px 90px 96px;
+}
+.fat-tabela-row.fat-tabela-total {
+  font-weight: var(--fw-semibold);
+  background: var(--surface-2);
+  border-top: 1px solid var(--border-strong);
+}
+
+/* drill-down Frente × Trecho */
+.fat-drill {
+  margin-top: var(--s-4);
+}
+.fat-drill-frentes {
+  display: flex;
+  gap: var(--s-2);
+  overflow-x: auto;
+  padding-bottom: var(--s-2);
+  margin-bottom: var(--s-3);
+  scrollbar-width: thin;
+}
+.fat-drill-frente {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  align-items: flex-start;
+  padding: var(--s-2) var(--s-3);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  cursor: pointer;
+  transition:
+    border-color 0.15s var(--easing),
+    background 0.15s var(--easing),
+    transform 0.15s var(--easing);
+}
+.fat-drill-frente:hover {
+  border-color: var(--border-strong);
+  transform: translateY(-1px);
+}
+.fat-drill-frente:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+.fat-drill-frente.ativo {
+  border-color: var(--brand);
+  background: var(--brand-50);
+}
+.fat-drill-frente-nome {
+  font-size: var(--fs-13);
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+  white-space: nowrap;
+}
+.fat-drill-frente-meta {
+  font-size: var(--fs-12);
+  color: var(--text-3);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+@media (max-width: 880px) {
+  .fat-tabela-drill {
+    --cols: minmax(0, 1.3fr) 90px 100px 90px;
+  }
+  .fat-tabela-drill [role="columnheader"]:nth-child(n + 5),
+  .fat-tabela-drill [role="cell"]:nth-child(n + 5) {
+    display: none;
+  }
+}
+/* Resumo BM a BM (lateral · scroll vertical com todos os BMs do horizonte) */
+.fat-resumo-bm {
+  display: flex;
+  flex-direction: column;
+}
+.fat-resumo-scroll {
+  /* base 0 + grow: o scroll NÃO empurra a altura do card (senão os 46 BMs comandariam e o Resumo
+     ficaria mais alto que a Curva). Assim a Curva (chart fixo) define a altura e o scroll preenche.
+     position: relative → offsetTop das linhas é relativo ao container (scroll até o BM corrente). */
+  position: relative;
+  flex: 1 1 0;
+  min-height: 0;
+  overflow-y: auto;
+  margin-top: var(--s-2);
+  scrollbar-width: thin;
+}
+/* Dot de farol 8px (linhas do Resumo BM a BM + régua do drill) — cor via token semântico inline. */
+.fat-ader-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 6px;
+  vertical-align: 0;
+  flex-shrink: 0;
+}
+.fat-resumo-total {
+  border-top: 2px solid var(--border-strong);
+  margin-top: var(--s-1);
+}
+.fat-resumo-total .fat-tabela-row {
+  font-weight: var(--fw-bold);
+  color: var(--text);
+  border-bottom: none;
+}
+@media (max-width: 1100px) {
+  .fat-resumo-scroll {
+    max-height: 380px;
+  }
+}
+.fat-tabela-resumobm {
+  --cols: minmax(0, 1.3fr) 1fr 1fr 56px;
+}
+.fat-tabela-resumobm .fat-tabela-head {
+  position: sticky;
+  top: 0;
+  background: var(--surface);
+  z-index: 1;
+}
+/* Barra de recorte do drill (título + toggle Disciplina/Frente) */
+.fat-drill-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+  min-width: 0;
+}
+.fat-recorte-bar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--s-3);
+  flex-wrap: wrap;
+}
+.fat-tabela-head,
+.fat-tabela-row {
+  display: grid;
+  grid-template-columns: var(--cols);
+  gap: var(--s-3);
+  align-items: center;
+  padding: 9px var(--s-2);
+}
+.fat-tabela-head {
+  font-size: 10px;
+  font-weight: var(--fw-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-3);
+  border-bottom: 1px solid var(--border);
+}
+.fat-tabela-row {
+  border-bottom: 1px solid var(--border);
+}
+.fat-tabela-row:last-child {
+  border-bottom: 0;
+}
+.fat-tabela-row.corrente {
+  background: var(--warning-bg);
+}
+.fat-tabela .center {
+  display: flex;
+  justify-content: center;
+}
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+.fw-bold {
+  font-weight: var(--fw-bold);
+  color: var(--text);
+}
+.fw-semibold {
+  font-weight: var(--fw-semibold);
+}
+.fat-cell-frente {
+  color: var(--text);
+  font-weight: var(--fw-medium);
+}
+.fat-frentes-obs {
+  font-size: var(--fs-12);
+  color: var(--text-2);
+  line-height: 1.5;
+  margin: var(--s-3) 0 0 0;
+}
+.fat-frentes-obs strong {
+  color: var(--text);
+  font-weight: var(--fw-semibold);
+}
+
+/* ── Matriz Disciplina × Mês (heatmap) ──────────────────────────── */
+.fat-matriz {
+  margin-top: var(--s-4);
+}
+.mtz-scroll {
+  overflow-x: auto;
+  padding-bottom: var(--s-2);
+}
+.mtz-grid {
+  display: grid;
+  grid-template-columns: 168px repeat(var(--n), minmax(14px, 1fr));
+  gap: 2px;
+  min-width: 720px;
+}
+.mtz-corner {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  background: var(--surface);
+  display: flex;
+  align-items: flex-end;
+  padding: 0 var(--s-2) 4px 0;
+  font-size: 11px;
+  font-weight: var(--fw-semibold);
+  color: var(--text-3);
+}
+.mtz-mes-h {
+  font-size: 9px;
+  color: var(--text-4);
+  white-space: nowrap;
+  overflow: visible;
+  display: flex;
+  align-items: flex-end;
+  font-variant-numeric: tabular-nums;
+}
+.mtz-disc {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background: var(--surface);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-2);
+  padding-right: var(--s-2);
+  height: 22px;
+}
+.mtz-disc-nome {
+  font-size: 11px;
+  color: var(--text-2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.mtz-disc-tot {
+  flex-shrink: 0;
+  font-size: 10px;
+  color: var(--text-3);
+}
+.mtz-cell {
+  height: 22px;
+  border-radius: 2px;
+  background: var(--info);
+  opacity: var(--op, 0);
+  transition: outline-color 0.12s var(--easing);
+}
+.mtz-cell:hover {
+  outline: 1.5px solid var(--brand);
+}
+.mtz-pendente {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  padding: var(--s-5);
+  background: var(--surface-2);
+  border-radius: var(--r-md);
+  font-size: var(--fs-13);
+  line-height: 1.5;
+  color: var(--text-2);
+}
+.mtz-pendente svg {
+  color: var(--text-3);
+  flex-shrink: 0;
+}
+.mtz-pendente strong {
+  color: var(--text);
+  font-weight: var(--fw-semibold);
+}
+
+/* ── Drill bidirecional Disciplina × Frente (expand · mockup C.3) ───────── */
+.fat-d2-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--s-3);
+  margin-bottom: var(--s-4);
+}
+.fat-d2-tabela {
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) repeat(4, minmax(0, 1fr)) minmax(0, 0.9fr);
+  font-size: var(--fs-13);
+}
+.fat-d2-row {
+  display: grid;
+  grid-template-columns: subgrid;
+  grid-column: 1 / -1;
+  align-items: center;
+  border-bottom: 1px solid var(--border);
+}
+.fat-d2-row > [role="cell"],
+.fat-d2-row > [role="columnheader"] {
+  padding: var(--s-2) var(--s-3);
+}
+.fat-d2-row > .r,
+.fat-d2-row > .tabular {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.fat-d2-head-row {
+  color: var(--text-3);
+  font-size: var(--fs-12);
+  font-weight: var(--fw-semibold);
+  border-bottom: 1px solid var(--border-strong);
+}
+.fat-d2-row.clicavel {
+  cursor: pointer;
+  transition: background-color 0.12s var(--easing);
+}
+.fat-d2-row.clicavel:hover {
+  background: var(--surface-2);
+}
+/* Linha expansível é operável por teclado (tabIndex + Enter/Espaço) → focus ring visível. */
+.fat-d2-row.clicavel:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+  position: relative;
+  z-index: 1;
+}
+.fat-d2-row.aberta {
+  background: var(--brand-50);
+}
+.fat-d2-nome {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  color: var(--text);
+  font-weight: var(--fw-medium);
+}
+.fat-d2-caret {
+  display: inline-flex;
+  align-items: center;
+  width: 14px;
+  color: var(--text-3);
+  font-size: var(--fs-12);
+  flex-shrink: 0;
+}
+.fat-d2-filho {
+  background: var(--surface-2);
+}
+.fat-d2-filho > [role="cell"] {
+  padding-top: var(--s-1);
+  padding-bottom: var(--s-1);
+  color: var(--text-2);
+  font-size: var(--fs-12);
+}
+.fat-d2-nome-filho {
+  /* alinha o filho INDENTADO sob o nome da disciplina (caret 12 + gap + pad da célula). */
+  padding-left: calc(var(--s-8) + var(--s-2)) !important;
+  font-weight: var(--fw-regular);
+  color: var(--text-3);
+}
+/* farol do drill: Badge canônico em caixa título ("Crítico"), sem o uppercase padrão do Badge. */
+.fat-d2-farol {
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: var(--fs-12);
+}
+/* Contador da coleção ("X de 15 disciplinas") no slot extra da ColToolbar. */
+.fat-d2-count {
+  font-size: var(--fs-12);
+  color: var(--text-3);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+/* Nota do TOTAL sob busca ativa — soma o conjunto completo, não o filtrado. */
+.fat-d2-total-nota {
+  margin-left: var(--s-2);
+  font-size: var(--fs-11);
+  font-weight: var(--fw-regular);
+  color: var(--text-3);
+}
+.fat-d2-macro {
+  display: block;
+  grid-column: 1 / -1;
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+}
+.fat-d2-macro > [role="cell"] {
+  padding: var(--s-2) var(--s-3);
+  font-size: var(--fs-11);
+  font-weight: var(--fw-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-3);
+}
+.fat-d2-total {
+  border-top: 2px solid var(--border-strong);
+  border-bottom: none;
+}
+.fat-d2-total .fat-d2-nome,
+.fat-d2-total > [role="cell"] {
+  font-weight: var(--fw-bold);
+  color: var(--text);
+}
+.fat-d2-medir {
+  color: var(--text-4);
+}
+/* Rodapé do drill — sem itálico (casa com as demais notas da tela); régua no vocabulário do Farol. */
+.fat-d2-hint {
+  margin-top: var(--s-3);
+  font-size: var(--fs-12);
+  color: var(--text-3);
+}
+.fat-regua-item {
+  white-space: nowrap;
+}
+@media (max-width: 880px) {
+  .fat-d2-tabela {
+    grid-template-columns: minmax(0, 1.4fr) repeat(4, minmax(0, 1fr)) minmax(0, 0.9fr);
+    font-size: var(--fs-12);
+  }
+}
+
+/* ── Select da Curva S (filtra a curva por disciplina/frente) ───────────── */
+.fat-curva-ctrl {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  flex-wrap: wrap;
+  margin-bottom: var(--s-3);
+}
+/* Erro de leitura da série de recortes — falha alto ao lado do controle, com retry. */
+.fat-curva-ctrl-erro {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  font-size: var(--fs-12);
+  color: var(--danger);
+}
+.fat-curva-scope {
+  font-weight: var(--fw-regular);
+  color: var(--text-3);
+  font-size: var(--fs-12);
+}

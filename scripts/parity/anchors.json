@@ -1,0 +1,274 @@
+{
+  "get_faturamento_resumo": {
+    "label": "realizado acumulado R$ (BM oficial ATERPA até 10/06/2026)",
+    "numeric": true,
+    "chat_path": "realizado_acumulado_rs",
+    "oracle": 11375380.19,
+    "oracle_approx": true,
+    "tela_mult": 1
+  },
+  "get_produtividade_resumo": {
+    "label": "ponte_pct_capacidade (% capacidade vs contratado · C.7 Sinais/Ponte)",
+    "numeric": true,
+    "chat_path": "ponte_pct_capacidade",
+    "oracle": 47.7,
+    "oracle_approx": true,
+    "tela_mult": 100
+  },
+  "get_produtividade_economica_resumo": {
+    "label": "HH previsto total (Σ HH previsto · gate de conservação C.7)",
+    "numeric": true,
+    "chat_path": "hh_previsto_total",
+    "oracle": 2658616.0,
+    "oracle_approx": true,
+    "tela_mult": 1
+  },
+  "get_insumos_resumo": {
+    "label": "contrato FD c/ BDI R$ (Σ obra_insumos_fd.valor_contrato_bdi · v53 Excel)",
+    "numeric": true,
+    "chat_path": "contrato_fd_bdi_rs",
+    "oracle": 96818470.95,
+    "oracle_approx": false,
+    "tela_mult": 1
+  },
+  "get_recursos_resumo": {
+    "label": "MOD contratadoQtde (Σ histograma obra_recursos_meses, homens·mês)",
+    "numeric": true,
+    "chat_path": "categorias.MOD.contratadoQtde",
+    "oracle": 7109.0,
+    "oracle_approx": true,
+    "tela_mult": 1
+  },
+  "get_marcos_contratuais": {
+    "label": "nº marcos em risco ou crítico (nRiscoOuCritico)",
+    "numeric": true,
+    "chat_path": "nRiscoOuCritico",
+    "oracle": 5.0,
+    "oracle_approx": true,
+    "tela_mult": 1
+  },
+  "get_marcos_cronograma_fonte": {
+    "label": "nº de tarefas do cronograma-fonte (obra_cronograma_tarefas)",
+    "numeric": true,
+    "chat_path": "nTarefas",
+    "oracle": 51.0,
+    "oracle_approx": true,
+    "tela_mult": 1
+  },
+  "get_curva_fisica_por_frente": {
+    "label": "nº de disciplinas (curva física por frente · C.5)",
+    "numeric": true,
+    "chat_path": "n_disciplinas",
+    "oracle": 15.0,
+    "oracle_approx": true,
+    "tela_mult": 1
+  },
+  "get_curva_prevista_fisica": {
+    "label": "físico real overall % (Σ real serviços ÷ Σ contratado serviços) no BM de corte · C.5 Prazo · BM oficial 10/06/2026",
+    "numeric": true,
+    "chat_path": "real_fisico_no_corte_pct",
+    "oracle": 0.54,
+    "oracle_approx": true,
+    "tela_mult": 1
+  },
+  "get_desequilibrio_resumo": {
+    "label": "desequilíbrio total D.0 (R$) — PV oficial · D.1 medido + D.2 recomputados",
+    "numeric": true,
+    "chat_path": "total_rs",
+    "oracle": 6425619.58,
+    "oracle_approx": true,
+    "tela_mult": 1
+  },
+  "get_orcamento_resumo": {
+    "label": "preco_venda (PV · Σ BASE1 orçamento de venda R$, C.1)",
+    "numeric": false,
+    "chat_path": null,
+    "oracle": null,
+    "oracle_approx": true,
+    "tela_mult": 1
+  },
+  "get_bdi_buildup": {
+    "label": "markup total do BDI (Σ folhas, sem double-count · C.1) R$",
+    "numeric": true,
+    "chat_path": "markup_total",
+    "oracle": 140129221.74,
+    "oracle_approx": true,
+    "tela_mult": 1
+  },
+  "get_curvas_resumo": {
+    "label": "executado acumulado R$ (C.8 · cruza com faturamento real · BM oficial)",
+    "numeric": true,
+    "chat_path": "executado_acum_rs",
+    "oracle": 11375380.19,
+    "oracle_approx": true,
+    "tela_mult": 1
+  },
+  "get_mapa_liberacao_resumo": {
+    "label": "Σ valor das frentes físicas do mapa (R$, obra física C.14) — chat soma_valor_rs vs tela Σ getMapaFrentes.valorRs",
+    "numeric": true,
+    "chat_path": "soma_valor_rs",
+    "oracle": 381573415.0,
+    "oracle_approx": true,
+    "tela_mult": 1
+  },
+  "get_chuvas_resumo": {
+    "label": "dias a cobrar (kpis.diasACobrar)",
+    "numeric": true,
+    "chat_path": "dias_a_cobrar",
+    "oracle": 2.0,
+    "oracle_approx": true,
+    "tela_mult": 1
+  },
+  "get_panorama": {
+    "label": "nº de dimensões avaliadas (cobertura, de 6)",
+    "numeric": true,
+    "chat_path": "n_avaliados",
+    "oracle": 4.0,
+    "oracle_approx": true,
+    "tela_mult": 1
+  },
+  "buscar_secoes": {
+    "label": "nº de seções com dado (tem_dado=true · obra_secoes)",
+    "numeric": false,
+    "chat_path": "n",
+    "oracle": null,
+    "oracle_approx": true,
+    "tela_mult": 1
+  },
+  "get_insumos_excedente": {
+    "label": "repasse real M2 R$ (excedente ao IPCA × medido · rec · v53)",
+    "numeric": true,
+    "chat_path": "repasse_real_rs",
+    "oracle": 10246.94,
+    "oracle_approx": false,
+    "tela_mult": 1
+  },
+  "get_condutas": {
+    "label": "nº de condutas (n_condutas) — contagem estrutural de obra_condutas (domínio qualitativo C.11)",
+    "numeric": false,
+    "chat_path": "n_condutas",
+    "oracle": 15.0,
+    "oracle_approx": true,
+    "tela_mult": 1
+  },
+  "get_plano_acao": {
+    "label": "nº de tarefas no Plano de Ação (resumo.total)",
+    "numeric": false,
+    "chat_path": "resumo.total",
+    "oracle": 15.0,
+    "oracle_approx": true,
+    "tela_mult": 1
+  },
+  "get_indiretos_detalhe": {
+    "label": "desequilíbrio total D.1 Indiretos R$ (M2.2 · medido = BM oficial L1386)",
+    "numeric": true,
+    "chat_path": "desequilibrio_total",
+    "oracle": 2460458.58,
+    "oracle_approx": true,
+    "tela_mult": 1
+  },
+  "get_bdi_desequilibrio": {
+    "label": "desequilíbrio BDI não-remunerado R$ (D.2 · PV oficial + medição BM)",
+    "numeric": true,
+    "chat_path": "desequilibrio_total_rs",
+    "oracle": 3228420.12,
+    "oracle_approx": true,
+    "tela_mult": 1
+  },
+  "get_encargos_detalhe": {
+    "label": "desequilíbrio de encargos R$ (desequilibrioRs)",
+    "numeric": true,
+    "chat_path": "composicao.0.divergente",
+    "oracle": 0.0,
+    "oracle_approx": true,
+    "tela_mult": 1
+  },
+  "get_valor_agregado": {
+    "label": "perda de produtividade TOTAL D.4 (R$) — Real alocado − VA medido (total.perdaRs)",
+    "numeric": true,
+    "chat_path": "categorias.2.perda_rs",
+    "oracle": 6838963.0,
+    "oracle_approx": true,
+    "tela_mult": 1
+  },
+  "get_pontuais": {
+    "label": "pendente total dos eventos pontuais (dossiê · D.6) R$ — params.pendente_total_rs / pendenteTotalRs",
+    "numeric": true,
+    "chat_path": "params.pendente_total_rs",
+    "oracle": 763276.8,
+    "oracle_approx": true,
+    "tela_mult": 1
+  },
+  "get_c3_aderencia_acumulada": {
+    "label": "aderência acumulada % (real BM ÷ previsto v46 acum · C.3)",
+    "numeric": true,
+    "chat_path": "aderencia_acumulada_pct",
+    "oracle": 40.47,
+    "oracle_approx": true,
+    "tela_mult": 1
+  },
+  "get_c3_projecao_earned_schedule": {
+    "label": "projeção término mês (ES · C.3 · real BM × previsto v46)",
+    "numeric": true,
+    "chat_path": "projecao_termino_mes",
+    "oracle": 47.3,
+    "oracle_approx": false,
+    "tela_mult": 1
+  },
+  "get_c3_delta_projecao": {
+    "label": "Δ projeção vs prazo (meses · C.3)",
+    "numeric": true,
+    "chat_path": "delta_projecao_meses",
+    "oracle": 1.3,
+    "oracle_approx": false,
+    "tela_mult": 1
+  },
+  "get_c3_real_mes_corte": {
+    "label": "real do mês de corte R$ (BM 3 oficial)",
+    "numeric": true,
+    "chat_path": "real_mes_corte_rs",
+    "oracle": 5000114.75,
+    "oracle_approx": false,
+    "tela_mult": 1
+  },
+  "get_c3_drill_mobilizacao_real": {
+    "label": "real Mobilização R$ (drill C.3 · BM 64,3%)",
+    "numeric": true,
+    "chat_path": "mobilizacao_real_rs",
+    "oracle": 3429131.5,
+    "oracle_approx": false,
+    "tela_mult": 1
+  },
+  "get_c3_admlocal_contratado": {
+    "label": "contratado Adm Local R$ (46×2.890.552,79 · PV oficial)",
+    "numeric": true,
+    "chat_path": "admlocal_contratado_rs",
+    "oracle": 132965428.25,
+    "oracle_approx": false,
+    "tela_mult": 1
+  },
+  "get_c3_cruzamento_t01_mobilizacao": {
+    "label": "real T01×Mob R$ (cruzamento/auxiliar)",
+    "numeric": true,
+    "chat_path": "t01_mobilizacao_real_rs",
+    "oracle": 3429131.5,
+    "oracle_approx": false,
+    "tela_mult": 1
+  },
+  "get_c3_serie_conservacao_previsto": {
+    "label": "Σ previsto série disciplina R$ (= PV oficial 611.357.314,09 · conservação)",
+    "numeric": true,
+    "chat_path": "serie_previsto_total_rs",
+    "oracle": 611357314.09,
+    "oracle_approx": false,
+    "tela_mult": 1
+  },
+  "get_c3_serie_itens_seletor": {
+    "label": "nº itens seletor Curva S (anti-truncamento)",
+    "numeric": true,
+    "chat_path": "n_itens_seletor",
+    "oracle": 32,
+    "oracle_approx": false,
+    "tela_mult": 1
+  }
+}

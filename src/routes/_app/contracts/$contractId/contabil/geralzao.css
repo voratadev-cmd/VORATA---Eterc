@@ -1,0 +1,158 @@
+/* M-Contábil · aba Visão Geral · grid de 8 dimensões + análise do agente */
+
+.ctg-secao {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+}
+.ctg-secao-head {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.ctg-secao-titulo {
+  font-size: var(--fs-15);
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+  margin: 0;
+}
+.ctg-secao-sub {
+  font-size: 11px;
+  color: var(--text-3);
+  margin: 0;
+}
+
+.ctg-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--s-3);
+}
+@media (max-width: 1280px) {
+  .ctg-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 720px) {
+  .ctg-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.ctg-dim {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: var(--s-3) var(--s-4);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.ctg-dim-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.ctg-dim-icon {
+  display: inline-flex;
+}
+.ctg-dim-farol {
+  padding: 2px 8px;
+  border-radius: var(--r-pill);
+  font-size: 9px;
+  font-weight: var(--fw-bold);
+  letter-spacing: 0.06em;
+}
+.ctg-dim-titulo {
+  font-size: 11px;
+  font-weight: var(--fw-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-3);
+  margin-top: 4px;
+}
+.ctg-dim-valor {
+  font-size: var(--fs-22);
+  font-weight: var(--fw-bold);
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+}
+.ctg-dim-desc {
+  font-size: 11px;
+  color: var(--text-2);
+  line-height: 1.45;
+}
+.ctg-dim-sep {
+  height: 1px;
+  background: var(--border);
+  margin: 6px 0 2px;
+}
+.ctg-dim-acao {
+  font-size: 11px;
+  color: var(--text-2);
+}
+.ctg-dim-acao-label {
+  font-weight: var(--fw-bold);
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: 9px;
+  margin-right: 4px;
+}
+
+/* ── Análise do agente (callout) ───────────────────────────────── */
+
+.ctg-analise {
+  background: var(--info-bg);
+  border-left: 4px solid var(--info);
+  border-radius: var(--r-sm);
+  padding: var(--s-3) var(--s-4);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+[data-theme="dark"] .ctg-analise {
+  background: rgba(67, 124, 218, 0.08);
+}
+.ctg-analise-head {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.ctg-analise-icon {
+  display: inline-flex;
+  color: var(--info);
+}
+.ctg-analise-tag {
+  font-size: 10px;
+  font-weight: var(--fw-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--info);
+}
+.ctg-analise-texto {
+  margin: 0;
+  font-size: var(--fs-13);
+  color: var(--text);
+  line-height: 1.6;
+}
+.ctg-analise-subtitulo {
+  font-size: 11px;
+  font-weight: var(--fw-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-3);
+  margin: 4px 0 0 0;
+}
+.ctg-analise-pontos {
+  list-style: decimal;
+  padding-left: 20px;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: var(--fs-12);
+  color: var(--text-2);
+  line-height: 1.55;
+}

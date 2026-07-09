@@ -1,0 +1,169 @@
+/* M2.1.9 · aba Visão Geral · Análise IA + 3 fases */
+
+.cdg-analise {
+  background: var(--info-bg);
+  border-left: 4px solid var(--info);
+  border-radius: var(--r-sm);
+  padding: var(--s-3) var(--s-4);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+[data-theme="dark"] .cdg-analise {
+  background: rgba(67, 124, 218, 0.08);
+}
+.cdg-analise-head {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.cdg-analise-icon {
+  color: var(--info);
+  display: inline-flex;
+}
+.cdg-analise-tag {
+  font-size: 10px;
+  font-weight: var(--fw-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--info);
+}
+.cdg-analise-texto {
+  margin: 0;
+  font-size: var(--fs-13);
+  color: var(--text);
+  line-height: 1.6;
+}
+.cdg-analise-texto strong {
+  font-weight: var(--fw-bold);
+  color: var(--text);
+}
+
+/* ── Fases (3 cards) ──────────────────────────────────────────── */
+
+.cdg-secao {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+}
+.cdg-secao-head {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.cdg-secao-titulo {
+  font-size: var(--fs-15);
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+  margin: 0;
+}
+.cdg-secao-sub {
+  font-size: 11px;
+  color: var(--text-3);
+  margin: 0;
+}
+
+.cdg-fases {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--s-3);
+}
+@media (max-width: 1100px) {
+  .cdg-fases {
+    grid-template-columns: 1fr;
+  }
+}
+
+.cdg-fase {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--border);
+  border-radius: var(--r-md);
+  padding: var(--s-3) var(--s-4);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cdg-fase-head {
+  display: flex;
+}
+.cdg-fase-id {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: var(--fw-bold);
+  letter-spacing: 0.06em;
+}
+.cdg-fase-letra {
+  color: var(--text-3);
+}
+.cdg-fase-nome {
+  color: var(--text-3);
+}
+
+.cdg-fase-titulo {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--fs-15);
+  font-weight: var(--fw-bold);
+  color: var(--text);
+  letter-spacing: -0.01em;
+}
+.cdg-fase-titulo-icon {
+  display: inline-flex;
+  color: var(--brand);
+}
+.cdg-fase-descricao {
+  margin: 0;
+  font-size: 11px;
+  color: var(--text-3);
+  line-height: 1.5;
+}
+
+.cdg-fase-progresso-line {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-top: 4px;
+}
+.cdg-fase-progresso-num {
+  font-size: var(--fs-28);
+  font-weight: var(--fw-bold);
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+.cdg-fase-progresso-total {
+  font-size: var(--fs-15);
+  font-weight: var(--fw-regular);
+  color: var(--text-3);
+}
+.cdg-fase-progresso-pct {
+  font-size: var(--fs-15);
+  font-weight: var(--fw-bold);
+  font-variant-numeric: tabular-nums;
+}
+
+.cdg-fase-progresso-bar {
+  width: 100%;
+  height: 6px;
+  background: var(--surface-2);
+  border-radius: var(--r-pill);
+  overflow: hidden;
+}
+.cdg-fase-progresso-fill {
+  height: 100%;
+  border-radius: var(--r-pill);
+  transition: width 0.3s var(--easing);
+}
+
+.cdg-fase-faltantes {
+  margin: 0;
+  font-size: 11px;
+  color: var(--text-2);
+  font-weight: var(--fw-semibold);
+  line-height: 1.5;
+}

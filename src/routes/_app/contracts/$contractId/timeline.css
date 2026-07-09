@@ -1,0 +1,692 @@
+/* C.13 — Timeline do Contrato (Gantt contratado × real). Co-localizado. Tokens-only.
+   Cor por intenção: contratado=ink/brand · real=success · atraso=danger · marco=warning.
+   NUNCA border-left/top colorida em card (vetado no CLAUDE.md). Farol via Badge. */
+
+.tl-page {
+  padding: var(--s-6) var(--s-8);
+}
+
+/* ── Cabeçalho ───────────────────────────────────────────────────────────── */
+.tl-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--s-4);
+}
+.tl-title {
+  font-size: var(--fs-28);
+  font-weight: var(--fw-bold);
+  color: var(--text);
+  letter-spacing: -0.01em;
+}
+.tl-sub {
+  margin-top: var(--s-1);
+  font-size: var(--fs-13);
+  color: var(--text-3);
+}
+
+.tl-kpis {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--s-2) var(--s-5);
+  margin: var(--s-4) 0 var(--s-2);
+}
+.tl-kpi {
+  font-size: var(--fs-12);
+  color: var(--text-3);
+}
+.tl-kpi b {
+  color: var(--text);
+  font-size: var(--fs-15);
+  font-weight: var(--fw-semibold);
+  font-variant-numeric: tabular-nums;
+  margin-left: var(--s-1);
+}
+
+/* legenda */
+.tl-legend {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--s-1) var(--s-4);
+  margin-left: auto;
+  font-size: var(--fs-11);
+  color: var(--text-3);
+}
+.tl-li {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.tl-sw {
+  width: 16px;
+  height: 9px;
+  border-radius: 2px;
+  display: inline-block;
+}
+.tl-swd {
+  width: 16px;
+  height: 9px;
+  border: 1px dashed var(--border-strong);
+  border-radius: 2px;
+  display: inline-block;
+}
+.tl-sw-ctr-g {
+  background: var(--info);
+}
+.tl-sw-real {
+  background: var(--success);
+}
+.tl-sw-and {
+  background: linear-gradient(
+    90deg,
+    var(--success) 45%,
+    color-mix(in srgb, var(--success) 20%, transparent)
+  );
+}
+.tl-sw-slip {
+  background: var(--danger);
+}
+.tl-dia {
+  width: 9px;
+  height: 9px;
+  background: var(--warning);
+  transform: rotate(45deg);
+  display: inline-block;
+}
+.tl-imp-leg {
+  color: var(--danger);
+  font-weight: var(--fw-semibold);
+}
+
+/* ── Toolbar ─────────────────────────────────────────────────────────────── */
+.tl-toolbar {
+  display: flex;
+  gap: var(--s-2);
+  margin: var(--s-3) 0 var(--s-2);
+}
+.tl-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--fs-12);
+  font-weight: var(--fw-semibold);
+  padding: 5px 11px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+  transition: background 0.15s var(--easing);
+}
+.tl-btn:hover {
+  background: var(--surface-2);
+}
+.tl-btn svg {
+  width: 13px;
+  height: 13px;
+}
+.tl-btn-gl {
+  font-size: 13px;
+  line-height: 1;
+  color: var(--text-3);
+}
+
+/* ── Gantt ───────────────────────────────────────────────────────────────── */
+.tl-gantt {
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  background: var(--surface);
+}
+
+.tl-master {
+  display: flex;
+  align-items: stretch;
+  min-height: 88px;
+  background: var(--surface-2);
+  border-bottom: 2px solid var(--ink);
+}
+.tl-mlabel {
+  width: 300px;
+  flex-shrink: 0;
+  padding: var(--s-2);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.tl-mlabel-t {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--fs-13);
+  font-weight: var(--fw-bold);
+  color: var(--text);
+}
+.tl-mlabel-t svg {
+  width: 14px;
+  height: 14px;
+  color: var(--brand);
+}
+.tl-mlabel-s {
+  font-size: var(--fs-11);
+  color: var(--text-3);
+  margin-top: 3px;
+}
+.tl-track {
+  flex: 1;
+  position: relative;
+  height: 40px;
+}
+.tl-mtrack {
+  height: auto;
+}
+.tl-mbar {
+  position: absolute;
+  top: 48px;
+  height: 11px;
+  border-radius: 5px;
+  background: linear-gradient(90deg, var(--ink), var(--info));
+}
+.tl-mesp {
+  position: absolute;
+  top: 64px;
+  width: 9px;
+  height: 9px;
+  background: var(--warning);
+  transform: rotate(45deg) translateX(-50%);
+  border: 1px solid var(--surface);
+  cursor: help;
+}
+
+/* pins (OS real / término) — posicionados na posição REAL do eixo (com PAD), dot centrado e
+   label alinhado p/ dentro (start→direita, end→esquerda) p/ não estourar o container */
+.tl-pin {
+  position: absolute;
+  top: 48px;
+  transform: translateX(-50%);
+  z-index: 4;
+}
+.tl-pd {
+  width: 11px;
+  height: 11px;
+  background: var(--ink);
+  border: 2px solid var(--surface);
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px var(--ink);
+  display: block;
+  margin: 0 auto;
+}
+.tl-pl {
+  position: absolute;
+  bottom: 18px;
+  width: 130px;
+  font-size: var(--fs-11);
+  line-height: 1.2;
+  color: var(--text-2);
+  font-variant-numeric: tabular-nums;
+}
+.tl-pl-start {
+  left: -5px; /* começa no dot e estende à direita */
+  text-align: left;
+}
+.tl-pl-end {
+  right: -5px; /* termina no dot e estende à esquerda */
+  text-align: right;
+}
+.tl-pl b {
+  color: var(--text);
+}
+
+/* linha de tarefa */
+.tl-row {
+  display: flex;
+  align-items: center;
+  min-height: 40px;
+  border-bottom: 1px solid var(--surface-2);
+}
+.tl-row:last-child {
+  border-bottom: none;
+}
+.tl-row:hover {
+  background: var(--surface-2);
+}
+.tl-label {
+  width: 300px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding-right: 6px;
+  font-size: var(--fs-12);
+  color: var(--text-2);
+  min-width: 0;
+}
+.tl-label-g .tl-nm {
+  font-weight: var(--fw-bold);
+  color: var(--text);
+}
+.tl-chev {
+  width: 12px;
+  flex-shrink: 0;
+  color: var(--text-4);
+  font-size: 10px;
+}
+.tl-chev-none {
+  visibility: hidden;
+}
+.tl-nm {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.tl-rtag {
+  font-size: 9px;
+  color: var(--text-4);
+  font-style: italic;
+  margin-left: 4px;
+  flex-shrink: 0;
+}
+
+/* barras */
+.tl-cbar {
+  position: absolute;
+  top: 8px;
+  height: 10px;
+  border-radius: 3px;
+  min-width: 2px;
+  z-index: 2;
+  background: var(--info);
+}
+.tl-cbar-g {
+  background: var(--ink);
+}
+.tl-cfill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  background: color-mix(in srgb, var(--surface) 50%, transparent);
+  border-radius: 3px 0 0 3px;
+}
+.tl-cdev {
+  position: absolute;
+  top: 7px;
+  transform: translateX(3px);
+  font-size: 8.5px;
+  color: var(--danger);
+  font-weight: var(--fw-bold);
+  z-index: 3;
+  font-variant-numeric: tabular-nums;
+}
+.tl-rbar {
+  position: absolute;
+  top: 21px;
+  height: 10px;
+  border-radius: 3px;
+  background: var(--success);
+  min-width: 2px;
+  z-index: 2;
+}
+/* em andamento: pintada do início real até o corte do BM · ponta direita esmaece (continua) */
+.tl-rbar-and {
+  border-radius: 3px 0 0 3px;
+  background: linear-gradient(
+    90deg,
+    var(--success) 70%,
+    color-mix(in srgb, var(--success) 20%, transparent)
+  );
+}
+/* atraso: trecho do real que passa do término contratado */
+.tl-rslip {
+  position: absolute;
+  top: 21px;
+  height: 10px;
+  border-radius: 0 3px 3px 0;
+  background: var(--danger);
+  min-width: 2px;
+  z-index: 3;
+}
+.tl-rplace {
+  position: absolute;
+  top: 21px;
+  height: 10px;
+  border: 1px dashed var(--border-strong);
+  border-radius: 3px;
+  z-index: 1;
+}
+.tl-mk {
+  position: absolute;
+  top: 9px;
+  width: 9px;
+  height: 9px;
+  background: var(--warning);
+  transform: rotate(45deg) translateX(-50%);
+  border: 1px solid var(--surface);
+  z-index: 4;
+}
+
+/* gridlines + hoje */
+.tl-yl {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--border);
+  z-index: 0;
+}
+.tl-ylab {
+  position: absolute;
+  top: 2px;
+  transform: translateX(3px);
+  font-size: 9px;
+  color: var(--text-4);
+  font-weight: var(--fw-semibold);
+}
+.tl-hj {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--danger);
+  opacity: 0.4;
+  z-index: 1;
+}
+.tl-hjlab {
+  position: absolute;
+  top: 2px;
+  transform: translateX(3px);
+  font-size: 9px;
+  color: var(--danger);
+  font-weight: var(--fw-bold);
+  opacity: 1;
+}
+
+/* ── Seções ──────────────────────────────────────────────────────────────── */
+.tl-sec {
+  font-size: var(--fs-11);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-3);
+  font-weight: var(--fw-bold);
+  margin: var(--s-6) 0 var(--s-3);
+}
+.tl-card {
+  padding: var(--s-4);
+}
+
+/* ── Zoom ────────────────────────────────────────────────────────────────── */
+.tl-zchips {
+  display: flex;
+  gap: var(--s-2);
+  flex-wrap: wrap;
+  margin-bottom: var(--s-3);
+}
+.tl-zchip {
+  font-size: var(--fs-11);
+  padding: 5px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-pill);
+  background: var(--surface);
+  color: var(--text-2);
+  cursor: pointer;
+  font-weight: var(--fw-semibold);
+  transition:
+    background 0.15s var(--easing),
+    border-color 0.15s var(--easing);
+}
+.tl-zchip:hover {
+  background: var(--surface-2);
+}
+.tl-zchip.on {
+  background: var(--ink);
+  color: var(--surface);
+  border-color: var(--ink);
+}
+.tl-zoom {
+  padding: 0;
+  overflow: hidden;
+}
+.tl-zhdr {
+  padding: var(--s-3) var(--s-3);
+  font-size: var(--fs-13);
+  font-weight: var(--fw-bold);
+  color: var(--text);
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+  font-variant-numeric: tabular-nums;
+}
+.tl-zrow {
+  display: flex;
+  align-items: center;
+  min-height: 46px;
+  border-bottom: 1px solid var(--surface-2);
+}
+.tl-zrow:last-child {
+  border-bottom: none;
+}
+.tl-zlabel {
+  width: 240px;
+  flex-shrink: 0;
+  font-size: var(--fs-12);
+  color: var(--text-2);
+  padding: 6px var(--s-3);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.tl-ztrack {
+  flex: 1;
+  position: relative;
+  height: 46px;
+  margin-right: var(--s-3);
+}
+.tl-zbar {
+  position: absolute;
+  top: 9px;
+  height: 14px;
+  border-radius: 4px;
+  min-width: 3px;
+  z-index: 2;
+  background: var(--info);
+}
+.tl-zplace {
+  position: absolute;
+  top: 26px;
+  height: 14px;
+  border: 1px dashed var(--border-strong);
+  border-radius: 4px;
+  z-index: 1;
+}
+.tl-zrbar {
+  position: absolute;
+  top: 26px;
+  height: 14px;
+  border-radius: 4px;
+  background: var(--success);
+  min-width: 3px;
+  z-index: 2;
+}
+.tl-zrbar-and {
+  border-radius: 4px 0 0 4px;
+  background: linear-gradient(
+    90deg,
+    var(--success) 70%,
+    color-mix(in srgb, var(--success) 20%, transparent)
+  );
+}
+.tl-zrslip {
+  position: absolute;
+  top: 26px;
+  height: 14px;
+  border-radius: 0 4px 4px 0;
+  background: var(--danger);
+  min-width: 3px;
+  z-index: 3;
+}
+.tl-zmk {
+  position: absolute;
+  top: 10px;
+  width: 11px;
+  height: 11px;
+  background: var(--warning);
+  transform: rotate(45deg) translateX(-50%);
+  border: 1px solid var(--surface);
+  z-index: 4;
+}
+.tl-zdate {
+  position: absolute;
+  top: 28px;
+  right: 0;
+  font-size: 9px;
+  color: var(--text-4);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Eventos ─────────────────────────────────────────────────────────────── */
+.tl-evnm {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.tl-evcrit {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--danger);
+  flex-shrink: 0;
+}
+/* status de análise (binário) — texto neutro, não farol */
+.tl-anstat {
+  font-size: var(--fs-12);
+  color: var(--text-2);
+}
+.tl-anstat.pend {
+  color: var(--text-3);
+  font-style: italic;
+}
+/* projeção do término (impactos documentados) */
+.tl-sec-hint {
+  font-weight: var(--fw-regular);
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--text-3);
+  font-size: var(--fs-12);
+}
+.tl-proj-trecho {
+  color: var(--text);
+  font-weight: var(--fw-semibold);
+}
+.tl-proj-drivers {
+  font-size: 11px;
+  color: var(--text-3);
+  line-height: 1.45;
+}
+/* colunas v46 da tabela de eventos */
+.tl-janela {
+  font-size: var(--fs-12);
+  color: var(--text-2);
+}
+.tl-atraso {
+  color: var(--danger);
+  font-weight: var(--fw-bold);
+}
+.tl-fonte {
+  font-size: 11px;
+  color: var(--text-3);
+}
+.tl-nulo {
+  color: var(--text-4);
+}
+.tl-zoom-empty {
+  padding: var(--s-4);
+}
+
+/* impacto ◆ datado na masterrow (contexto temporal · abaixo da barra, com os marcos) */
+.tl-imp {
+  position: absolute;
+  top: 62px;
+  transform: translateX(-50%);
+  font-size: 11px;
+  line-height: 1;
+  color: var(--danger);
+  z-index: 5;
+  cursor: help;
+}
+
+/* ── Windows Analysis ────────────────────────────────────────────────────── */
+.tl-windows {
+  padding: var(--s-4);
+}
+.tl-wgrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--s-3);
+}
+.tl-wcard {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: var(--s-3);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--surface-2);
+}
+.tl-wcard-l {
+  font-size: var(--fs-11);
+  color: var(--text-3);
+}
+.tl-wcard-v {
+  font-size: var(--fs-20);
+  font-weight: var(--fw-bold);
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+.tl-wobs {
+  margin-top: var(--s-3);
+  font-size: var(--fs-12);
+  color: var(--text-2);
+  background: var(--surface-2);
+  border-radius: var(--r-sm);
+  padding: var(--s-3);
+}
+.tl-wnote {
+  margin-top: var(--s-3);
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-size: var(--fs-12);
+  color: var(--text-3);
+}
+.tl-wnote svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  margin-top: 1px;
+  color: var(--info);
+}
+
+/* ── Responsivo ──────────────────────────────────────────────────────────── */
+@media (max-width: 1100px) {
+  .tl-wgrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 880px) {
+  .tl-mlabel,
+  .tl-label {
+    width: 180px;
+  }
+  .tl-zlabel {
+    width: 140px;
+  }
+  .tl-legend {
+    margin-left: 0;
+  }
+}
+@media (max-width: 720px) {
+  .tl-wgrid {
+    grid-template-columns: 1fr;
+  }
+}

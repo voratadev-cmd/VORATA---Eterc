@@ -1,0 +1,592 @@
+/* Aba RMA · Indicadores e Farol (C.2) — dashboard-farol de consolidação. Tokens-only.
+   Farol via Badge/dot — NUNCA borda colorida em card (vetado no CLAUDE.md). */
+
+.ind-main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-5);
+}
+
+/* ── Header local (título à esquerda · RmaParamBar no slot direito) ── */
+
+.ind-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--s-3) var(--s-6);
+  flex-wrap: wrap;
+}
+.ind-head .rma-pbar {
+  margin-top: 6px;
+}
+.ind-titulo {
+  font-size: var(--fs-28);
+  font-weight: var(--fw-bold);
+  color: var(--text);
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+.ind-sub {
+  font-size: var(--fs-13);
+  color: var(--text-3);
+  margin: 4px 0 0 0;
+}
+
+/* ── Dot de farol (8px · currentColor) — substitui o "●" textual ──── */
+
+.ind-dot {
+  display: inline-block;
+  flex-shrink: 0;
+  width: 8px;
+  height: 8px;
+  border-radius: var(--r-pill);
+  background: currentColor;
+}
+
+/* ── Banner consolidado (pior bloco) ──────────────────────────────── */
+
+.ind-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-3);
+  padding: var(--s-4);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--surface-2);
+}
+.ind-banner-icon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.ind-banner-titulo {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: var(--fs-15);
+  font-weight: var(--fw-bold);
+}
+.ind-banner-texto {
+  font-size: var(--fs-13);
+  color: var(--text-2);
+  line-height: 1.5;
+  margin: 2px 0 0 0;
+}
+.ind-banner.tone-success {
+  background: var(--success-bg);
+  border-color: color-mix(in srgb, var(--success) 28%, var(--border));
+}
+.ind-banner.tone-success .ind-banner-titulo,
+.ind-banner.tone-success .ind-banner-icon {
+  color: var(--success);
+}
+.ind-banner.tone-info {
+  background: var(--info-bg);
+  border-color: color-mix(in srgb, var(--info) 28%, var(--border));
+}
+.ind-banner.tone-info .ind-banner-titulo,
+.ind-banner.tone-info .ind-banner-icon {
+  color: var(--info);
+}
+.ind-banner.tone-warning {
+  background: var(--warning-bg);
+  border-color: color-mix(in srgb, var(--warning) 32%, var(--border));
+}
+.ind-banner.tone-warning .ind-banner-titulo,
+.ind-banner.tone-warning .ind-banner-icon {
+  color: var(--warning);
+}
+.ind-banner.tone-danger {
+  background: var(--danger-bg);
+  border-color: color-mix(in srgb, var(--danger) 30%, var(--border));
+}
+.ind-banner.tone-danger .ind-banner-titulo,
+.ind-banner.tone-danger .ind-banner-icon {
+  color: var(--danger);
+}
+
+/* ── Eyebrow de seção ─────────────────────────────────────────────── */
+
+.ind-sec {
+  font-size: var(--fs-12);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-3);
+  font-weight: var(--fw-bold);
+  margin: 0 0 var(--s-3) 0;
+}
+
+/* ── 4 cards de bloco (valor + farol via Badge/dot) ───────────────── */
+
+.ind-cards {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--s-3);
+}
+@media (max-width: 1100px) {
+  .ind-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 720px) {
+  .ind-cards {
+    grid-template-columns: 1fr;
+  }
+}
+.ind-card {
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: var(--s-4);
+}
+.ind-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-2);
+  margin-bottom: var(--s-2);
+}
+.ind-card-nm {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--fs-12);
+  font-weight: var(--fw-semibold);
+  color: var(--text-2);
+}
+.ind-card-ic {
+  display: grid;
+  place-items: center;
+  color: var(--text-3);
+}
+/* Badge é uppercase por padrão; o pill de farol leva dot 8px + título ("Observação"). */
+.ind-card-pill {
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: var(--fs-12);
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.ind-card-big {
+  font-size: var(--fs-28);
+  font-weight: var(--fw-bold);
+  color: var(--text);
+  line-height: 1.05;
+  font-variant-numeric: tabular-nums;
+}
+.ind-card-big.ind-card-big-text {
+  font-size: var(--fs-18);
+  padding-top: 4px;
+}
+.ind-card-mini {
+  display: flex;
+  flex-direction: column;
+}
+.ind-card-mini-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: var(--fs-12);
+  color: var(--text-2);
+  padding: 3px 0;
+  border-bottom: 1px dashed var(--border);
+}
+.ind-card-mini-row:last-child {
+  border-bottom: none;
+}
+.ind-card-mini-row b {
+  color: var(--text);
+  font-weight: var(--fw-semibold);
+  font-variant-numeric: tabular-nums;
+}
+.ind-card-foot {
+  font-size: var(--fs-12);
+  color: var(--text-3);
+  margin-top: auto;
+  padding-top: var(--s-2);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Nota italic (régua / insumos) ────────────────────────────────── */
+
+.ind-nota {
+  font-size: var(--fs-12);
+  color: var(--text-3);
+  font-style: italic;
+  line-height: 1.5;
+  margin: var(--s-3) 0 0 0;
+}
+
+/* ── 3 painéis ────────────────────────────────────────────────────── */
+
+.ind-paineis {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--s-4);
+  align-items: start;
+}
+@media (max-width: 1100px) {
+  .ind-paineis {
+    grid-template-columns: 1fr;
+  }
+}
+.ind-pan {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: var(--s-4);
+}
+.ind-pan-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-3);
+  margin-bottom: var(--s-3);
+  flex-wrap: wrap;
+}
+.ind-pan-title {
+  font-size: var(--fs-14);
+  font-weight: var(--fw-bold);
+  color: var(--text);
+  margin: 0;
+}
+.ind-panel-pend {
+  font-size: var(--fs-13);
+  color: var(--text-3);
+  padding: var(--s-6) var(--s-2);
+  text-align: center;
+}
+
+/* ── Curva (legenda ChartKit + unidades dos eixos + chart + footer) ── */
+
+.ind-leg {
+  margin-bottom: var(--s-2);
+  gap: var(--s-3);
+}
+/* Janela de BMs (Segmented compacto no header do painel). */
+.ind-janela {
+  padding: 2px;
+}
+.ind-janela .seg-item {
+  height: 24px;
+  padding: 0 var(--s-2);
+  font-size: var(--fs-12);
+}
+/* Unidades dos eixos (esq = acumulado · dir = mensal), discretas acima do gráfico. */
+.ind-chart-units {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: var(--fs-12);
+  color: var(--text-4);
+  font-variant-numeric: tabular-nums;
+  margin-bottom: 2px;
+}
+.ind-chart {
+  width: 100%;
+}
+/* Linha extra do título do tooltip (aderência do mês + GAP). */
+.ind-tip-extra {
+  display: block;
+  margin-top: 2px;
+  font-weight: var(--fw-regular);
+  color: var(--text-3);
+  font-variant-numeric: tabular-nums;
+}
+/* Erro inline de painel (ErroCard framed=false) — compacto, sem moldura dupla. */
+.ind-pan-erro {
+  margin-top: var(--s-3);
+}
+.ind-curva-info {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: var(--s-2) var(--s-3);
+  margin-top: var(--s-3);
+  font-size: var(--fs-12);
+  color: var(--text-2);
+  line-height: 1.5;
+  font-variant-numeric: tabular-nums;
+}
+.ind-curva-info b {
+  color: var(--text);
+  font-weight: var(--fw-semibold);
+}
+
+/* ── Alocação de Recursos (3×3 barras) ────────────────────────────── */
+
+.ind-rgroups {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+}
+.ind-rgrp-label {
+  font-size: var(--fs-12);
+  font-weight: var(--fw-bold);
+  color: var(--text);
+  margin-bottom: 5px;
+}
+.ind-rgrp-label span {
+  font-weight: var(--fw-regular);
+  color: var(--text-3);
+  font-size: var(--fs-12);
+  margin-left: 6px;
+}
+.ind-brow {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  margin-bottom: 5px;
+}
+.ind-bk {
+  font-size: var(--fs-12);
+  color: var(--text-3);
+  width: 92px;
+  flex-shrink: 0;
+}
+.ind-tk {
+  flex: 1;
+  height: 13px;
+  background: var(--surface-3);
+  border-radius: 5px;
+  overflow: hidden;
+}
+.ind-bar {
+  display: block;
+  height: 100%;
+  border-radius: 5px;
+}
+/* Família de cor do ChartKit: contratado = info (total esmaecido · até-BM cheio), real = navy. */
+.ind-bar-total {
+  background: color-mix(in srgb, var(--info) 40%, transparent);
+}
+.ind-bar-ate {
+  background: var(--info);
+}
+.ind-bar-real {
+  background: var(--rma-navy);
+}
+.ind-vv {
+  font-size: var(--fs-12);
+  font-weight: var(--fw-bold);
+  color: var(--text);
+  width: 56px;
+  text-align: right;
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+}
+.ind-rleg {
+  margin-top: var(--s-3);
+  gap: var(--s-3);
+}
+
+/* ── Prazo (donut + linhas + tabela + projeção) ───────────────────── */
+
+.ind-donut-wrap {
+  display: flex;
+  align-items: center;
+  gap: var(--s-4);
+  margin-bottom: var(--s-3);
+}
+.ind-prz-lines {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  min-width: 0;
+}
+.ind-pl {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-size: var(--fs-12);
+}
+.ind-pl-k {
+  color: var(--text-2);
+}
+.ind-pl-v {
+  font-size: var(--fs-14);
+  font-weight: var(--fw-bold);
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+.ind-pl small {
+  color: var(--text-3);
+  font-variant-numeric: tabular-nums;
+}
+.ind-dtab {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-12);
+}
+.ind-dtab td {
+  padding: 6px 2px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-2);
+}
+.ind-dtab tr:last-child td {
+  border-bottom: none;
+}
+.ind-dtab td.v {
+  text-align: right;
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.ind-pbox {
+  margin-top: var(--s-3);
+  border-radius: var(--r-sm);
+  padding: var(--s-3);
+  font-size: var(--fs-12);
+  line-height: 1.5;
+}
+.ind-pbox b {
+  font-weight: var(--fw-semibold);
+}
+.ind-pbox.tone-neutral {
+  background: var(--surface-2);
+  color: var(--text-2);
+}
+.ind-pbox.tone-success {
+  background: var(--success-bg);
+  color: var(--success);
+}
+/* Estouro de prazo = Risco (warning) — classe alinhada ao token (antes "tone-danger" pintado de warning). */
+.ind-pbox.tone-warning {
+  background: var(--warning-bg);
+  color: var(--warning);
+}
+
+/* ── Análise de Insumos / Materiais ───────────────────────────────── */
+
+.ind-insu {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: var(--s-4);
+}
+.ind-insu-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-3);
+  margin-bottom: var(--s-3);
+}
+.ind-icards {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--s-3);
+  margin-bottom: var(--s-3);
+}
+@media (max-width: 880px) {
+  .ind-icards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+.ind-ic {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: var(--s-3);
+}
+.ind-ic-l {
+  font-size: var(--fs-12);
+  color: var(--text-3);
+}
+.ind-ic-v {
+  font-size: var(--fs-18);
+  font-weight: var(--fw-bold);
+  color: var(--text);
+  margin-top: 3px;
+  font-variant-numeric: tabular-nums;
+}
+.ind-abc {
+  margin-top: var(--s-1);
+}
+/* Barra acima da tabela ABC: contador "Top 8 de N" + toggle "Mostrar todos". */
+.ind-abc-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-3);
+  margin-bottom: var(--s-1);
+}
+.ind-abc-count {
+  font-size: var(--fs-12);
+  color: var(--text-3);
+  font-variant-numeric: tabular-nums;
+}
+/* Classe ABC = concentração de valor, NÃO farol — peso neutro (A destaca em --text, B/C em --text-3). */
+.ind-abc-cls {
+  color: var(--text-3);
+  font-weight: var(--fw-semibold);
+}
+.ind-abc-cls-a {
+  color: var(--text);
+  font-weight: var(--fw-bold);
+}
+/* Micro-barra Pareto na coluna "% do total" (normalizada pelo maior item). */
+.ind-abc-pct {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--s-2);
+  font-variant-numeric: tabular-nums;
+}
+.ind-abc-pct-track {
+  width: 56px;
+  height: 6px;
+  background: var(--surface-3);
+  border-radius: var(--r-pill);
+  overflow: hidden;
+}
+.ind-abc-pct-fill {
+  display: block;
+  height: 100%;
+  background: var(--info);
+  border-radius: var(--r-pill);
+}
+.ind-pend {
+  color: var(--text-3);
+}
+
+/* ── Análise IA (pendente honesto) ────────────────────────────────── */
+
+.ind-ia {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: var(--s-4);
+}
+.ind-ia-head {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  margin-bottom: var(--s-2);
+}
+.ind-ia-badge {
+  font-weight: var(--fw-bold);
+}
+.ind-ia-title {
+  font-size: var(--fs-13);
+  font-weight: var(--fw-bold);
+  color: var(--text);
+}
+.ind-ia-pend {
+  font-size: var(--fs-13);
+  color: var(--text-3);
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* nota de períodos mistos (só com ?bm rebobinado) — aviso honesto, peso baixo */
+.ind-nota-corte {
+  margin: calc(-1 * var(--s-2)) 0 var(--s-2);
+  font-style: italic;
+}

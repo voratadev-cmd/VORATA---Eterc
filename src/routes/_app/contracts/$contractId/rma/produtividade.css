@@ -1,0 +1,433 @@
+/* RMA · Aba Produtividade (5.3.4 · C.7) — financeira (R$/HH) fiel ao mockup. Co-localizado.
+   Tokens-only. Busca/ordenação/paginação vêm do módulo compartilhado (.col-* em patterns.css). */
+
+.prod-main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+}
+
+/* ── Header local ──────────────────────────────────────────────── */
+.prod-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--s-3);
+  flex-wrap: wrap;
+}
+.prod-titulo {
+  font-size: var(--fs-18);
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+  margin: 0;
+}
+.prod-sub {
+  font-size: var(--fs-13);
+  color: var(--text-3);
+  margin: 4px 0 0 0;
+}
+.prod-head-badges {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  flex-wrap: wrap;
+}
+
+/* ── Faixa de parâmetros — barra canônica RmaParamBar; aqui só o link p/ D.4 ── */
+.prod-pbar-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--fs-13);
+  font-weight: var(--fw-semibold);
+  color: var(--brand);
+  text-decoration: none;
+  border-radius: var(--r-sm);
+}
+.prod-pbar-link:hover {
+  text-decoration: underline;
+}
+.prod-pbar-link:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+
+/* ── KPIs ──────────────────────────────────────────────────────── */
+.prod-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--s-3);
+}
+.prod-kpis-5 {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+@media (max-width: 1280px) {
+  .prod-kpis,
+  .prod-kpis-5 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+@media (max-width: 720px) {
+  .prod-kpis,
+  .prod-kpis-5 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Grid [gráfico | lateral] ──────────────────────────────────── */
+.prod-grow {
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
+  gap: var(--s-4);
+  align-items: stretch;
+}
+@media (max-width: 1100px) {
+  .prod-grow {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Card de seção genérico ────────────────────────────────────── */
+.prod-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: var(--s-4);
+  display: flex;
+  flex-direction: column;
+}
+.prod-section-head {
+  margin-bottom: var(--s-3);
+}
+.prod-section-head-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--s-3);
+  flex-wrap: wrap;
+}
+.prod-section-title {
+  font-size: var(--fs-15);
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+  margin: 0;
+}
+.prod-section-sub {
+  font-size: var(--fs-12);
+  color: var(--text-3);
+  margin-top: 2px;
+}
+
+/* ── Gráfico (legenda/tooltip = ChartKit compartilhado) ────────── */
+.prod-chart {
+  margin-top: var(--s-2);
+  margin-left: -8px;
+}
+/* linha extra do título do tooltip (dado do mês: faturado · HH real · aderência) */
+.prod-tip-extra {
+  display: block;
+  margin-top: 2px;
+  font-weight: var(--fw-regular);
+  color: var(--text-3);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Caixa de stats (HH acum) */
+.prod-stbox {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--s-3);
+  margin-top: var(--s-3);
+}
+.prod-stb {
+  background: var(--surface-2);
+  border-radius: var(--r-sm);
+  padding: var(--s-2) var(--s-3);
+}
+.prod-stb-v {
+  font-size: var(--fs-16);
+  font-weight: var(--fw-bold);
+  color: var(--text);
+}
+.prod-stb-l {
+  font-size: var(--fs-11);
+  color: var(--text-3);
+  margin-top: 2px;
+}
+
+/* Nota de rodapé */
+.prod-note {
+  font-size: var(--fs-12);
+  color: var(--text-3);
+  line-height: 1.5;
+  margin: var(--s-3) 0 0 0;
+  padding-top: var(--s-3);
+  border-top: 1px solid var(--border);
+}
+.prod-note strong {
+  color: var(--text);
+  font-weight: var(--fw-semibold);
+}
+
+/* ── Análise IA ────────────────────────────────────────────────── */
+.prod-analise-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  font-weight: var(--fw-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--brand);
+  margin-bottom: var(--s-2);
+}
+.prod-analise-texto {
+  font-size: var(--fs-13);
+  color: var(--text-2);
+  line-height: 1.6;
+  margin: 0;
+  max-width: 90ch;
+}
+.prod-analise-texto strong {
+  color: var(--text);
+  font-weight: var(--fw-semibold);
+}
+
+/* ── Régua do farol (rodapé da seção 1) — 4 níveis compactos ───── */
+.prod-farol-regua {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--s-2) var(--s-4);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: var(--s-2) var(--s-4);
+  font-size: var(--fs-12);
+}
+.prod-farol-regua-t {
+  color: var(--text-3);
+}
+.prod-farol-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: var(--fw-semibold);
+  color: var(--text-2);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+/* dot de farol 8px (substitui o glifo ● textual) */
+.prod-criterio-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--r-pill);
+  flex-shrink: 0;
+}
+.prod-farol-pill-success .prod-criterio-dot {
+  background: var(--success);
+}
+.prod-farol-pill-info .prod-criterio-dot {
+  background: var(--info);
+}
+.prod-farol-pill-warning .prod-criterio-dot {
+  background: var(--warning);
+}
+.prod-farol-pill-danger .prod-criterio-dot {
+  background: var(--danger);
+}
+
+/* ── Célula pendente + utilitário ──────────────────────────────── */
+.prod-cell-pend {
+  color: var(--text-4);
+}
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Refactor C.7: rótulos de seção + física ────────────────────────────────── */
+.prod-sec-label {
+  font-size: var(--fs-11);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-3);
+  font-weight: var(--fw-bold);
+  margin: var(--s-6) 0 var(--s-3);
+}
+.prod-sec-hint {
+  text-transform: none;
+  letter-spacing: 0;
+  font-weight: var(--fw-regular);
+  color: var(--text-4);
+}
+
+/* chips de filtro (disciplina / trecho) */
+.prod-chiprow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+  margin-bottom: var(--s-3);
+}
+.prod-chip-lbl {
+  font-size: var(--fs-11);
+  color: var(--text-3);
+  margin-right: var(--s-1);
+}
+.prod-chip {
+  font-size: var(--fs-12);
+  padding: 4px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-pill);
+  background: var(--surface);
+  color: var(--text-2);
+  cursor: pointer;
+  font-weight: var(--fw-medium);
+  transition:
+    background 0.15s var(--easing),
+    border-color 0.15s var(--easing);
+}
+.prod-chip:hover {
+  background: var(--surface-2);
+}
+.prod-chip.on {
+  background: var(--ink);
+  color: var(--on-accent);
+  border-color: var(--ink);
+}
+
+/* tabela do tracker físico */
+.prod-fis-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+.prod-fis-t {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-12);
+}
+.prod-fis-t th {
+  text-align: left;
+  color: var(--text-3);
+  font-weight: var(--fw-semibold);
+  font-size: var(--fs-11);
+  padding: 7px 8px;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+.prod-fis-t td {
+  padding: 7px 8px;
+  border-bottom: 1px solid var(--surface-2);
+  color: var(--text-2);
+}
+.prod-fis-t td.r,
+.prod-fis-t th.r {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.prod-fis-t tbody tr:last-child td {
+  border-bottom: none;
+}
+.prod-fis-t tbody tr:hover {
+  background: var(--surface-2);
+}
+.prod-fis-disc {
+  color: var(--text-3);
+}
+.prod-aguard {
+  font-size: var(--fs-11);
+  color: var(--text-4);
+}
+
+/* detalhe do cálculo (stat grid) */
+.prod-det {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--s-2) var(--s-4);
+}
+.prod-det-it {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--s-3);
+  padding: 6px 0;
+  border-bottom: 1px solid var(--surface-2);
+}
+.prod-det-it-wide {
+  grid-column: 1 / -1;
+}
+.prod-det-l {
+  font-size: var(--fs-12);
+  color: var(--text-3);
+}
+.prod-det-v {
+  font-size: var(--fs-13);
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+}
+
+/* ponte: utilização × liberação */
+.prod-ponte-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--s-3);
+  margin-bottom: var(--s-3);
+}
+.prod-ponte-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--s-3);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+}
+.prod-ponte-v {
+  font-size: var(--fs-18);
+  font-weight: var(--fw-bold);
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+.prod-ponte-l {
+  font-size: var(--fs-11);
+  color: var(--text-3);
+}
+
+/* tabela de impedimentos */
+.prod-imp-t {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-12);
+  margin-top: var(--s-1);
+}
+.prod-imp-t th {
+  text-align: left;
+  color: var(--text-3);
+  font-weight: var(--fw-semibold);
+  font-size: var(--fs-11);
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--border);
+}
+.prod-imp-t td {
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--surface-2);
+  color: var(--text-2);
+}
+.prod-imp-t td.r,
+.prod-imp-t th.r {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.prod-imp-t tbody tr:last-child td {
+  border-bottom: none;
+}
+
+@media (max-width: 880px) {
+  .prod-det,
+  .prod-ponte-stats {
+    grid-template-columns: 1fr;
+  }
+}

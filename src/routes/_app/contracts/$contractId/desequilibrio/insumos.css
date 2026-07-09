@@ -1,0 +1,369 @@
+/* D.5 Reajuste e Reequilíbrio v53 — específico da tela (visual base em InsumosFd/insumos-fd.css
+   + reaproveita .c6-* da C.6 via classes duplicadas aqui). Co-localizado. Tokens-only. */
+
+.d5-page {
+  padding: var(--s-6) var(--s-8);
+  --c6-navy: var(--ink);
+}
+[data-theme="dark"] .d5-page {
+  --c6-navy: var(--text);
+}
+
+/* título/sub/pill/chat — mesma identidade da C.6 (classes locais para não depender de outra rota) */
+.d5-page .c6-titulo {
+  font-size: 22px;
+  font-weight: var(--fw-bold);
+  color: var(--text);
+  margin-bottom: 8px;
+}
+.d5-page .c6-sub {
+  color: var(--text-3);
+  font-size: var(--fs-13);
+  margin-bottom: 6px;
+}
+.d5-page .c6-sub b {
+  color: var(--text);
+}
+.d5-page .c6-pill {
+  display: inline-block;
+  padding: 3px 11px;
+  border-radius: var(--r-pill);
+  font-size: var(--fs-12);
+  font-weight: var(--fw-semibold);
+  background: var(--success-bg);
+  color: var(--success);
+}
+.d5-hot {
+  color: var(--danger);
+  font-weight: var(--fw-bold);
+  font-variant-numeric: tabular-nums;
+}
+
+/* barra do mecanismo (nº em círculo + título) */
+.d5-mecbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 26px 0 4px;
+}
+.d5-mecbar .num {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--ink);
+  color: var(--on-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-13);
+  flex-shrink: 0;
+}
+.d5-mecbar .tt {
+  font-size: 15px;
+  font-weight: var(--fw-bold);
+  color: var(--text);
+}
+
+/* cards de cenário do M1 (clicáveis) */
+.d5-m1cards {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 12px 0;
+}
+.d5-m1card {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 14px 16px;
+  cursor: pointer;
+  transition:
+    border-color 0.15s var(--easing),
+    background 0.15s var(--easing),
+    box-shadow 0.15s var(--easing);
+  flex: 1;
+  min-width: 150px;
+  text-align: left;
+  font-family: inherit;
+}
+.d5-m1card:hover {
+  border-color: var(--info);
+}
+.d5-m1card:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+.d5-m1card.on {
+  border-color: var(--text-2);
+  background: color-mix(in srgb, var(--info) 6%, var(--surface));
+  box-shadow: var(--sh-sm);
+}
+.d5-m1card .mc-t {
+  font-size: var(--fs-12);
+  font-weight: var(--fw-bold);
+  color: var(--text);
+}
+.d5-m1card .mc-d {
+  font-size: 10px;
+  color: var(--text-3);
+  margin: 2px 0 8px;
+}
+.d5-m1card .mc-v {
+  font-size: var(--fs-12);
+  color: var(--text-2);
+  font-variant-numeric: tabular-nums;
+}
+.d5-m1card .mc-r {
+  font-size: 16px;
+  font-weight: var(--fw-bold);
+  color: color-mix(in srgb, var(--warning) 80%, var(--text));
+  font-variant-numeric: tabular-nums;
+  margin-top: 4px;
+}
+
+/* snapshot no topo (KPIs-resposta do JTBD) — padrão canônico de KPI card (chip quadrado + valor),
+   SEM tarja de borda (regra anti-card-IA). Cards são âncoras às suas seções (M1/M2). */
+.d5-snapshot {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--s-3);
+  margin: 16px 0 8px;
+}
+.d5-snap {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: var(--s-4);
+  display: flex;
+  flex-direction: column;
+  text-decoration: none;
+  transition:
+    transform 0.14s var(--easing),
+    border-color 0.14s var(--easing),
+    box-shadow 0.14s var(--easing);
+}
+.d5-snap:hover {
+  transform: translateY(-2px);
+  border-color: var(--border-strong);
+  box-shadow: var(--sh-sm);
+}
+.d5-snap:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+.d5-snap-top {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  margin-bottom: var(--s-3);
+}
+.d5-snap-chip {
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border-radius: var(--r-sm);
+  background: var(--surface-2);
+  color: var(--text-2);
+}
+.d5-snap-l {
+  font-size: var(--fs-12);
+  color: var(--text-3);
+  font-weight: var(--fw-semibold);
+  line-height: var(--lh-snug);
+}
+.d5-snap-v {
+  font-size: var(--fs-22);
+  font-weight: var(--fw-bold);
+  color: var(--text);
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+.d5-snap-s {
+  font-size: var(--fs-11);
+  color: var(--text-4);
+  margin-top: var(--s-1);
+}
+@media (max-width: 720px) {
+  .d5-snapshot {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* legenda do gráfico do IPCA colada ao painel */
+.d5-chartlegend {
+  margin-top: 8px;
+}
+
+/* memória de cálculo do M1 (auditável) — termos rotulados + fórmula final */
+.d5-memo {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 13px 16px;
+  font-size: var(--fs-12);
+  color: var(--text-2);
+  line-height: 1.6;
+  font-variant-numeric: tabular-nums;
+  margin-top: var(--s-3);
+}
+.d5-memo b {
+  color: var(--text);
+}
+.d5-memo-hd {
+  font-size: var(--fs-12);
+  color: var(--text-3);
+  font-weight: var(--fw-semibold);
+  margin-bottom: 8px;
+}
+.d5-memo-terms {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 22px;
+  margin-bottom: 8px;
+}
+.d5-memo-term {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.d5-memo-term .k {
+  font-size: var(--fs-11);
+  color: var(--text-3);
+}
+.d5-memo-term .v {
+  font-size: var(--fs-13);
+  color: var(--text-2);
+}
+.d5-memo-warn {
+  background: var(--warning-bg);
+  color: var(--warning);
+  border-radius: var(--r-sm);
+  padding: 8px 11px;
+  margin-bottom: 8px;
+  font-size: var(--fs-11);
+  font-weight: var(--fw-medium);
+}
+.d5-memo-formula {
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+  font-size: var(--fs-12);
+}
+.d5-memo-sub {
+  color: var(--text-3);
+  margin-top: 4px;
+  font-size: var(--fs-11);
+}
+
+/* linkbox de reconciliação com a D.0 (espelho do .c6-linkbox da C.6 — classe duplicada localmente
+   para não depender de outra rota; o repasse M2 real vira lançamento na D.0, fora do teto) */
+.d5-page .c6-linkbox {
+  background: color-mix(in srgb, var(--info) 7%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--info) 24%, var(--surface));
+  border-radius: var(--r-sm);
+  padding: 14px 18px;
+  margin: 18px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.d5-page .c6-linkbox .lt {
+  font-size: var(--fs-13);
+  color: var(--text);
+}
+.d5-page .c6-linkbox .lv {
+  display: flex;
+  gap: 22px;
+  align-items: center;
+}
+.d5-page .c6-linkbox .lv .it {
+  text-align: right;
+}
+.d5-page .c6-linkbox .lv .it .il {
+  font-size: var(--fs-12);
+  color: var(--text-3);
+}
+.d5-page .c6-linkbox .lv .it .iv {
+  font-size: 16px;
+  font-weight: var(--fw-bold);
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+.d5-page .c6-linkbox a.go {
+  background: var(--info);
+  color: var(--on-accent);
+  padding: 8px 15px;
+  border-radius: 7px;
+  text-decoration: none;
+  font-size: 12.5px;
+  font-weight: var(--fw-semibold);
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: filter 0.15s var(--easing);
+}
+.d5-page .c6-linkbox a.go:hover {
+  filter: brightness(1.08);
+}
+
+/* card IA (mesma identidade da C.6) */
+.d5-page .c6-chat {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 18px 22px;
+  margin: 18px 0 20px;
+}
+.d5-page .c6-chat .ch {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.d5-page .c6-chat .ch .ia {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.d5-page .c6-chat .ch .ia .badge {
+  background: color-mix(in srgb, var(--info) 10%, var(--surface));
+  color: var(--info);
+  font-size: 11px;
+  font-weight: var(--fw-bold);
+  padding: 4px 9px;
+  border-radius: 6px;
+}
+.d5-page .c6-chat .ch .ia b {
+  color: var(--text);
+  font-size: var(--fs-13);
+}
+.d5-page .c6-chat .ch .edit {
+  color: var(--info);
+  font-size: var(--fs-12);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.d5-page .c6-chat p {
+  font-size: var(--fs-13);
+  color: var(--text-2);
+  line-height: 1.6;
+}
+.d5-page .c6-chat p b {
+  color: var(--text);
+}
+
+/* dot da pill (glifo ● textual vetado como ícone) — espelha o .c6-pill-dot da C.6 */
+.d5-pill-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  margin-right: 2px;
+}

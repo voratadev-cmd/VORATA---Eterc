@@ -1,0 +1,583 @@
+/* Transpasse Orçamentário (M1.4) — co-localizado.
+ * Reusa .crumb global (patterns.css). Tudo o mais é específico desta tela.
+ * NUNCA usar border-left colorida em cards (regra CLAUDE.md).
+ */
+
+/* ── Hero strip (5 cells) ──────────────────────────────────────── */
+
+.tr-hero {
+  display: grid;
+  grid-template-columns: 1.2fr 1.1fr 1.1fr 1.1fr 1.2fr;
+  gap: 0;
+  background: var(--ink);
+  color: #fff;
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  margin-bottom: var(--s-5);
+}
+.tr-hero-cell {
+  padding: var(--s-4) var(--s-5);
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  position: relative;
+}
+.tr-hero-cell:last-child {
+  border-right: 0;
+}
+.tr-hero-label {
+  font-size: 10px;
+  font-weight: var(--fw-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: rgba(255, 255, 255, 0.65);
+}
+.tr-hero-value {
+  font-size: var(--fs-22);
+  font-weight: var(--fw-bold);
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  margin-top: var(--s-2);
+}
+.tr-hero-status {
+  color: var(--warning);
+}
+.tr-hero-value-sm {
+  font-size: var(--fs-15);
+  font-weight: var(--fw-semibold);
+  line-height: 1.2;
+  margin-top: var(--s-2);
+}
+.tr-hero-sub {
+  font-size: var(--fs-12);
+  color: rgba(255, 255, 255, 0.6);
+  margin-top: 4px;
+}
+.tr-hero-progress {
+  margin-top: var(--s-2);
+}
+.tr-hero-progress-bar {
+  height: 4px;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: var(--r-pill);
+  overflow: hidden;
+}
+.tr-hero-progress-fill {
+  height: 100%;
+  background: var(--warning);
+  transition: width 0.3s var(--easing);
+}
+
+/* Última cell: ação (bloqueado=vermelho / liberado=verde) */
+.tr-hero-action {
+  background: var(--danger);
+}
+.tr-hero-action.ok {
+  background: var(--success);
+}
+.tr-hero-action-title {
+  font-size: var(--fs-15);
+  font-weight: var(--fw-bold);
+  margin-top: var(--s-2);
+  color: #fff;
+}
+.tr-hero-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: var(--s-3);
+  padding: 8px 14px;
+  background: rgba(0, 0, 0, 0.2);
+  color: #fff;
+  border: 0;
+  border-radius: var(--r-sm);
+  font-size: var(--fs-13);
+  font-weight: var(--fw-semibold);
+  font-family: var(--font);
+  cursor: pointer;
+  transition: background 0.12s var(--easing);
+}
+.tr-hero-action-btn:hover {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+@media (max-width: 1100px) {
+  .tr-hero {
+    grid-template-columns: 1fr 1fr;
+  }
+  .tr-hero-cell {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  .tr-hero-cell:nth-child(2n) {
+    border-right: 0;
+  }
+  .tr-hero-cell:last-child {
+    grid-column: 1 / -1;
+  }
+}
+@media (max-width: 720px) {
+  .tr-hero {
+    grid-template-columns: 1fr;
+  }
+  .tr-hero-cell {
+    border-right: 0;
+  }
+}
+
+/* ── Card 1: Resumo do Contrato ────────────────────────────────── */
+
+.tr-resumo-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--s-4) var(--s-5);
+  margin-bottom: var(--s-4);
+}
+.tr-resumo-item {
+  min-width: 0;
+}
+.tr-resumo-item-label {
+  font-size: 10px;
+  font-weight: var(--fw-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-3);
+  margin-bottom: 2px;
+}
+.tr-resumo-item-value {
+  font-size: var(--fs-13);
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+}
+
+.tr-premissas-block {
+  background: var(--surface-2);
+  border-radius: var(--r-md);
+  padding: var(--s-3) var(--s-4);
+}
+.tr-premissas-label {
+  font-size: 10px;
+  font-weight: var(--fw-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-3);
+  margin-bottom: var(--s-2);
+}
+.tr-premissas {
+  list-style: none;
+  margin: 0 0 var(--s-3) 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.tr-premissa {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-2);
+  font-size: var(--fs-13);
+  color: var(--text-2);
+  line-height: 1.4;
+}
+.tr-premissa-check {
+  display: grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--success);
+  color: #fff;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+@media (max-width: 880px) {
+  .tr-resumo-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* ── Tabela genérica de Transpasse (Riscos · Documentos) ───────── */
+
+.tr-tabela {
+  display: flex;
+  flex-direction: column;
+  font-size: var(--fs-13);
+}
+.tr-tabela-riscos {
+  --cols: minmax(0, 1.3fr) 100px 110px minmax(0, 1.8fr);
+}
+.tr-tabela-docs {
+  --cols: minmax(0, 1.8fr) 100px 130px 110px;
+}
+.tr-tabela-head,
+.tr-tabela-row {
+  display: grid;
+  grid-template-columns: var(--cols);
+  gap: var(--s-3);
+  align-items: center;
+  padding: 10px var(--s-3);
+}
+.tr-tabela-head {
+  font-size: 10px;
+  font-weight: var(--fw-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-3);
+  border-bottom: 1px solid var(--border);
+}
+.tr-tabela-row {
+  border-bottom: 1px solid var(--border);
+}
+.tr-tabela-row:last-child {
+  border-bottom: 0;
+}
+.tr-tabela .center {
+  display: flex;
+  justify-content: center;
+}
+
+.tr-cell-risco,
+.tr-cell-doc {
+  color: var(--text);
+  font-weight: var(--fw-medium);
+}
+.tr-cell-nivel {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-2);
+}
+.tr-nivel-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.tr-cell-impacto,
+.tr-cell-prazo,
+.tr-cell-ref {
+  color: var(--text-2);
+}
+.tr-cell-plano {
+  color: var(--text-2);
+  line-height: 1.4;
+}
+.tr-doc-tag {
+  font-size: 9px;
+  font-weight: var(--fw-bold);
+  letter-spacing: 0.06em;
+  padding: 2px 8px;
+  line-height: 1.2;
+}
+
+/* ── Plano de Ação (timeline numerada) ─────────────────────────── */
+
+.tr-acoes-timeline {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+  position: relative;
+}
+.tr-acao {
+  display: grid;
+  grid-template-columns: 32px 1fr;
+  gap: var(--s-3);
+  align-items: flex-start;
+  position: relative;
+}
+/* Linha vertical conectora */
+.tr-acao:not(:last-child)::before {
+  content: "";
+  position: absolute;
+  left: 16px;
+  top: 32px;
+  bottom: calc(-1 * var(--s-3));
+  width: 2px;
+  background: var(--success);
+  opacity: 0.3;
+  transform: translateX(-50%);
+}
+.tr-acao-num {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--success);
+  color: #fff;
+  font-size: var(--fs-13);
+  font-weight: var(--fw-bold);
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+}
+.tr-acao-text {
+  min-width: 0;
+  padding-top: 4px;
+}
+.tr-acao-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s-3);
+  margin-bottom: 2px;
+}
+.tr-acao-titulo {
+  font-size: var(--fs-14);
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+}
+.tr-acao-prazo {
+  font-size: var(--fs-12);
+  color: var(--text-3);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.tr-acao-desc {
+  font-size: var(--fs-13);
+  color: var(--text-2);
+  line-height: 1.45;
+}
+
+/* ── Modelos Pré-formatados ────────────────────────────────────── */
+
+.tr-modelos {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+.tr-modelo {
+  display: grid;
+  grid-template-columns: 36px 1fr auto;
+  gap: var(--s-3);
+  align-items: center;
+  padding: 10px;
+  background: var(--surface-2);
+  border-radius: var(--r-md);
+}
+.tr-modelo-icon {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  color: var(--brand);
+  flex-shrink: 0;
+}
+.tr-modelo-text {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  line-height: 1.25;
+}
+.tr-modelo-titulo {
+  font-size: var(--fs-13);
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+}
+.tr-modelo-tag {
+  font-size: 9px;
+  font-weight: var(--fw-bold);
+  letter-spacing: 0.06em;
+  padding: 2px 6px;
+  align-self: flex-start;
+  line-height: 1.2;
+}
+.tr-modelo-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-sm);
+  font-size: var(--fs-12);
+  font-weight: var(--fw-semibold);
+  font-family: var(--font);
+  color: var(--text-2);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.tr-modelo-btn:hover {
+  background: var(--surface-3);
+  color: var(--text);
+}
+
+/* ── Checklist ──────────────────────────────────────────────────── */
+
+.tr-checklist {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+.tr-check {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  padding: 8px;
+  border-radius: var(--r-sm);
+  font-size: var(--fs-13);
+}
+.tr-check-box {
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border: 1.5px solid var(--border-strong);
+  border-radius: var(--r-sm);
+  flex-shrink: 0;
+  color: #fff;
+}
+.tr-check-concluido .tr-check-box {
+  background: var(--success);
+  border-color: var(--success);
+}
+.tr-check-parcial .tr-check-box {
+  background: var(--warning-bg);
+  border-color: var(--warning);
+}
+.tr-check-concluido {
+  background: var(--success-bg);
+}
+.tr-check-parcial {
+  background: var(--warning-bg);
+}
+.tr-check-label {
+  flex: 1;
+  color: var(--text);
+}
+.tr-check-pendente .tr-check-label {
+  color: var(--text-3);
+}
+.tr-check-progresso {
+  font-size: 11px;
+  color: var(--text-3);
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--fw-semibold);
+}
+
+.tr-checklist-footer {
+  margin-top: var(--s-4);
+  padding-top: var(--s-3);
+  border-top: 1px solid var(--border);
+}
+.tr-checklist-footer-label {
+  font-size: var(--fs-12);
+  color: var(--text-3);
+  margin-bottom: 6px;
+}
+.tr-checklist-footer-pct {
+  font-size: var(--fs-13);
+  font-weight: var(--fw-semibold);
+  color: var(--success);
+  text-align: right;
+  margin-top: 4px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Observações (card dark) ───────────────────────────────────── */
+
+.tr-observacoes {
+  background: var(--ink);
+  color: #fff;
+  border-radius: var(--r-md);
+  padding: var(--s-4);
+}
+.tr-observacoes-head {
+  margin-bottom: var(--s-3);
+}
+.tr-observacoes-title {
+  font-size: var(--fs-15);
+  font-weight: var(--fw-semibold);
+  color: #fff;
+}
+.tr-observacoes-sub {
+  font-size: var(--fs-12);
+  color: rgba(255, 255, 255, 0.6);
+  margin-top: 2px;
+}
+.tr-observacoes-list {
+  list-style: disc inside;
+  margin: 0 0 var(--s-4) 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+.tr-observacoes-list li {
+  font-size: var(--fs-13);
+  color: rgba(255, 255, 255, 0.85);
+  line-height: 1.45;
+}
+/* ── Footer com 3 botões ───────────────────────────────────────── */
+
+.tr-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--s-3);
+  margin-top: var(--s-6);
+  padding-top: var(--s-4);
+  border-top: 1px solid var(--border);
+}
+.tr-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 18px;
+  border-radius: var(--r-sm);
+  font-size: var(--fs-13);
+  font-weight: var(--fw-semibold);
+  font-family: var(--font);
+  cursor: pointer;
+  transition: all 0.12s var(--easing);
+}
+.tr-btn-ghost {
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-3);
+}
+.tr-btn-ghost:hover {
+  color: var(--text-2);
+  background: var(--surface-2);
+}
+.tr-btn-outline {
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  color: var(--text-2);
+}
+.tr-btn-outline:hover {
+  background: var(--surface-2);
+}
+.tr-btn-primary {
+  background: var(--success);
+  border: 0;
+  color: #fff;
+}
+.tr-btn-primary:hover:not(.tr-btn-disabled) {
+  filter: brightness(1.05);
+}
+.tr-btn-disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+@media (max-width: 880px) {
+  .tr-footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .tr-btn {
+    justify-content: center;
+  }
+}

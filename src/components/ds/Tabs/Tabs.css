@@ -1,0 +1,27 @@
+.tabs {
+  display: flex;
+  gap: var(--s-1);
+  margin-bottom: var(--s-4);
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+}
+.tabs-item {
+  padding: 10px var(--s-3);
+  background: transparent;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  color: var(--text-3);
+  font-size: var(--fs-13);
+  font-weight: var(--fw-semibold);
+  cursor: pointer;
+  margin-bottom: -1px;
+  white-space: nowrap;
+  font-family: var(--font);
+}
+.tabs-item:hover {
+  color: var(--text);
+}
+.tabs-item.active {
+  color: var(--brand);
+  border-bottom-color: var(--brand);
+}

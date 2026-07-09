@@ -1,0 +1,75 @@
+# DigitalOcean App Platform · spec do AGENTE (substitui o worker TS removido).
+# ─────────────────────────────────────────────────────────────────────
+# Uma imagem (agent/Dockerfile), três componentes:
+#   · api       (service HTTP) — chat "Adm Contratual IA"
+#   · mapper    (worker)       — drena obra_arquivos status='raw' → texto-mapa
+#   · extractor (worker)       — drena status='ready_to_extract' → envelope
+#
+# IMPORTANTE: exatamente UM consumidor por fase (1 mapper + 1 extractor). NÃO
+# subir junto com o worker TS (foi removido) nem rodar 2 instâncias do mesmo
+# worker, senão dois processos pegam da mesma fila.
+#
+# Secrets (configurar no painel DO · encrypted): SUPABASE_SERVICE_KEY,
+# ANTHROPIC_API_KEY, VPS_SECRET.
+# ─────────────────────────────────────────────────────────────────────
+name: rdm-ia-agent
+region: nyc
+
+services:
+  - name: api
+    dockerfile_path: agent/Dockerfile
+    source_dir: agent
+    github:
+      repo: voratadev-cmd/Base-Repository
+      branch: main
+      deploy_on_push: false # ligue quando os secrets estiverem configurados
+    instance_count: 1
+    instance_size_slug: basic-xs
+    http_port: 8000
+    run_command: uvicorn main:app --host 0.0.0.0 --port 8000
+    health_check:
+      http_path: /api/health
+    envs:
+      - { key: SUPABASE_URL, value: https://SUPABASE_REF_ETERC_AQUI.supabase.co, scope: RUN_TIME }
+      - { key: SUPABASE_SERVICE_KEY, scope: RUN_TIME, type: SECRET }
+      - { key: VPS_SECRET, scope: RUN_TIME, type: SECRET }
+      - { key: ANTHROPIC_API_KEY, scope: RUN_TIME, type: SECRET }
+      - { key: AGENT_MODEL, value: claude-sonnet-4-5, scope: RUN_TIME }
+      - { key: CORS_ORIGINS, value: https://app.exemplo.com, scope: RUN_TIME }
+
+workers:
+  - name: mapper
+    dockerfile_path: agent/Dockerfile
+    source_dir: agent
+    github:
+      repo: voratadev-cmd/Base-Repository
+      branch: main
+      deploy_on_push: false
+    instance_count: 1
+    instance_size_slug: basic-xs
+    run_command: python -m agents.mapeamento.job
+    envs:
+      - { key: SUPABASE_URL, value: https://SUPABASE_REF_ETERC_AQUI.supabase.co, scope: RUN_TIME }
+      - { key: SUPABASE_SERVICE_KEY, scope: RUN_TIME, type: SECRET }
+      - { key: VPS_SECRET, scope: RUN_TIME, type: SECRET }
+      - { key: ANTHROPIC_API_KEY, scope: RUN_TIME, type: SECRET }
+      - { key: MAPPER_MODEL, value: claude-sonnet-4-5, scope: RUN_TIME }
+      - { key: LEASE_TIMEOUT_MIN, value: "10", scope: RUN_TIME }
+
+  - name: extractor
+    dockerfile_path: agent/Dockerfile
+    source_dir: agent
+    github:
+      repo: voratadev-cmd/Base-Repository
+      branch: main
+      deploy_on_push: false
+    instance_count: 1
+    instance_size_slug: basic-s # extração é mais pesada (PyMuPDF/pycel/pandas)
+    run_command: python -m agents.extracao.job
+    envs:
+      - { key: SUPABASE_URL, value: https://SUPABASE_REF_ETERC_AQUI.supabase.co, scope: RUN_TIME }
+      - { key: SUPABASE_SERVICE_KEY, scope: RUN_TIME, type: SECRET }
+      - { key: VPS_SECRET, scope: RUN_TIME, type: SECRET }
+      - { key: ANTHROPIC_API_KEY, scope: RUN_TIME, type: SECRET }
+      - { key: EXTRACTOR_MODEL, value: claude-sonnet-4-5, scope: RUN_TIME }
+      - { key: LEASE_TIMEOUT_MIN, value: "10", scope: RUN_TIME }

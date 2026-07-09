@@ -1,0 +1,29 @@
+/* M2.1.9 · aba Operação · Dica info */
+
+.cdo-dica {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: var(--s-3) var(--s-4);
+  background: var(--info-bg);
+  border-radius: var(--r-sm);
+}
+[data-theme="dark"] .cdo-dica {
+  background: rgba(67, 124, 218, 0.08);
+}
+.cdo-dica-icon {
+  color: var(--info);
+  display: inline-flex;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.cdo-dica-texto {
+  margin: 0;
+  font-size: var(--fs-13);
+  color: var(--text-2);
+  line-height: 1.6;
+}
+.cdo-dica-texto strong {
+  color: var(--info);
+  font-weight: var(--fw-bold);
+}

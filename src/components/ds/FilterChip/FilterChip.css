@@ -1,0 +1,59 @@
+.fchip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-pill);
+  font-size: var(--fs-13);
+  font-weight: var(--fw-medium);
+  color: var(--text-2);
+  cursor: pointer;
+  font-family: var(--font);
+  transition: all 0.12s var(--easing);
+}
+.fchip:hover {
+  border-color: var(--border-strong);
+  color: var(--text);
+}
+.fchip.active {
+  border-color: var(--brand);
+  background: var(--brand-50);
+  color: var(--brand-700);
+}
+[data-theme="dark"] .fchip.active {
+  background: rgba(241, 136, 77, 0.14);
+  color: var(--brand);
+}
+.fchip-value {
+  background: var(--brand);
+  color: #fff;
+  font-size: 11px;
+  padding: 1px 6px;
+  border-radius: var(--r-pill);
+  font-weight: var(--fw-bold);
+}
+.fchip-clear {
+  display: grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  color: inherit;
+  padding: 0;
+}
+.fchip-clear:hover {
+  background: rgba(0, 0, 0, 0.08);
+}
+[data-theme="dark"] .fchip-clear:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+.fchip-dashed {
+  border-style: dashed;
+  color: var(--text-3);
+}

@@ -1,0 +1,40 @@
+/* RmaParamBar — barra fina de parâmetros das abas do RMA. Co-localizado, tokens-only.
+   Espelha a ind-param-bar da C.2 (a referência visual das 4 barras unificadas). */
+.rma-pbar {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  flex-wrap: wrap;
+}
+.rma-pbar-item {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+}
+.rma-pbar-k {
+  font-size: var(--fs-12);
+  color: var(--text-3);
+}
+.rma-pbar-v {
+  font-size: var(--fs-13);
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+.rma-pbar-sep {
+  width: 1px;
+  height: 14px;
+  background: var(--border-strong);
+}
+/* Seletor de período encostado à direita da linha. */
+.rma-pbar-picker {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+}
+@media (max-width: 720px) {
+  .rma-pbar-picker {
+    margin-left: 0;
+    width: 100%;
+  }
+}

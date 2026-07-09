@@ -1,0 +1,147 @@
+/* M2.1.9 · aba Áreas Responsáveis · 8 cards em grid 4×2 */
+
+.cda-secao {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+}
+.cda-secao-head {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.cda-secao-titulo {
+  font-size: var(--fs-15);
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+  margin: 0;
+}
+.cda-secao-sub {
+  font-size: 11px;
+  color: var(--text-3);
+  margin: 0;
+}
+
+.cda-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--s-3);
+}
+@media (max-width: 1280px) {
+  .cda-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 720px) {
+  .cda-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.cda-area {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--border);
+  border-radius: var(--r-md);
+  padding: var(--s-3) var(--s-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+
+.cda-area-head {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+.cda-area-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--r-sm);
+  background: var(--surface-2);
+  flex-shrink: 0;
+}
+.cda-area-titulo-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+.cda-area-titulo {
+  font-size: var(--fs-13);
+  font-weight: var(--fw-bold);
+  color: var(--text);
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+}
+.cda-area-resp {
+  font-size: 11px;
+  color: var(--text-3);
+  line-height: 1.4;
+}
+
+.cda-area-counts {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  padding: 10px 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+.cda-count {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+}
+.cda-count-valor {
+  font-size: var(--fs-22);
+  font-weight: var(--fw-bold);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+}
+.cda-count-valor-success {
+  color: var(--success);
+}
+.cda-count-valor-warning {
+  color: var(--warning);
+}
+.cda-count-valor-danger {
+  color: var(--danger);
+}
+.cda-count-label {
+  font-size: 9px;
+  font-weight: var(--fw-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-3);
+}
+
+.cda-area-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  color: var(--text);
+  font-size: 11px;
+  font-weight: var(--fw-bold);
+  cursor: pointer;
+  font-family: var(--font);
+}
+.cda-area-cta:hover {
+  background: var(--brand-50);
+  border-color: var(--brand-100);
+  color: var(--brand);
+}
+.cda-area-cta-icon {
+  display: inline-flex;
+  color: var(--brand);
+}

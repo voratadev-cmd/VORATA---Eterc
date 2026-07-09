@@ -1,0 +1,23 @@
+# Agente de chat/insights "Adm Contratual IA" · FastAPI + claude-agent-sdk.
+# Python 3.11+ recomendado (claude-agent-sdk exige 3.10+).
+fastapi>=0.110
+uvicorn[standard]>=0.27
+claude-agent-sdk
+supabase>=2.4
+python-dotenv>=1.0
+httpx>=0.27
+pydantic>=2.6
+
+# ── Parsers do mapeador (amostragem de documentos) ─────────────────
+pypdf>=4.2            # PDF · contagem de páginas + texto por página
+openpyxl>=3.1         # XLSX · sheets, dimensões, amostras de linhas
+xlrd>=2.0             # XLS (binário legado) · sheets + amostras de linhas
+python-docx>=1.1      # DOCX · parágrafos + tabelas
+
+# ── Extração (Fase 2) · leitura full + visão + OCR ─────────────────
+# Libs NATIVAS com versão BOUNDED (rebuild não pega wheel incompatível). Para
+# reprodutibilidade total em prod, gerar um requirements.lock (pip-compile).
+pycel>=1.0b30,<1.1    # calcula fórmulas de XLSX sem valor em cache (planilha gerada por sistema)
+PyMuPDF>=1.27,<1.28   # PDF · texto + tabelas (find_tables) + rasterização (visão) · pin alinhado à versão VALIDADA nos testes de BM real (1.27.x); local e prod batem
+pytesseract>=0.3.10   # OCR fallback p/ PDF escaneado (precisa binário tesseract + traineddata 'por')
+Pillow>=10.0          # buffer de imagem p/ OCR / visão

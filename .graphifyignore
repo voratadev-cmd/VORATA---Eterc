@@ -1,0 +1,49 @@
+# ── LGPD: documentos REAIS de cliente — NUNCA indexar (nem passada local, nem LLM) ──
+docs/rma/documentos/
+docs/rma/DOCUMENTOS REVISADOS/
+agent/agents/normalizacao/fixtures/
+
+# ── pesados/gerados (o .graphifyignore SUBSTITUI o .gitignore quando presente — replicar aqui) ──
+node_modules/
+.claude/
+graphify-out/
+dist/
+.output/
+.tanstack/
+.nitro/
+.wrangler/
+venv/
+.venv/
+__pycache__/
+coverage/
+*.lock
+*.log
+*.tsbuildinfo
+.env
+.env.*
+
+# ── mídia/binários de escritório — fora do escopo (nunca passam por LLM) ──
+*.pdf
+*.xlsx
+*.xls
+*.xlsm
+*.XLSX
+*.pptx
+*.docx
+*.mpp
+*.png
+*.jpg
+*.jpeg
+*.webp
+*.gif
+*.svg
+*.ico
+*.mp4
+*.mp3
+*.woff
+*.woff2
+
+# ── arquivos de texto sem valor de grafo (a passada semântica cobre docs/*.md e CLAUDE.md) ──
+*.txt
+*.rst
+yarn.lock

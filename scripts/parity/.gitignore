@@ -1,0 +1,5 @@
+# artefatos regenerados a cada run do gate (não versionar)
+chat_*.json
+tela_*.json
+probe_results.json
+*_err.txt

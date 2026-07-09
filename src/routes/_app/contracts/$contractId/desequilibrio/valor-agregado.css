@@ -1,0 +1,714 @@
+/* M3.4 · D.4 Perda de Produtividade · co-localizado. Tokens-only · sem border-left de farol em card. */
+
+.va-main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-5);
+}
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Header ─────────────────────────────────────────────────────── */
+
+.va-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--s-4);
+  flex-wrap: wrap;
+}
+.va-head-main {
+  min-width: 0;
+}
+.va-titulo {
+  font-size: var(--fs-28);
+  font-weight: var(--fw-bold);
+  color: var(--text);
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+.va-sub {
+  font-size: var(--fs-13);
+  color: var(--text-3);
+  margin: 4px 0 0 0;
+  max-width: 86ch;
+  line-height: var(--lh-snug);
+}
+.va-sub b {
+  color: var(--text-2);
+  font-weight: var(--fw-semibold);
+}
+
+/* ── Título de seção ────────────────────────────────────────────── */
+
+.va-sec-titulo {
+  font-size: 11px;
+  font-weight: var(--fw-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-3);
+  margin: 0 0 var(--s-3) 0;
+}
+
+/* ── Resumo dos três métodos (4 cards) ──────────────────────────── */
+
+.va-resumo {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--s-3);
+}
+@media (max-width: 1100px) {
+  .va-resumo {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 560px) {
+  .va-resumo {
+    grid-template-columns: 1fr;
+  }
+}
+/* Card de método INTELIGENTE — cor automática por tom (ícone tingido + tag + mini-barra),
+   sem borda colorida em cima. Preenchido a partir do array `metodos`. */
+.metodo-card {
+  position: relative;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: var(--s-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  min-height: 138px;
+  transition:
+    border-color 0.15s var(--easing),
+    box-shadow 0.15s var(--easing),
+    transform 0.15s var(--easing);
+}
+.metodo-card:hover {
+  border-color: var(--border-strong);
+  box-shadow: var(--sh-md);
+  transform: translateY(-1px);
+}
+.metodo-head {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+}
+.metodo-ico {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--r-sm);
+  flex-shrink: 0;
+}
+.metodo-label {
+  flex: 1;
+  font-size: var(--fs-13);
+  font-weight: var(--fw-semibold);
+  color: var(--text-2);
+}
+.metodo-tag {
+  font-size: 9px;
+  font-weight: var(--fw-bold);
+  letter-spacing: 0.04em;
+  padding: 2px 7px;
+  border-radius: var(--r-sm);
+}
+.metodo-valor {
+  font-size: var(--fs-22);
+  font-weight: var(--fw-bold);
+  color: var(--text);
+  line-height: 1.05;
+  margin-top: 2px;
+}
+.metodo-valor-wait {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--fs-16);
+  font-weight: var(--fw-semibold);
+  color: var(--text-3);
+}
+.metodo-sub {
+  font-size: 11px;
+  color: var(--text-4);
+}
+.metodo-bar {
+  height: 5px;
+  border-radius: var(--r-pill);
+  background: var(--surface-2);
+  overflow: hidden;
+  margin-top: auto;
+}
+.metodo-bar i {
+  display: block;
+  height: 100%;
+  border-radius: var(--r-pill);
+  transition: width 0.45s var(--easing);
+}
+.metodo-bar-pend {
+  background: repeating-linear-gradient(-45deg, var(--surface-2) 0 5px, var(--surface-3) 5px 10px);
+}
+/* cor por tom — o "inteligente": ícone, tag e barra herdam o semântico do método/status */
+.metodo-info .metodo-ico {
+  background: var(--info-bg);
+  color: var(--info);
+}
+.metodo-info .metodo-bar i {
+  background: var(--info);
+}
+.metodo-neutral .metodo-ico {
+  background: var(--surface-2);
+  color: var(--text-3);
+}
+.metodo-brand .metodo-ico {
+  background: var(--brand-50);
+  color: var(--brand);
+}
+.metodo-brand .metodo-bar i {
+  background: var(--brand);
+}
+/* card HERÓI do método ativo — fundo brand bem leve (padrão canônico /indiretos), adapta no dark via
+   color-mix. É DESTAQUE de seleção, NUNCA farol: danger fica reservado ao veredito (Crítico). */
+.metodo-hero {
+  background: color-mix(in srgb, var(--brand) 7%, var(--surface));
+  border-color: color-mix(in srgb, var(--brand) 32%, var(--border));
+}
+.metodo-hero .metodo-ico {
+  background: color-mix(in srgb, var(--brand) 16%, var(--surface));
+  color: var(--brand-700);
+}
+.metodo-hero .metodo-tag {
+  background: color-mix(in srgb, var(--brand) 16%, var(--surface));
+  color: var(--brand-700);
+}
+
+/* ── Comparativo (tabela 4-col) ─────────────────────────────────── */
+
+.va-cmp {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  overflow: hidden;
+}
+.va-cmp-head,
+.va-cmp-row {
+  display: grid;
+  grid-template-columns: 1.1fr 2.6fr 1.1fr 1.1fr;
+  gap: var(--s-3);
+  align-items: center;
+  padding: var(--s-3) var(--s-4);
+}
+.va-cmp-head {
+  background: var(--ink);
+  font-size: 10px;
+  font-weight: var(--fw-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--on-accent);
+}
+.va-cmp-head .right {
+  text-align: right;
+  justify-self: end;
+}
+.va-cmp-row {
+  border-top: 1px solid var(--border);
+  font-size: var(--fs-13);
+  color: var(--text-2);
+}
+/* linha ATIVA = destaque de seleção (herói brand), não farol — color-mix adapta no dark. */
+.va-cmp-ativo {
+  background: color-mix(in srgb, var(--brand) 7%, var(--surface));
+}
+.va-cmp-met {
+  font-weight: var(--fw-bold);
+  color: var(--text);
+}
+.va-cmp-como {
+  color: var(--text-3);
+  font-size: var(--fs-12);
+}
+.va-cmp-res {
+  font-weight: var(--fw-bold);
+  color: var(--warning);
+  font-size: var(--fs-14);
+}
+.va-cmp-pend {
+  color: var(--text-4);
+}
+.va-cmp .right {
+  text-align: right;
+  justify-self: end;
+}
+.va-cmp-sit {
+  justify-self: start;
+}
+.va-cmp-wait {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--fs-12);
+  color: var(--text-3);
+  font-weight: var(--fw-medium);
+}
+
+/* ── Reconciliação com a D.0 (âncora) ───────────────────────────── */
+
+.va-recon {
+  background: color-mix(in srgb, var(--brand) 4%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--brand) 22%, var(--border));
+  border-radius: var(--r-md);
+  padding: var(--s-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+.va-recon-main {
+  display: flex;
+  align-items: baseline;
+  gap: var(--s-3);
+  flex-wrap: wrap;
+}
+.va-recon-l {
+  font-size: 11px;
+  font-weight: var(--fw-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--brand-700);
+}
+.va-recon-v {
+  font-size: var(--fs-20);
+  font-weight: var(--fw-bold);
+  color: var(--text);
+}
+.va-recon-link {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--fs-12);
+  font-weight: var(--fw-semibold);
+  color: var(--brand);
+  text-decoration: none;
+  padding: 3px 6px;
+  border-radius: var(--r-sm);
+}
+.va-recon-link:hover {
+  background: var(--brand-50);
+}
+.va-recon-link:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+.va-recon-txt {
+  font-size: var(--fs-12);
+  color: var(--text-3);
+  line-height: var(--lh-normal);
+  margin: 0;
+  max-width: 92ch;
+}
+.va-recon-txt b {
+  font-weight: var(--fw-semibold);
+  color: var(--text-2);
+}
+
+/* ── Evolução — gráfico VA acumulado ────────────────────────────── */
+
+.va-chart-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: var(--s-4) var(--s-4) var(--s-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+.va-chart-legend {
+  padding-left: var(--s-2);
+}
+.va-chart {
+  width: 100%;
+}
+
+/* ── Detalhe — 2 cards expansíveis ──────────────────────────────── */
+
+.va-detgrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--s-4);
+}
+@media (max-width: 880px) {
+  .va-detgrid {
+    grid-template-columns: 1fr;
+  }
+}
+.va-detcard {
+  text-align: left;
+  font-family: var(--font);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: var(--s-4);
+  transition:
+    box-shadow 0.15s var(--easing),
+    border-color 0.15s var(--easing);
+}
+.va-detcard:hover {
+  border-color: var(--border-strong);
+}
+.va-detcard-open {
+  border-color: var(--brand);
+}
+.va-detcard-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-2);
+  font-size: var(--fs-13);
+  font-weight: var(--fw-bold);
+  color: var(--text);
+  margin: 0 0 var(--s-3) 0;
+}
+.va-detcard-title > span:first-child {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.va-detcard-title svg {
+  color: var(--text-3);
+}
+.va-detcard-exp {
+  appearance: none;
+  border: none;
+  background: none;
+  font-family: var(--font);
+  font-size: 10px;
+  font-weight: var(--fw-semibold);
+  color: var(--brand);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: var(--r-sm);
+}
+.va-detcard-exp:hover {
+  background: var(--brand-50);
+}
+.va-detcard-exp:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+
+/* toggle sem/com ajuste no card do Total Cost */
+.va-tc-toggle {
+  display: flex;
+  gap: 6px;
+  margin-bottom: var(--s-3);
+}
+.va-tc-tgl {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  align-items: flex-start;
+  appearance: none;
+  font-family: var(--font);
+  text-align: left;
+  padding: 7px 10px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  color: var(--text-3);
+  cursor: pointer;
+  transition:
+    border-color 0.15s var(--easing),
+    background 0.15s var(--easing),
+    color 0.15s var(--easing);
+}
+.va-tc-tgl:hover {
+  border-color: var(--border-strong);
+}
+.va-tc-tgl:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+.va-tc-tgl-l {
+  font-size: var(--fs-12);
+  font-weight: var(--fw-semibold);
+}
+.va-tc-tgl-v {
+  font-size: var(--fs-13);
+  font-weight: var(--fw-bold);
+}
+.va-tc-tgl-on.va-tc-tgl-sem {
+  border-color: var(--success);
+  background: var(--success);
+  color: var(--on-accent);
+}
+.va-tc-tgl-on.va-tc-tgl-com {
+  border-color: var(--warning);
+  background: var(--warning);
+  color: var(--on-accent);
+}
+.va-tc-note {
+  font-size: 10.5px;
+  font-style: italic;
+  color: var(--text-3);
+  line-height: var(--lh-normal);
+  margin-top: var(--s-2);
+}
+
+/* mini-tabela MOD/EQP/TOTAL */
+.va-mini {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-12);
+}
+.va-mini th {
+  text-align: right;
+  padding: 4px 7px;
+  font-size: 9px;
+  font-weight: var(--fw-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--text-3);
+  border-bottom: 1px solid var(--border);
+}
+.va-mini th:first-child {
+  text-align: left;
+}
+.va-mini td {
+  padding: 5px 7px;
+  text-align: right;
+  color: var(--text-2);
+  border-bottom: 1px solid var(--border);
+}
+.va-mini td:first-child {
+  text-align: left;
+  color: var(--text-2);
+  font-weight: var(--fw-medium);
+}
+.va-mini tr:last-child td {
+  border-bottom: none;
+}
+.va-mini-tot td {
+  font-weight: var(--fw-bold);
+  color: var(--text);
+  border-top: 2px solid var(--border-strong);
+}
+.va-mini-deq {
+  color: var(--warning);
+  font-weight: var(--fw-semibold);
+}
+
+/* ── Detalhe expandido (tabela completa) ────────────────────────── */
+
+.va-det {
+  margin-top: var(--s-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+}
+.va-det-titulo {
+  margin: 0;
+}
+.va-dt {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-12);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  overflow: hidden;
+}
+.va-dt th {
+  background: var(--ink);
+  color: var(--on-accent);
+  text-align: right;
+  padding: var(--s-2) var(--s-3);
+  font-size: 9px;
+  font-weight: var(--fw-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.va-dt th:first-child {
+  text-align: left;
+}
+.va-dt td {
+  padding: 5px var(--s-3);
+  text-align: right;
+  color: var(--text-2);
+  border-bottom: 1px solid var(--border);
+}
+.va-dt td:first-child {
+  text-align: left;
+}
+.va-dt tr:hover td {
+  background: var(--surface-2);
+}
+.va-dt-grp td {
+  background: var(--surface-2);
+  font-weight: var(--fw-bold);
+  color: var(--text);
+  font-size: 9.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.va-dt-grp:hover td {
+  background: var(--surface-2);
+}
+.va-dt-sub td {
+  background: var(--surface-3);
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+}
+.va-dt-sub:hover td {
+  background: var(--surface-3);
+}
+.va-dt-tot td {
+  font-weight: var(--fw-bold);
+  color: var(--text);
+  border-top: 2px solid var(--border-strong);
+  border-bottom: none;
+}
+.va-dt-tot:hover td {
+  background: transparent;
+}
+.va-dt-deq {
+  color: var(--warning);
+  font-weight: var(--fw-semibold);
+}
+
+/* ── Milha Aferida ──────────────────────────────────────────────── */
+
+.va-milha {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: var(--s-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+}
+.va-milha-status {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--fs-13);
+  font-weight: var(--fw-bold);
+  color: var(--text-3);
+  background: var(--surface-3);
+  padding: 5px var(--s-3);
+  border-radius: var(--r-sm);
+}
+.va-milha-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-6);
+}
+.va-milha-l {
+  font-size: 10px;
+  font-weight: var(--fw-semibold);
+  color: var(--text-3);
+}
+.va-milha-v {
+  font-size: var(--fs-15);
+  font-weight: var(--fw-bold);
+  color: var(--text);
+  margin-top: 2px;
+}
+
+/* ── Caveats (notas) ────────────────────────────────────────────── */
+
+.va-caveat {
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: var(--s-3) var(--s-4);
+  font-size: var(--fs-12);
+  line-height: var(--lh-normal);
+  color: var(--text-2);
+}
+.va-caveat b {
+  font-weight: var(--fw-semibold);
+}
+.va-caveat-warn {
+  background: var(--warning-bg);
+  border-color: var(--warning-bg);
+  color: var(--warning);
+}
+.va-caveat-info {
+  background: var(--info-bg);
+  border-color: var(--info-bg);
+  color: var(--info);
+}
+.va-caveat-neutral {
+  background: var(--surface-2);
+  color: var(--text-3);
+}
+
+/* ── Leitura IA ─────────────────────────────────────────────────── */
+
+.va-ia {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: var(--s-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+.va-ia-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10.5px;
+  font-weight: var(--fw-bold);
+  letter-spacing: 0.06em;
+  color: var(--brand-700);
+}
+.va-ia-texto {
+  font-size: var(--fs-13);
+  color: var(--text-2);
+  line-height: var(--lh-normal);
+  margin: 0;
+}
+.va-ia-texto b {
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+}
+
+/* ── Skeletons ──────────────────────────────────────────────────── */
+
+.va-sk-kpi {
+  height: 110px;
+  border-radius: var(--r-md);
+}
+.va-sk-tab {
+  height: 220px;
+  border-radius: var(--r-md);
+}
+
+/* ── Responsivo ≤720: tabelas rolam horizontal ──────────────────── */
+
+@media (max-width: 720px) {
+  .va-cmp-head,
+  .va-cmp-row {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+  .va-cmp-head .right,
+  .va-cmp-row .right {
+    justify-self: start;
+    text-align: left;
+  }
+  .va-dt {
+    display: block;
+    overflow-x: auto;
+  }
+}

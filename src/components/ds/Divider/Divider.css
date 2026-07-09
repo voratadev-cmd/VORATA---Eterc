@@ -1,0 +1,13 @@
+.divider {
+  height: 1px;
+  background: var(--border);
+  border: 0;
+  margin: var(--s-3) 0;
+}
+.divider-vertical {
+  width: 1px;
+  height: auto;
+  align-self: stretch;
+  background: var(--border);
+  margin: 0 var(--s-3);
+}

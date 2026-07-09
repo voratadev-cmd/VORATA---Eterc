@@ -1,0 +1,17 @@
+node_modules
+dist
+dist-ssr
+build
+.output
+.vinxi
+.tanstack
+.nitro
+.wrangler
+.husky/_
+coverage
+yarn.lock
+package-lock.json
+bun.lock
+src/routeTree.gen.ts
+*.min.js
+*.min.css

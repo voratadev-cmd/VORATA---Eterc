@@ -1,0 +1,575 @@
+/* M5.1 · Lições Aprendidas · co-localizado. */
+
+.lc-main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+}
+
+/* ── TabBar ────────────────────────────────────────────────────── */
+
+.lc-tabs {
+  display: flex;
+  gap: var(--s-5);
+  border-bottom: 1px solid var(--border);
+  padding: 0 var(--s-1);
+  margin-bottom: var(--s-1);
+}
+.lc-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 0;
+  font-size: var(--fs-13);
+  font-weight: var(--fw-semibold);
+  color: var(--text-3);
+  text-decoration: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+}
+.lc-tab:hover {
+  color: var(--text-2);
+}
+.lc-tab-active {
+  color: var(--text);
+  border-bottom-color: var(--danger);
+}
+.lc-tab-dot {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+}
+
+/* ── Header ────────────────────────────────────────────────────── */
+
+.lc-head {
+  display: flex;
+  gap: var(--s-3);
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+.lc-head-titulo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+}
+.lc-titulo {
+  font-size: var(--fs-28);
+  font-weight: var(--fw-bold);
+  color: var(--text);
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+.lc-sub {
+  font-size: var(--fs-13);
+  color: var(--text-3);
+  margin: 0;
+  max-width: 820px;
+  line-height: 1.55;
+}
+.lc-head-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.lc-btn-sec,
+.lc-btn-ink,
+.lc-btn-danger {
+  padding: 8px 14px;
+  border-radius: var(--r-sm);
+  font-size: var(--fs-12);
+  font-weight: var(--fw-bold);
+  font-family: var(--font);
+  cursor: pointer;
+  border: 1px solid transparent;
+  line-height: 1.3;
+  white-space: nowrap;
+}
+.lc-btn-sec {
+  background: var(--surface);
+  border-color: var(--border);
+  color: var(--text);
+}
+.lc-btn-sec:hover {
+  background: var(--surface-2);
+}
+.lc-btn-ink {
+  background: var(--ink);
+  color: #fff;
+}
+.lc-btn-ink:hover {
+  background: var(--ink-700);
+}
+.lc-btn-danger {
+  background: var(--danger);
+  color: #fff;
+}
+.lc-btn-danger:hover {
+  filter: brightness(0.95);
+}
+
+/* ── 4 KPIs (3 via FarolCard + 1 com botão CTA inline) ────────── */
+
+.lc-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--s-3);
+}
+@media (max-width: 1100px) {
+  .lc-kpis {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+@media (max-width: 720px) {
+  .lc-kpis {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* KPI 4 — Base de conhecimento (mantém inline pois tem botão CTA) */
+.lc-kpi-cta {
+  background: var(--danger);
+  border-radius: var(--r-md);
+  padding: var(--s-3) var(--s-4);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.lc-kpi-label {
+  font-size: 10px;
+  font-weight: var(--fw-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: rgba(255, 255, 255, 0.75);
+}
+.lc-kpi-valor {
+  font-size: var(--fs-22);
+  font-weight: var(--fw-bold);
+  color: #fff;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+  line-height: 1.15;
+}
+.lc-kpi-valor-small {
+  font-size: var(--fs-18);
+}
+.lc-kpi-btn {
+  align-self: flex-start;
+  margin-top: 6px;
+  padding: 8px 12px;
+  background: rgba(0, 0, 0, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: #fff;
+  font-size: 11px;
+  font-weight: var(--fw-bold);
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  font-family: var(--font);
+  text-align: left;
+}
+.lc-kpi-btn:hover {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+/* ── Resumo Executivo (callout brand) ──────────────────────────── */
+
+.lc-resumo {
+  background: var(--brand-50);
+  border: 1px solid var(--brand-100);
+  border-radius: var(--r-md);
+  padding: var(--s-3) var(--s-4);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+[data-theme="dark"] .lc-resumo {
+  background: rgba(67, 124, 218, 0.08);
+  border-color: rgba(67, 124, 218, 0.2);
+}
+.lc-resumo-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  font-weight: var(--fw-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--brand);
+}
+.lc-resumo-icone {
+  display: inline-flex;
+}
+.lc-resumo-texto {
+  margin: 0;
+  font-size: var(--fs-13);
+  color: var(--text);
+  line-height: 1.65;
+}
+
+/* ── Grid 2 cols ───────────────────────────────────────────────── */
+
+.lc-grid {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr;
+  gap: var(--s-4);
+  align-items: start;
+}
+@media (max-width: 1100px) {
+  .lc-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.lc-col-left,
+.lc-col-right {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+}
+
+/* ── Card base ─────────────────────────────────────────────────── */
+
+.lc-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: var(--s-3) var(--s-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+}
+/* Faixa colorida discreta à esquerda · só para cards de tom (success/danger/warning).
+   Não é a regra vetada "border-left strip" — é um indicador semântico do TIPO de bloco
+   (funcionou/não funcionou/riscos), não do farol de um indicador. */
+.lc-card-success {
+  border-left: 4px solid var(--success);
+}
+.lc-card-danger {
+  border-left: 4px solid var(--danger);
+}
+.lc-card-warning {
+  border-left: 4px solid var(--warning);
+}
+.lc-card-head {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.lc-card-titulo {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--fs-15);
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+  margin: 0;
+}
+.lc-card-icone {
+  display: inline-flex;
+  width: 22px;
+  height: 22px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+}
+.lc-card-icone-success {
+  background: var(--success-bg);
+  color: var(--success);
+}
+.lc-card-icone-danger {
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+.lc-card-icone-warning {
+  background: var(--warning-bg);
+  color: var(--warning);
+}
+.lc-card-icone-brand {
+  background: var(--brand-50);
+  color: var(--brand);
+}
+.lc-card-sub {
+  font-size: 11px;
+  color: var(--text-3);
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* ── Itens (Funcionou / Não funcionou) ─────────────────────────── */
+
+.lc-itens {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+}
+.lc-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.lc-item-titulo {
+  font-size: var(--fs-13);
+  font-weight: var(--fw-bold);
+  color: var(--text);
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.lc-item-numero {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  font-size: 11px;
+  font-weight: var(--fw-bold);
+  font-variant-numeric: tabular-nums;
+  border-radius: var(--r-pill);
+  margin-right: 2px;
+}
+.lc-item-numero-success {
+  background: var(--success-bg);
+  color: var(--success);
+}
+.lc-item-numero-danger {
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+.lc-item-desc {
+  margin: 0;
+  font-size: var(--fs-12);
+  color: var(--text-2);
+  line-height: 1.6;
+}
+
+/* ── Riscos · tabela ────────────────────────────────────────────── */
+
+.lc-tabela-wrap {
+  overflow-x: auto;
+}
+.lc-tabela {
+  min-width: 600px;
+  display: flex;
+  flex-direction: column;
+}
+.lc-tabela-head {
+  display: grid;
+  grid-template-columns: 1.4fr 1.2fr 0.8fr 1fr;
+  gap: var(--s-3);
+  align-items: center;
+  padding: 8px var(--s-2);
+  font-size: 10px;
+  font-weight: var(--fw-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-3);
+  border-bottom: 1px solid var(--border);
+}
+.lc-risco {
+  display: grid;
+  grid-template-columns: 1.4fr 1.2fr 0.8fr 1fr;
+  gap: var(--s-3);
+  align-items: center;
+  padding: 10px var(--s-2);
+  font-size: var(--fs-12);
+  border-bottom: 1px solid var(--border);
+}
+.lc-risco:last-of-type {
+  border-bottom: 0;
+}
+.lc-risco-titulo {
+  color: var(--text);
+  font-weight: var(--fw-semibold);
+}
+.lc-risco-map {
+  font-size: var(--fs-12);
+}
+.lc-risco-map-sim {
+  color: var(--success);
+}
+.lc-risco-map-nao {
+  color: var(--danger);
+  font-weight: var(--fw-bold);
+}
+.lc-risco-impacto {
+  color: var(--danger);
+  font-weight: var(--fw-bold);
+  font-variant-numeric: tabular-nums;
+}
+.lc-risco-mit {
+  font-weight: var(--fw-semibold);
+}
+
+/* ── Premissas ─────────────────────────────────────────────────── */
+
+.lc-premissas-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--s-3);
+}
+@media (max-width: 720px) {
+  .lc-premissas-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.lc-premissa-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 10px;
+  border-radius: var(--r-sm);
+  text-align: center;
+}
+.lc-premissa-stat-success {
+  background: var(--success-bg);
+}
+.lc-premissa-stat-danger {
+  background: var(--danger-bg);
+}
+.lc-premissa-stat-info {
+  background: var(--info-bg);
+}
+.lc-premissa-num {
+  font-size: var(--fs-32);
+  font-weight: var(--fw-bold);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+.lc-premissa-stat-success .lc-premissa-num {
+  color: var(--success);
+}
+.lc-premissa-stat-danger .lc-premissa-num {
+  color: var(--danger);
+}
+.lc-premissa-stat-info .lc-premissa-num {
+  color: var(--info);
+}
+.lc-premissa-label {
+  font-size: 10px;
+  font-weight: var(--fw-bold);
+  letter-spacing: 0.06em;
+  color: var(--text);
+  margin-top: 4px;
+}
+.lc-premissa-pct {
+  font-size: 11px;
+  color: var(--text-3);
+  margin-top: 2px;
+}
+
+.lc-premissas-erradas {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.lc-premissas-erradas-titulo {
+  font-size: var(--fs-13);
+  font-weight: var(--fw-bold);
+  color: var(--danger);
+  margin: 0;
+}
+.lc-premissas-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: var(--fs-12);
+  color: var(--text-2);
+}
+.lc-premissas-list li {
+  padding-left: 12px;
+  position: relative;
+  line-height: 1.5;
+}
+.lc-premissas-list li::before {
+  content: "•";
+  position: absolute;
+  left: 0;
+  color: var(--text-3);
+}
+
+/* ── Recomendações ─────────────────────────────────────────────── */
+
+.lc-recomendacoes {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.lc-recomendacao {
+  background: var(--brand-50);
+  border-radius: var(--r-sm);
+  padding: 10px 12px;
+}
+[data-theme="dark"] .lc-recomendacao {
+  background: rgba(67, 124, 218, 0.08);
+}
+.lc-recomendacao-titulo {
+  font-size: var(--fs-13);
+  font-weight: var(--fw-bold);
+  color: var(--text);
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.lc-recomendacao-codigo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 18px;
+  padding: 0 6px;
+  background: var(--brand);
+  color: #fff;
+  border-radius: var(--r-pill);
+  font-size: 10px;
+  font-weight: var(--fw-bold);
+  font-variant-numeric: tabular-nums;
+}
+.lc-recomendacao-desc {
+  margin: 4px 0 0 0;
+  font-size: var(--fs-12);
+  color: var(--text-2);
+  line-height: 1.55;
+}
+
+/* ── Empty state ───────────────────────────────────────────────── */
+
+.lc-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s-2);
+  padding: var(--s-10) var(--s-4);
+  color: var(--info);
+  text-align: center;
+  background: var(--info-bg);
+  border-radius: var(--r-md);
+}
+.lc-empty p {
+  margin: 0;
+  font-size: var(--fs-15);
+  color: var(--text-2);
+  font-weight: var(--fw-semibold);
+}
+.lc-empty-sub {
+  font-weight: var(--fw-regular) !important;
+  color: var(--text-3) !important;
+  font-size: var(--fs-13) !important;
+  max-width: 480px;
+}

@@ -1,0 +1,41 @@
+/* Estilos do layout pai do RMA (compartilhados entre todas as abas).
+ * Cada aba (visao-geral, indicadores, etc.) tem seu próprio CSS co-localizado
+ * em rma/<aba>.css com os estilos específicos do seu conteúdo.
+ */
+
+/* ── Seletor Ano + Mês (no PageHeader actions) ──────────────────── */
+
+.bm-seletor {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.bm-seletor-label {
+  font-size: 10px;
+  font-weight: var(--fw-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-3);
+  margin-right: 2px;
+}
+.bm-seletor-corrente,
+.bm-seletor-historico {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: var(--fw-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 4px 8px;
+  border-radius: var(--r-pill);
+}
+.bm-seletor-corrente {
+  background: var(--success-bg);
+  color: var(--success);
+}
+.bm-seletor-historico {
+  background: var(--surface-2);
+  color: var(--text-3);
+}

@@ -1,0 +1,30 @@
+.ff {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+.ff-label {
+  font-size: var(--fs-13);
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+}
+.ff-hint {
+  font-size: var(--fs-12);
+  color: var(--text-3);
+  line-height: var(--lh-normal);
+}
+.ff-error {
+  font-size: var(--fs-12);
+  font-weight: var(--fw-medium);
+  color: var(--danger);
+  line-height: var(--lh-normal);
+}
+/* Estado de erro pinta o controle do DS (Input/PasswordInput) sem ele saber do erro. */
+.ff-has-error .input {
+  border-color: var(--danger);
+}
+.ff-has-error .input:focus {
+  border-color: var(--danger);
+  box-shadow: 0 0 0 3px var(--danger-bg);
+}

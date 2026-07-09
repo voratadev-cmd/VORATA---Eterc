@@ -1,0 +1,600 @@
+[
+  {
+    "domain": "Faturamento (C.3)",
+    "chat_tool": "get_faturamento_resumo",
+    "numeric": true,
+    "chat_headline_fields": [
+      "contratado_total_rs",
+      "realizado_acumulado_rs",
+      "contratado_acumulado_rs",
+      "avanco_financeiro_real_frac",
+      "desvio_acumulado_rs",
+      "desvio_acumulado_frac",
+      "saldo_a_faturar_rs",
+      "aderencia_no_periodo_frac",
+      "farol"
+    ],
+    "chat_reads": [
+      "obra_faturamento_curvas (custo_total = PV / contratado total)",
+      "obra_secoes -> secao 'C.3 - Cards de resumo - ACUMULADO' (realAcumAteBM, contratadoAcumAteBM, desvioAcumRS, desvioAcumPct, saldoAFaturar)",
+      "obra_secoes -> secao 'C.3 - Cards de resumo - PERIODO' (farolAderenciaAcum, aderenciaNoPeriodo, faturadoNoMesBM, previstoParaOMes, ...)",
+      "branch alternativo Sorriso: coletar_fatos -> obra_medicoes / obra_medicao_totais / obra_faturamento_meses (NAO usado na BR-101, que e workbook-motor)"
+    ],
+    "screen_readmodel": "calcFaturamento.ts:calcularFaturamento (src/lib/rma/calcFaturamento.ts; alimentado por faturamentoCurva.ts:getFaturamentoCurva; orquestrado p/ a tela em src/lib/hooks/useFaturamentoCalc.ts)",
+    "screen_headline_fields": [
+      "custoTotal",
+      "realizadoAcum",
+      "contratadoAcum",
+      "avancoRealizadoPct",
+      "avancoContratadoPct",
+      "desvioAcumRs",
+      "desvioAcumPct",
+      "aderenciaAcum",
+      "farol",
+      "saldoAFaturar (derivado custoTotal-realizadoAcum no hook/pagina C.3)"
+    ],
+    "oracle_value": "contratado_total_rs (PV) ~= R$ 611,4M; realizado_acumulado_rs ~= R$ 12,87M (avanco financeiro real ~2,1%); contratado_acumulado_rs ~= R$ 28,1M (~4,6%); desvio_acumulado_frac ~= -54,2%; saldo_a_faturar_rs ~= R$ 598,5M; farol = Critico",
+    "oracle_provenance": "Memoria validada (golden) chat-paridade-tools.md (jun/2026), linha \"faturamento: PV de obra_faturamento_curvas.custo_total (611M) + cards C.3 ACUMULADO/PERIODO (real 12,87M=2,1%, contratado 28,1M=4,6%, desvio -54,2%, saldo 598,5M, Critico)\". PV 611,4M reforcado pela memoria c14-mapa-feito (Sigma 381,6M trechos + 229,8M transversais -> PV 611,4M). Comentarios de invariante em calcFaturamento.ts (FAROL OFICIAL C.3 = aderencia acum, regua 90/85/70; avanco financeiro = realizadoAcum / custoTotal). Valores capturados no corte do ultimo BM realizado da BR-101 (v46).",
+    "suspected_divergence": "Mecanismo de fonte difere apesar de comentario \"mesma fonte da tela\": o CHAT (branch workbook-motor) le os headlines de um SNAPSHOT pre-calculado e gravado em obra_secoes (Cards C.3 ACUMULADO/PERIODO), enquanto a TELA recomputa AO VIVO via calcularFaturamento sobre a curva (getFaturamentoCurva). Se os cards de obra_secoes nao forem re-bakeados apos uma re-normalizacao (ex.: v45->v46), o chat pode divergir da tela. Pontos especificos: (1) saldo_a_faturar_rs vem do card no chat vs derivado (custoTotal-realizadoAcum) no hook/pagina; (2) farol no chat e a string crua de farolAderenciaAcum do card (apenas limpa de bullets), enquanto na tela e classificado por calcFaturamento via regua faturamento_aderencia_acumulada (90/85/70) -- mesma regra so se o card foi gerado por essa mesma regua.",
+    "notes": "BR-101 (fe288319) cai no branch workbook-motor (sem obra_medicoes). Distincao conceitual reforcada pelo proprio _nota da tool: 'avanco financeiro' = realizado acumulado / contratado total (% do contrato faturado) != 'aderencia' = realizado / previsto no corte; ambos em FRACAO (-0,54 = -54%). Farol da C.3 = aderencia (operacional), distinto do desvio p.p. usado na C.2 Indicadores (executiva) -- nao unificar. A tool tambem anexa 'fisico' (real/previsto/atraso pp) quando ha cronograma e dados de periodo/projecao (faturado_no_mes_rs, previsto_para_o_mes_rs, ritmo_medio_3bm_rs, projecao_termino_mes). Para gate numerico, ancora recomendada = realizado_acumulado_rs (~R$ 12,87M) e contratado_total_rs/PV (~R$ 611,4M), ambos com tolerancia por arredondamento (valores de memoria estao em milhoes abreviados, nao ao centavo)."
+  },
+  {
+    "domain": "Produtividade física (C.7) — BR-101",
+    "chat_tool": "get_produtividade_resumo",
+    "numeric": true,
+    "chat_headline_fields": [
+      "aderencia_fisica_media_frac",
+      "ponte_pct_capacidade",
+      "n_servicos",
+      "n_servicos_medidos",
+      "ociosidade_hh"
+    ],
+    "chat_reads": [
+      "obra_produtividade (fluxo aço/concreto · Sorriso, via coletar_fatos)",
+      "obra_produtividade_fisica (fluxo workbook-motor · BR-101)",
+      "obra_produtividade_params (ponte: capacidade/liberado/aproveitamento/ociosidade)"
+    ],
+    "screen_readmodel": "produtividadeFisica.ts:getProdutividadeFisica (tracker serviço×trecho) + produtividadeFisica.ts:getProdutividadeParams (ponte/capacidade)",
+    "screen_headline_fields": [
+      "aderencia (por linha em ProdFisica[], coluna da tabela FisicaTracker)",
+      "pontePctCapacidade",
+      "pontePctLiberado/pontePctAproveitamento",
+      "ponteOciosidadeHh"
+    ],
+    "oracle_value": "47,7% (ponte_pct_capacidade); 13 serviços, 1 medido (n_servicos=13, n_servicos_medidos=1)",
+    "oracle_provenance": "Memória do projeto c07-produtividade-feito.md (REFACTOR física real, jun/2026): \"Capacidade da ponte = 47,7% (seção C.7 Sinais dedicada, não o 70,6 da C.8)\"; tracker serviço×trecho com 13 linhas (n_servicos=13); AnaliseCard descreve \"a única medição\" → n_servicos_medidos=1. Mesma migration/fonte (obra_produtividade_fisica + obra_produtividade_params) que a tela C.7, com gate de conservação tripla (% físico=medida/contratado · aderência=real/CPU · Σ HH ociosas=ociosidade). FALTA oráculo numérico explícito p/ aderencia_fisica_media_frac e ociosidade_hh — não há valor validado em memória/docs; como só 1 serviço é medido na BR-101, a \"média\" coincide com a aderência da única linha medida (valor exato não registrado).",
+    "suspected_divergence": "Sim. (1) O chat retorna aderencia_fisica_media_frac = MÉDIA aritmética da aderência (real÷CPU) entre os serviços medidos; a tela NÃO calcula nenhuma média física — mostra a aderência por linha no FisicaTracker e narra \"a única medição\" no AnaliseCard. Na BR-101 batem por coincidência (só 1 serviço medido), mas ao medir mais serviços a média do chat divergirá da tela (que não tem agregado). (2) Risco de confundir com a aderência ECONÔMICA acumulada (51,7% Crítico = aderenciaAcum, headline financeiro da tela) que vem de outra tool (get_produtividade_economica_resumo) — são números diferentes. (3) A tool tem dois fluxos (obra_produtividade p/ Sorriso vs obra_produtividade_fisica p/ BR-101); só o 2º espelha a tela C.7.",
+    "notes": "Tool em agent/agents/adm_contratual/tools.py:340-407. Para BR-101 (workbook-motor) cai no 2º fluxo (obra_produtividade_fisica + obra_produtividade_params); o 1º fluxo (obra_produtividade via coletar_fatos) é da obra Sorriso (aço/concreto kg/Hh). _proveniencia da tool declara explicitamente \"mesma fonte da tela C.7\". Read-model: src/lib/supabase/produtividadeFisica.ts. Rota: src/routes/_app/contracts/$contractId/rma/produtividade.tsx (FisicaTracker L339, Ponte/PonteStat L519-527, AnaliseCard L820+). ponte_pct_capacidade aparece na tela como PonteStat \"% capacidade vs contratado\". numeric=true."
+  },
+  {
+    "domain": "Produtividade econômica R$/HH (C.7) — BR-101",
+    "chat_tool": "get_produtividade_economica_resumo",
+    "numeric": true,
+    "chat_headline_fields": [
+      "rs_por_hh_real",
+      "aderencia_hh_pct",
+      "indice_economico_cpi",
+      "rs_por_hh_real_ultimo_mes",
+      "hh_previsto_total",
+      "hh_real_medido"
+    ],
+    "chat_reads": [
+      "obra_produtividade_economica (colunas: ano, mes, periodo_label, faturado_rs, hh_previsto, hh_real, rs_por_hh, aderencia, status; filtro contrato_id; recomputa cards Σ/Σ sobre meses MEDIDOS)"
+    ],
+    "screen_readmodel": "src/lib/supabase/produtividadeEconomica.ts:getProdutividadeEconomica",
+    "screen_headline_fields": [
+      "somaHhPrevisto",
+      "somaHhReal",
+      "meses[].rsPorHh",
+      "meses[].aderencia"
+    ],
+    "oracle_value": "R$/HH real acum ~R$221 (= chat rs_por_hh_real) · R$/HH real ultimo mes ~R$150 (= rs_por_hh_real_ultimo_mes) · contratada-periodo ~R$427/HH · aderencia (R$/HH real÷contratada) ~51,7% Critico · HH previsto total ~2.658.616",
+    "oracle_provenance": "Memoria do projeto c07-produtividade-feito.md: financeira \"bate o oraculo 100% SEM normalizacao\" — cards real-acum R$221, real-mes R$150, contratada R$427, aderencia 51,7% Critico; e o refactor fisico registra HH total previsto recalculado 1.796.392→2.658.616 (que tambem realinhou a META para R$229,95). CAVEAT: esses numeros validados sao os da TELA, que os le de obra_produtividade_params (getProdutividadeParams em produtividadeFisica.ts), NAO da tabela que o chat recomputa; e a memoria marca o refactor fisico como \"nao commitado ainda (aguardando teste)\". Invariante do read-model: comentario em produtividadeEconomica.ts (linha 33) e _proveniencia da tool — \"Gate de conservacao: Σ HH previsto == card hhTotalPrevisto\". A aderencia_hh_pct (HH real÷previsto, mobilizacao) do chat NAO tem oraculo registrado — nenhuma memoria valida essa metrica.",
+    "suspected_divergence": "ALTO RISCO em 3 frentes. (1) Metrica diferente sob o mesmo nome \"aderencia\": o chat emite aderencia_hh_pct = HH real÷HH previsto dos meses medidos (MOBILIZACAO de mao de obra), enquanto a TELA mostra como headline \"aderencia 51,7%\" = aderenciaAcum = R$/HH real÷contratada (COST PERFORMANCE), vinda de outra tabela (obra_produtividade_params). O chat pode responder um numero de \"aderencia\" totalmente diferente do exibido. (2) Fonte diferente dos cards R$/HH: o chat recomputa rs_por_hh_real a partir de obra_produtividade_economica (Σ faturado medidos ÷ Σ HH real); a tela exibe p.realAcumRsHh / p.contratadaPeriodoRsHh de obra_produtividade_params. Se a tabela economica nao foi atualizada no recalc de HH (1.796.392→2.658.616), os numeros divergem do card da tela. (3) Paridade estrita chat↔read-model so existe para hh_previsto_total/hh_real_medido (== somaHhPrevisto/somaHhReal); getProdutividadeEconomica NAO computa os cards rs_por_hh_real/aderencia — esses sao calculados so dentro da tool e no componente produtividade.tsx (a partir de params), sem read-model compartilhado.",
+    "notes": "A tool descreve explicitamente as TRES produtividades para evitar confusao (aderencia HH mobilizacao vs CPI cost-performance vs fisica kg/Hh), e tem _glossario embutido — bom para o usuario, mas nao garante paridade com a tela. Verificacao de paridade do gate exigiria: confirmar que obra_produtividade_economica.hh_previsto somado == obra_produtividade_params.hh_total (2.658.616) e que rs_por_hh_real recomputado == real_acum_rs_hh (~R$221) na BR-101. Mapa de arquivos: chat agent/agents/adm_contratual/tools.py linhas 1264-1365; read-model da serie src/lib/supabase/produtividadeEconomica.ts:getProdutividadeEconomica; read-model dos cards exibidos src/lib/supabase/produtividadeFisica.ts:getProdutividadeParams; rota src/routes/_app/contracts/$contractId/rma/produtividade.tsx (p=data.params para os cards, meses=data.serie); hook src/lib/hooks/useProdutividade.ts (junta serie+params+fisica)."
+  },
+  {
+    "domain": "Insumos (C.6)",
+    "chat_tool": "get_insumos_resumo",
+    "numeric": true,
+    "chat_headline_fields": ["n_insumos", "valor_orcado_total_rs", "n_concentram_80pct_do_valor"],
+    "chat_reads": [
+      "obra_insumos (coluna valor_orcado, filtrada por contrato_id) — computado em contexto.py:coletar_fatos, exposto pela tool com _proveniencia tabela=obra_insumos"
+    ],
+    "screen_readmodel": "insumos.ts:getInsumos",
+    "screen_headline_fields": ["nInsumos", "totalValor", "nPareto80"],
+    "oracle_value": "n_insumos = 32 (memória c06-insumos: \"27/32 insumos sem preço unitário\"); Classe A = 4 insumos concentram 74,4% do valor orçado → n_concentram_80pct ≈ 5. valor_orcado_total_rs sem oráculo gate (referência conf 0,600)",
+    "oracle_provenance": "Memória /Users/mateusmilagre/.claude/projects/.../memory/c06-insumos-feito.md (validada jun/2026, branch feat/telas-rma-t2): \"27/32 insumos sem preço unitário\" → n_insumos=32; \"Classe A 4 insumos/74,4%\". Memória chat-paridade-tools.md auditou get_insumos_resumo como MATCH/honesto (tool==tela). Invariante no read-model insumos.ts (linhas 24-25, 57): valor orçado é REFERÊNCIA com conf 0,600, \"fontes divergem ~7%\", NÃO preço de centavo — por isso valor_orcado_total_rs não tem número-âncora gate-validado. Falta um oráculo confiável só para o R$ total (precisaria de extração com preço persistido — hoje 27/32 sem preço, \"pântano\").",
+    "suspected_divergence": null,
+    "notes": "Chat e tela leem a MESMA tabela/coluna (obra_insumos.valor_orcado) e usam a MESMA fórmula: n_insumos = todas as linhas do contrato (len(ins) ↔ insumos.length, inclui linhas sem valor); total = Σ valor_orcado>0 (round(2) no chat vs soma crua no TS — só arredondamento de exibição); 80% = mesmo loop Pareto ordenado desc (n80 ↔ nPareto80). Memória chat-paridade-tools.md confirma insumos auditado MATCH na BR-101. Nuance de honestidade (não é divergência de número): o chat reporta n_insumos=32 mas o total é sobre o subconjunto com valor; a tela expõe esse subconjunto explicitamente em nComValor (campo que o chat não devolve). O R$ total é grandeza de REFERÊNCIA (conf 0,600), não gate-travado ao centavo como faturamento/desequilíbrio — tratar como aproximado no gate."
+  },
+  {
+    "domain": "Recursos (C.4)",
+    "chat_tool": "get_recursos_resumo",
+    "numeric": true,
+    "chat_headline_fields": [
+      "categorias.{MOD,MOI,EQP}.contratadoQtde",
+      "categorias.{MOD,MOI,EQP}.contratadoRs",
+      "categorias.{MOD,MOI,EQP}.realQtde",
+      "categorias.{MOD,MOI,EQP}.realRs",
+      "categorias.{MOD,MOI,EQP}.picoQtde",
+      "nItensTotal"
+    ],
+    "chat_reads": [
+      "obra_recursos_meses (histograma mensal — fonte autoritativa dos totais por categoria)",
+      "obra_recursos (catálogo por função — vazio na BR-101)"
+    ],
+    "screen_readmodel": "recursos.ts:getRecursos",
+    "screen_headline_fields": [
+      "categorias.{MOD,MOI,EQP}.contratadoQtde",
+      "categorias.{MOD,MOI,EQP}.contratadoRs",
+      "categorias.{MOD,MOI,EQP}.realQtde",
+      "categorias.{MOD,MOI,EQP}.realRs",
+      "categorias.{MOD,MOI,EQP}.picoQtde",
+      "nItensTotal",
+      "maioresDesvios[]"
+    ],
+    "oracle_value": "BR-101 contratado (Σ histograma obra_recursos_meses, homens·mês / unid·mês): MOD 7109 · MOI 7340 · EQP 4352. Real alocado: MOD 123 · MOI 194 · EQP 112. MOI contínuo ~193/mês é o CORRETO (validado por 3 seções do workbook; ancora a D.1 Adm Local R$ 2.491.837).",
+    "oracle_provenance": "Memórias do projeto: recursos-catalogo-vs-histograma.md (\"histograma mensal, 156 linhas — MOD 7109/MOI 7340/EQP 4352 contratado, real 123/194/112\") e c04-recursos-parqueada.md (MOI ~193 validado vs mockup, célula PLACA corrigida, fixes no commit 993d6f5; aba C.4 validada 1:1 com mockup MOD/EQP/VA/Total Cost). Também chat-paridade-tools.md registra que a paridade de Recursos foi corrigida em tools.py. Não há comentário de gate numérico fixo dentro do read-model — o oráculo de R$ por função/desvio depende da derivação de recursosDetalhe.ts (não desta tool).",
+    "suspected_divergence": "Headlines NÃO divergem: ambos derivam contratadoQtde/contratadoRs/realQtde/picoQtde do MESMO Σ histograma (obra_recursos_meses), com null preservado (PENDENTE≠0) e mesma ordenação — o código Python cita paridade 1:1 com recursos.ts. Gap de cobertura (não de número): a tela lê uma 3ª tabela obra_recursos_desvio (maioresDesvios — ranking R$ acum por recurso, com a derivação corrigida da célula PLACA), que a tool do chat NÃO consulta nem retorna; logo o chat não responde \"maiores desvios de alocação por recurso\".",
+    "notes": "A BR-101 só tem histograma (obra_recursos_meses); o catálogo por função (obra_recursos) é vazio → itens=[] e nItensTotal=0 em ambos os lados; totais montados por agregação do histograma (flag catalogoAusente na tela). Unidades: MOD/MOI em homens·mês, EQP em unid.·mês. picoQtde = maior efetivo contratado num único mês (≠ Σ). _pendente só dispara se AMBAS as tabelas faltarem. A tool não retorna itens/maioresDesvios; a tela sim (itens + maioresDesvios via obra_recursos_desvio)."
+  },
+  {
+    "domain": "Marcos contratuais (C.5)",
+    "chat_tool": "get_marcos_contratuais",
+    "numeric": true,
+    "chat_headline_fields": [
+      "nMarcos",
+      "nRiscoOuCritico",
+      "contagemFarol (conforme/observacao/risco/critico)"
+    ],
+    "chat_reads": [
+      "obra_prazo_marcos (ordem, categoria, trecho, data_limite, pct_concluido) — NAO le a coluna `farol`",
+      "corte via _corte_iso → secao 'Curva por BM' (C.3) + _bm_corte (mes de corte → ISO ultimo dia do mes)"
+    ],
+    "screen_readmodel": "prazoMarcos.ts:getPrazoMarcos",
+    "screen_headline_fields": [
+      "count(statusMarco==='em-risco') agregado em rma/prazo.tsx — farol derivado por src/lib/rma/marcoFarol.ts:statusMarco",
+      "PrazoMarco[].dataLimite",
+      "PrazoMarco[].pctConcluido"
+    ],
+    "oracle_value": "5",
+    "oracle_provenance": "5 = marcos em risco (nRiscoOuCritico) na BR-101. Triangulado por: (1) memoria c05-prazo-feito.md (\"marcos 5/19/0\", \"MARCO_RISCO_HORIZONTE_MESES=12 → 5 em risco, bate oraculo\"; 5 Sinistros de Talude venc. set–dez/26, o proximo e +15m); (2) invariante no header de src/lib/rma/marcoFarol.ts (a coluna `farol` baked na migration 20260607000005 usou janela ~6m e PARTIA o cluster, marcava so 3); (3) comentario da propria tool em tools.py:638 (\"a coluna `farol` do banco... dizia 3 em risco; o correto sao 5\"). nMarcos total nao tem oraculo numerico isolado e confiavel nas memorias (o \"19\" do 5/19/0 nao foi re-validado); o numero-ancora robusto e 5 em risco.",
+    "suspected_divergence": "Paridade do HEADLINE esta OK: chat (_status_marco, tools.py:230) e tela (statusMarco, marcoFarol.ts:28) derivam o farol de forma identica — mesmo horizonte 12m, mesmo corte (ultimo dia do mes de corte), mesmas regras (cumprido≥100 / atrasado<0 / em-risco≤12m / no-prazo), e AMBOS ignoram a coluna `farol` baked. Ambos dao 5 em risco. RISCO LATENTE: o read-model getPrazoMarcos AINDA seleciona e expoe a coluna crua `farol` (PrazoMarco.farol, valor stale = 3 em risco); a tela so acerta porque a derivacao acontece no componente prazo.tsx, NAO no read-model. Qualquer consumidor que ler PrazoMarco.farol direto (a memoria sinaliza Indicadores C.2 como consumidor de getPrazoMarcos) divergiria do chat (3 vs 5). A divida apontada na memoria — promover statusMarco ao read-model — segue aberta.",
+    "notes": "Tool retorna lista de marcos + agregados (nMarcos, contagemFarol, nRiscoOuCritico) e flags de honestidade: pctConcluido e INPUT por BM → null PRESERVADO (PENDENTE ≠ 0) e pctConcluidoPendente=true quando nenhum marco foi medido (nao afirmar avanco de marco). O '%' nao e fonte de divergencia de farol na BR-101 porque, sem medicao, o risco e so proximidade da data-limite. Mapeamento status→nivel identico nos dois lados: atrasado=critico, em-risco=risco, no-prazo/cumprido=conforme, pendente=observacao. NAO confundir com get_marcos_cronograma_fonte (datas PLANEJADAS do MS Project / obra_cronograma_tarefas) — dominio e tabela diferentes. Atraso fisico por marco NAO e rastreado (Camada B / calcPrazo, sem tabela)."
+  },
+  {
+    "domain": "Marcos cronograma (fonte)",
+    "chat_tool": "get_marcos_cronograma_fonte",
+    "numeric": true,
+    "chat_headline_fields": ["terminoPlanejado", "nMarcos", "nTarefas"],
+    "chat_reads": [
+      "obra_cronograma_tarefas (data_termino — todas as tarefas → nTarefas + MAX(data_termino))",
+      "obra_cronograma_tarefas (eh_marco=true, order data_termino asc → marcos/nMarcos)"
+    ],
+    "screen_readmodel": "src/lib/supabase/cronograma.ts:getCronogramaTarefas",
+    "screen_headline_fields": ["terminoPlanejadoISO", "marcos.length (== nMarcos)", "nTarefas"],
+    "oracle_value": "51",
+    "oracle_provenance": "nTarefas=51: memory c13-timeline-feito.md — \"Motor de produção confirmado disparando as 3 rotas sobre payload real (322 seções): 51 tarefas/12 grupos\" (BR-101 workbook-motor; 53 linhas MS Project − 2 super-resumo duplicadas = 51). É o único campo com valor validado. nMarcos e terminoPlanejado NÃO têm oráculo registrado em memória/doc/invariante — para fixá-los seria preciso consultar obra_cronograma_tarefas (COUNT eh_marco=true e MAX(data_termino) p/ fe288319), o que não é permitido aqui. Nota da própria tool: datas dos marcos são PLANEJADAS por EDT (do .mpp), execução por marco não rastreada.",
+    "suspected_divergence": null,
+    "notes": "Tool é espelho intencional do read-model (comentário no código: \"espelha getCronogramaTarefas · cronograma.ts\"). Paridade já auditada: memory chat-paridade-tools.md lista \"marcos-cronograma\" entre as 6 tools MATCH/honestas (tool==tela). Equivalências confirmadas linha a linha: (1) terminoPlanejado — chat faz max(datas) em Python sobre ISO 'YYYY-MM-DD' (ordenação lexicográfica == .order('data_termino', desc).limit(1) do read-model), ambos filtram not.is.null → mesmo resultado; (2) nMarcos — ambos filtram eh_marco=true e ordenam por data_termino asc (na tela é marcos.length); (3) nTarefas — ambos contam TODAS as linhas sem filtro de data. Sem versionamento (LER LIVE) nos dois. ⚠ Não confundir com get_marcos_contratuais (C.5, datas-LIMITE, tabela obra_prazo_marcos via prazoMarcos.ts) — domínio distinto. getCronogramaTarefas hoje é consumido por adapters/relatorio/prazo.ts, hooks/usePrazoBm.ts e rma/bridgePrazo.ts (não por uma rota de tela dedicada a marcos-fonte)."
+  },
+  {
+    "domain": "Curva física por frente/disciplina — apesar do nome \"C.8\", a tool e a tela usam dados de C.5 (físico-financeiro por disciplina, obra_faturamento_disciplina_resumo), NÃO o read-model de curvas C.8 (obra_curvas_c8/obra_curvas_frentes).",
+    "chat_tool": "get_curva_fisica_por_frente",
+    "numeric": true,
+    "chat_headline_fields": [
+      "disciplinas[].previsto_fisico_no_corte_pct",
+      "disciplinas[].real_fisico_no_corte_pct",
+      "disciplinas[].atraso_pp",
+      "n_disciplinas"
+    ],
+    "chat_reads": [
+      "obra_faturamento_disciplina_resumo (C.5: disciplina, servico, contratado_total_rs, contratado_acum_rs, real_acum_rs, farol)",
+      "bm_corte via helper _bm_corte(obra_id)"
+    ],
+    "screen_readmodel": "faturamentoDisciplinaResumo.ts:getFaturamentoDisciplinaResumo",
+    "screen_headline_fields": [
+      "disciplinas[].contratadoAcum",
+      "disciplinas[].contratadoTotal",
+      "disciplinas[].realAcum",
+      "nDisciplinas",
+      "disciplinas[].pct (baked, ignorado tanto por chat quanto por prazo.tsx)"
+    ],
+    "oracle_value": "overall (apenas serviços): previsto 1,65% · real 0,50% · atraso −1,15pp; por disciplina ex.: Geodreno −12,5pp (Risco), Mobilização −45pp (Crítico); ~14 disciplinas com valor+farol",
+    "oracle_provenance": "Memória do projeto memory/c05-prazo-feito.md (valores validados via REST anon do build: \"físico real 0,50% / previsto 1,65% / atraso −1,15pp · 14/14 disciplinas valor+farol; régua FAROL_FISICO_PP −1/−5/−15\"). Reforçado por invariante no read-model faturamentoDisciplinaResumo.ts (\"Σ Contratado Total = PV, gate-validado\") e pelos comentários da rota prazo.tsx (linhas 4, 107-111, 122). O overall (1,65/0,50/−1,15) NÃO é emitido por esta tool (que dá só a lista por disciplina) — vem da tool irmã get_curva_prevista_fisica e da rota prazo.tsx.",
+    "suspected_divergence": "Baixo risco de divergência NUMÉRICA: chat e tela (prazo.tsx) usam a MESMA fonte (obra_faturamento_disciplina_resumo) e a MESMA fórmula por disciplina — previsto=contratado_acum/contratado_total, real=real_acum/contratado_total, atraso_pp=real−previsto. Pontos de atenção: (1) o read-model expõe uma coluna baked `pct` que NEM o chat NEM prazo.tsx usam (ambos recomputam) — qualquer outro consumidor que confiar em `pct` pode driftar; (2) o chat retorna TODAS as disciplinas (inclusive servico=false: Mobilização/Adm Local/Insumos) e NÃO agrega overall, enquanto a tela calcula o overall ponderando só servico=true — não é divergência de valor, mas o overall 1,65/0,50/−1,15 não está nesta tool.",
+    "notes": "A tool é per-disciplina/ranking (ordena por previsto desc), não tem um único headline escalar — os números-âncora são os pct por disciplina + n_disciplinas. Gate deve comparar por linha (disciplina→previsto/real/atraso) contra o que prazo.tsx renderiza, não um total único. Discrepância de contagem a vigiar: header do read-model diz \"15 disciplinas finas\", memória c05-prazo diz \"14/14 com valor+farol\" → n_disciplinas do chat (len rows) pode dar 15 enquanto a tela conta 14. A régua de farol é −1/−5/−15 p.p. (FAROL_FISICO_PP), não a legenda −3/−8 impressa no mockup; o farol no chat vem cru da fonte (lstrip de bullets) e na tela é derivado via farolDesvioFisico(atrasoPp) — ambos devem bater pela régua. corte (bm_corte) deriva de inicioISO+mesCorte; mês 3 (mai/26) reproduz o previsto 1,65% validado."
+  },
+  {
+    "domain": "Curva prevista física (RMA C.5 Prazo) · BR-101",
+    "chat_tool": "get_curva_prevista_fisica",
+    "numeric": true,
+    "chat_headline_fields": [
+      "previsto_fisico_no_corte_pct",
+      "real_fisico_no_corte_pct",
+      "atraso_fisico_pp",
+      "previsto_fisico_final_pct"
+    ],
+    "chat_reads": [
+      "obra_faturamento_disciplina_resumo (servico=true; contratado_total_rs/contratado_acum_rs/real_acum_rs)",
+      "obra_cronogramas (termino_obra)",
+      "obra_cronograma_meses (eixo de tempo / n_meses)",
+      "_bm_corte (BM de corte)"
+    ],
+    "screen_readmodel": "faturamentoDisciplinaResumo.ts:getFaturamentoDisciplinaResumo (derivação do físico overall em src/routes/_app/contracts/$contractId/rma/prazo.tsx:derivarFisico)",
+    "screen_headline_fields": ["prevOverallPct", "realOverallPct", "atrasoPp"],
+    "oracle_value": "previsto 1,65% / real 0,50% / atraso −1,15 pp (físico overall, apenas serviços, no BM de corte)",
+    "oracle_provenance": "Invariante documentada no próprio read-model/rota: prazo.tsx linhas 4, 110-111 e 122-123 (\"físico real overall = Σ(real serviços) ÷ Σ(contratado serviços) = 0,50%\"; \"bate o oráculo ao centésimo (overall 1,65% prev / 0,50% real)\"). Confirmado pela memória c05-prazo-feito.md (físico = contratadoAcum/contratadoTotal dos serviços, NÃO o cronograma; régua farol −1/−5/−15). Valores validados para a BR-101.",
+    "suspected_divergence": "Risco apenas de PRECISÃO de exibição, não de fórmula/coluna: o chat arredonda o overall previsto/real a 1 casa via _pct1 (0,0165 → 1,6%, podendo soar diferente do 1,65% da tela, que mostra 2 casas). O atraso usa 2 casas (round(...,2) = −1,15) e bate. Tabela (obra_faturamento_disciplina_resumo, filtro servico) e fórmula (Σ acum ÷ Σ total) são idênticas entre chat e tela.",
+    "notes": "Apesar do nome \"curva prevista física\", a tool NÃO devolve a série da curva do cronograma como headline: ela usa o cronograma só para o eixo de tempo (n_meses) e termino_planejado, e calcula o % físico-financeiro dos SERVIÇOS (igual à tela C.5). A tela tem ainda uma curva mensal acum (CurvaCard, via cronogramaFrenteMes) que a tool não reproduz — só expõe previsto/real no corte e previsto final 100%. real_fisico_medido=true para BR-101 (real_s>0). Headline numérico claro → cabe gate. chat_tool e tela compartilham a base; divergência potencial é só de casas decimais no overall."
+  },
+  {
+    "domain": "Desequilíbrio D.0 (Painel de Desequilíbrio — composição por categoria)",
+    "chat_tool": "get_desequilibrio_resumo",
+    "numeric": true,
+    "chat_headline_fields": [
+      "total_rs",
+      "n_com_valor",
+      "categorias[].valor_rs",
+      "categorias[].pct_do_total"
+    ],
+    "chat_reads": [
+      "obra_secoes · D.0 — Bloco 2 (coluna \"Valor (R$)\", sem override por categoria)"
+    ],
+    "screen_readmodel": "src/lib/supabase/desequilibrio.ts:getDesequilibrio",
+    "screen_headline_fields": [
+      "totalRs",
+      "nComValor",
+      "categorias[].valorRs",
+      "categorias[].pctDoTotal"
+    ],
+    "oracle_value": "6287068",
+    "oracle_provenance": "Comentário-invariante do read-model src/lib/supabase/desequilibrio.ts:8-12: \"Reproduz o total que o workbook DECLARA: R$ 6.287.068 (= D.1 2.491.837 + D.2 3.058.491 + D.4 736.741)\", confirmado 2x pela fonte (Σ das categorias E \"% sobre valor contratual\" da Bloco 1: 1,0284% × 611.357.315 = 6.287.061). Mesmo número no comentário da tool em agent/agents/adm_contratual/tools.py:772-773. Reforçado pela memória v46-normalizacao-andamento.md: \"os 6.287.068 são o teto DECLARADO na planilha (igual v45/v46)\". Fonte canônica = obra_secoes D.0 Bloco 2, coluna \"Valor (R$)\".",
+    "suspected_divergence": null,
+    "notes": "Âncora numérica do gate = total_rs (chat) ↔ totalRs (tela) = R$ 6.287.068. Chat e tela leem a MESMA fonte e a MESMA coluna (obra_secoes \"D.0 — Bloco 2\", \"Valor (R$)\"), SEM override por categoria (a D.4 usa o 736.740,88 da própria Bloco 2). Ambos os arquivos afirmam explicitamente \"chat == tela == fonte\" — paridade por construção. Pequenas notas, não-bloqueantes: (1) o chat faz round(sum,2); a tela faz reduce sem round — diferença só de ponto-flutuante, imaterial. (2) pct_do_total é fração 0..1 nos dois (recomputado de valor/total, ignorando o \"% do total\" corrompido do bloco). RISCOS LATERAIS a evitar no gate: NÃO confiar na tabela obra_desequilibrio (defasada v1, R$ 33,1M, D.1=96%) — nenhum dos dois usa; e ignorar valores de memórias antigas hoje superados (33.118.333 em m3-desequilibrio-plano.md e 11.509.976 em chat-paridade-tools.md são pré-correção). O valor vigente e correto é 6.287.068."
+  },
+  {
+    "domain": "Orçamento (C.1)",
+    "chat_tool": "get_orcamento_resumo",
+    "numeric": true,
+    "chat_headline_fields": [
+      "preco_venda",
+      "custo_direto",
+      "custo_indireto",
+      "custo_total_atividades",
+      "receita",
+      "bdi",
+      "n_itens"
+    ],
+    "chat_reads": ["obra_orcamentos", "obra_orcamento_itens"],
+    "screen_readmodel": "orcamento.ts:getOrcamento",
+    "screen_headline_fields": [
+      "precoVenda",
+      "custoDireto",
+      "custoIndireto",
+      "custoTotalAtividades",
+      "receita",
+      "bdi",
+      "nItens"
+    ],
+    "oracle_value": "611357314.09",
+    "oracle_provenance": "Campo-âncora = preco_venda (PV). Valor confiável p/ BR-101 = R$ 611.357.314,09 (≈ R$ 611,4 mi). Fontes: memória splitter-workbook-motor.md (\"F1 LOCAL: PV 611.357.314,09\"; triangulação \"PV 611.357.314 em Dashboard×Faturamento×curva\"; Onda A \"âncora PV 611.357.315 ok\") + memória d02-bdi-feito.md (\"PV=611.357.314, reconciliado ao centavo\") + m3-desequilibrio-plano.md (denominador oficial do farol = PV da curva 611.357.315; valor_contratual NULL nas 3 obras). Coortes secundárias do orçamento (mesmas memórias): custo_direto (CD) ≈ 471.180.974 (CD=valor/(%CD) constante, conservação livre de hierarquia); markup buildup C.1 = 140.129.221,74 (Σ folhas, tool separada get_bdi_buildup); CD+markup ≈ PV. Campo `bdi` aqui é o MARKUP-ratio (PV/custo, ex. ~1,24-1,30), não o valor R$. RESSALVA: docs/rma/AUDITORIA-EXTRACAO-139-SECOES.md cita \"Σ das 160 atividades do cronograma = 611.353.199,14 = PV exato\" — diverge ~R$4.115 do PV reconciliado (611.357.314); é fonte×fonte (Σ cronograma vs Σ BASE1/obra_orcamentos), não chat×tela. n_itens não tem oráculo numérico registrado.",
+    "suspected_divergence": null,
+    "notes": "Chat e tela são ESPELHOS 1:1 (paridade estrutural máxima): mesma tabela obra_orcamentos com SELECT idêntico (preco_venda, custo_direto, custo_indireto, custo_total_atividades, receita, bdi, status), mesmo .order('created_at', desc).limit(1) p/ pegar a normalização vigente, e contagem em obra_orcamento_itens por orcamento_id. A própria nota _proveniencia da tool e o comentário de honestidade do read-model (orcamento.ts:1-7) afirmam o mesmo contrato: orçamento é entidade INDEPENDENTE com gate próprio; status='needs_review' = Σ itens BASE1 ≠ preço-venda não fechou → PV/BDI sob suspeita; confiavel = (status=='ok'). Ambos expõem o gate (chat: confiavel; tela: status p/ consumidor gatear). Risco de divergência numérica = baixíssimo por construção; o único ponto de atenção é fonte×fonte (611.357.314 reconciliado vs 611.353.199,14 do Σ cronograma), não chat×tela. A memória chat-paridade-tools.md confirma que a paridade das tools da BR-101 foi auditada/corrigida (deploy pendente), reforçando que esta tool deve bater com a tela."
+  },
+  {
+    "domain": "BDI buildup (C.1)",
+    "chat_tool": "get_bdi_buildup",
+    "numeric": true,
+    "chat_headline_fields": ["markup_total", "n_rubricas"],
+    "chat_reads": ["obra_bdi_rubricas"],
+    "screen_readmodel": "bdi.ts:getBdi",
+    "screen_headline_fields": ["markupTotal", "rubricas.length"],
+    "oracle_value": "140129221.74",
+    "oracle_provenance": "Memória do projeto [splitter-workbook-motor.md]: \"C.1 BDI Detalhe (FONTE-MÃE) — rubricas, markup 140.129.221,74 (folhas, sem double-count), CD=valor/(%CD) constante 471.180.974 ... CD+markup≈PV\". Listado entre as \"6 fontes do RMA normalizadas LIVE + travadas no golden-snapshot ao centavo\" (agent test_golden_br101.py). Conservação: CD (471.180.974) + markup (140.129.221,74) ≈ PV (611.357.314). Esse é o markup_total. n_rubricas não tem oráculo numérico explícito (depende da contagem de linhas extraídas).",
+    "suspected_divergence": null,
+    "notes": "Chat (tools.py:883 get_bdi_buildup) e tela (src/lib/supabase/bdi.ts:getBdi, linhas 35-70) são IDÊNTICOS em fórmula: ambos `.select(\"ordem,descricao,pct_receita,pct_custo_direto,valor_rs,eh_subtotal,status\")` de obra_bdi_rubricas por contrato_id, ordem asc; markup = soma de valor_rs APENAS das folhas (eh_subtotal=false), excluindo subtotais p/ evitar double-count; status = \"needs_review\" se algum status != \"ok\". markup_total (py) == markupTotal (ts), n_rubricas (py) == rubricas.length (ts). Sem risco de divergência de coluna/fórmula. ⚠️ Distinção crítica que ambos documentam: markup ≠ desequilíbrio do BDI (D.2). O Δ do BDI (R$ 3.058.491 / piso 1.725.507) vive em get_desequilibrio_resumo / bdiDeseq.ts, NÃO aqui — não confundir o oráculo do markup (140.129.221,74) com o do desequilíbrio. Rota que consome getBdi: src/routes/_app/contracts/$contractId/ (Síntese C.1). Oráculo confiável e ao-centavo (golden snapshot); só não validado contra a fonte externa real (governança do usuário, por design)."
+  },
+  {
+    "domain": "Curvas (C.8) — Liberação × Capacidade × Alocado",
+    "chat_tool": "get_curvas_resumo",
+    "numeric": true,
+    "chat_headline_fields": [
+      "liberacao_pct",
+      "alocado_pct",
+      "contratado_acum_corte_rs",
+      "liberado_acum_rs",
+      "executado_acum_rs",
+      "maior_gap_rs"
+    ],
+    "chat_reads": ["obra_curvas_c8", "obra_curvas_frentes"],
+    "screen_readmodel": "curvasC8.ts:getCurvasC8 (matriz por frente: curvasC8.ts:getCurvasFrentes)",
+    "screen_headline_fields": [
+      "liberacaoPct",
+      "alocadoPct",
+      "contratadoAcumCorte",
+      "liberadoAcum",
+      "executadoAcum",
+      "maiorGapRs"
+    ],
+    "oracle_value": "Oráculo (definição limpa, derivável de C03/C07): Contratado/Liberado corte ≈ R$28,1mi (BM3/mai); Capacidade ≈ R$19,85mi (HH real 58.328 × meta R$/HH 340,33); Executado ≈ R$12,875mi (faturamento real); maior gap ≈ R$8,3mi. ATENÇÃO: o obra_curvas_c8 NORMALIZADO (lido por chat E tela) diverge: 41,0mi / 7,3mi / 20,5mi / 33,8mi respectivamente — valores sob auditoria.",
+    "oracle_provenance": "Memória do projeto c08-curvas-parqueada.md (jun/2026): registra que obra_curvas_c8 normalizado NÃO bate o mockup nem o dado derivável de C03/C07, lista os 4 pares (normalizado vs oráculo) e a fórmula limpa de cada curva. Reforçado pela memória chat-paridade-tools (capacidade C.8 suprimida) e pelos comentários de invariante no próprio tools.py (l.964-966: capacidade ~17% vs ~70% esperado, bug de normalização) e no read-model (l.1-3). Capacidade NÃO tem valor citável confiável — suprimida em ambos. Os demais headline-fields têm oráculo só na definição derivada (C07 meta/HH, C06 PV da curva), não no banco.",
+    "suspected_divergence": "Dois riscos. (1) Chat↔tela: o chat força capacidade_pct/capacidade_acum_rs=None (bug conhecido), mas o read-model getCurvasC8 ainda RETORNA capacidadePct/capacidadeAcum cru — a supressão mora nas telas (visao-geral.tsx/curvas.tsx), não no read-model; uma tela nova que consuma getCurvasC8 direto mostraria a capacidade furada enquanto o chat a omite. (2) Chat↔oráculo (e tela↔oráculo): ambos leem o MESMO obra_curvas_c8 buggy → concordam ENTRE SI mas DIVERGEM do oráculo em contratado-corte, capacidade, executado e maior gap (corte + fórmula de capacidade errados na normalização). Paridade chat=tela OK; correção vs oráculo PENDENTE de re-normalização.",
+    "notes": "Chat e tela são espelhos quase exatos: mesmas tabelas, mesmas colunas, mesmo .order(created_at desc).limit(1) e mesma conversão pct=fração×100. Diferença única: o chat zera capacidade (capacidade_pct/capacidade_acum_rs=None + capacidade_nota) por estar sob auditoria; o read-model não zera (telas consumidoras é que excluem). Sub-bloco \"frentes\" (obra_curvas_frentes: contratado_rs, produtividade_rs_hh ECONÔMICA R$/HH, gap_dominante_rs, responsabilidade) é idêntico em ambos. Semântica importante p/ o gate: 'alocado %' = avanço FINANCEIRO (executado/contratado), NÃO aderência vs previsto (isso é faturamento); executado_acum cruza com o faturamento real. Consumidores da tela: rma/visao-geral.tsx e rma/curvas.tsx."
+  },
+  {
+    "domain": "Mapa da obra C.14 — liberação por km (Σ liberado / Σ impedido / faixa de km)",
+    "chat_tool": "get_mapa_liberacao_resumo",
+    "numeric": true,
+    "chat_headline_fields": [
+      "soma_liberado_rs",
+      "soma_impedido_rs",
+      "soma_duplicacao_rs",
+      "soma_valor_rs",
+      "bm_corte",
+      "nao_iniciados_qtd",
+      "km_faixa_inicio",
+      "km_faixa_fim"
+    ],
+    "chat_reads": ["obra_mapa_segmentos"],
+    "screen_readmodel": "mapaSegmentos.ts:getMapaFrentes",
+    "screen_headline_fields": ["somaFisica", "liberado", "totalImp", "bmCorrenteIdx"],
+    "oracle_value": "381573415.00",
+    "oracle_provenance": "Obra física = Σ valor_contrato_rs das 16 frentes de obra_mapa_segmentos = R$ 381.573.415. Fontes: comentário-invariante em src/lib/supabase/mapaSegmentos.ts linha 4 (\"Lê obra_mapa_segmentos (Σ 381.573.415 = obra física)\") e memória c14-mapa-feito.md (\"16 frentes (5 trechos+11 pontuais, Σ381,6mi)\"). Para liberado/impedido na BR-101 o oráculo é liberado=381.573.415 (tudo) e impedido=R$ 0 — a obra não tem impedimento registrado (mapa.tsx linha 6 \"a BR-101 hoje não tem impedimento\" + useState([]) vazio na linha 113). ATENÇÃO: o Contratado Total / PV da C.3 é 611.357.314 (físicas 381,6mi + transversais 229,8mi de obra_secoes), NÃO 381,6mi — logo a \"INVARIANTE Σ duplicação == Contratado Total (C.3)\" escrita na docstring da tool não fecha com nenhuma das somas (nem 381,6mi nem o subconjunto dos 5 trechos). Falta um valor validado para o subtotal só dos 5 trechos de pista de duplicação.",
+    "suspected_divergence": "SIM, dois eixos. (1) Liberado/Impedido: a tool soma colunas armazenadas liberado_rs/impedido_rs/status_bm/bm_corrente de obra_mapa_segmentos; o read-model getMapaFrentes NEM SELECIONA essas colunas — a tela calcula liberado/impedido por um simulador client-side em mapa.tsx (impedimentos=useState([]) vazio na BR-101 → liberado=somaFisica=381,6mi, impedido=0). Se as colunas *_rs no banco estiverem populadas com projeção, o chat reporta um split liberado/impedido que a tela mostra como 100% liberado / R$0. (2) Achatamento de tipo: a tool faz tipo = (\"sinistro\" se tipo==\"sinistro\" senão \"duplicacao\"), mas o enum real é trecho|oae|dispositivo|talude|geodreno (não existe \"sinistro\" nem \"duplicacao\") → NENHUMA linha vira \"sinistro\", TODAS viram \"duplicacao\", então soma_duplicacao_rs = soma_valor_rs (381,6mi, incluindo os 11 pontuais/OAEs) e km_faixa_inicio/fim abrange pontuais, não só os 5 trechos de pista. A tela distingue ehPista=(tipo===\"trecho\") e trata pontuais como pontos isolados.",
+    "notes": "Tool: /Users/mateusmilagre/Documents/GitHub/Base-Repository/agent/agents/adm_contratual/tools.py:1023-1090 (achatamento de tipo na linha 1048; somas nas linhas 1073-1079; invariante na docstring linhas 1019-1020). Read-model da tela: /Users/mateusmilagre/Documents/GitHub/Base-Repository/src/lib/supabase/mapaSegmentos.ts:49 (getMapaFrentes, só lê valor_contrato_rs + tipo/km; comentário-âncora 381.573.415 na linha 4). Hook/tela: /Users/mateusmilagre/Documents/GitHub/Base-Repository/src/lib/hooks/useMapaObra.ts:58 (useMapaObra, somaFisica) e /Users/mateusmilagre/Documents/GitHub/Base-Repository/src/routes/_app/contracts/$contractId/mapa.tsx (linha 113 impedimentos vazio; linha 130 totalImp; linha 136 liberado=somaFisica-totalImp). Não há read-model TS equivalente para liberado_rs/impedido_rs/status_bm — é simulação client-side. NÃO alterei arquivos; não acessei banco."
+  },
+  {
+    "domain": "Chuvas (C.9)",
+    "chat_tool": "get_chuvas_resumo",
+    "numeric": true,
+    "chat_headline_fields": [
+      "impedido_total_rs",
+      "liberado_total_rs",
+      "frentes_nao_iniciadas",
+      "chuva_prev_total"
+    ],
+    "chat_reads": ["obra_chuvas", "obra_chuvas_meses"],
+    "screen_readmodel": "chuvasPainel.ts:getChuvasPainel",
+    "screen_headline_fields": [
+      "kpis.diasACobrar",
+      "kpis.pleiteavelRs",
+      "kpis.diasPropostaAcum",
+      "kpis.diasRealAcum",
+      "kpis.deltaNet"
+    ],
+    "oracle_value": "dias a cobrar = 2; pleiteável R$ 279.804,80 (oráculo da TELA renderizada, getChuvasPainel; mai/26 real 5 vs prop 3)",
+    "oracle_provenance": "O número validado pertence à TELA, não ao chat: invariante no topo de src/lib/supabase/chuvasPainel.ts:4 (\"Headline 'dias a cobrar = 2' ... bate o oráculo; pleiteável R$ 279.804,80\") + memória c09-chuvas-parqueada (\"Σ max(0, real−prop) = 2 dias na BR-101\"). Esses vêm de obra_secoes (C.9 + auxiliar_D.6). JÁ os campos que o CHAT realmente retorna (impedido_total_rs, liberado_total_rs, chuva_prev_total) NÃO têm oráculo documentado: a migration 20260606000009_chuvas.sql só define as colunas de obra_chuvas, sem valor BR-101 validado em memória/docs; a chuva real é input pendente (eixo_real_vazio=true). Para ter oráculo do lado do chat faltaria um valor validado de R$ impedido/chuva prevista total para a BR-101 (não encontrado).",
+    "suspected_divergence": "DIVERGÊNCIA ESTRUTURAL. O chat get_chuvas_resumo lê obra_chuvas/obra_chuvas_meses e expõe headline financeiro+pluviométrico (R$ impedido, R$ liberado, frentes não iniciadas, mm previsto total). A TELA C.9 (rma/chuvas.tsx → useChuvasPainel → chuvasPainel.ts:getChuvasPainel) lê obra_secoes (C.9/auxiliar_D.6) e expõe outro headline: \"dias a cobrar = 2\" e \"pleiteável R$ 279.804,80\" (método Σ max(0, real−prop), sem compensar). Tabelas, fórmulas e conceitos diferentes — campos do chat e da tela são praticamente disjuntos. O read-model que ESPELHA coluna-a-coluna o chat (src/lib/supabase/chuvas.ts:getChuvas, mesmas tabelas/colunas) está ÓRFÃO: nenhuma rota o renderiza (só useChuvas/usePontuais). Logo o gate de paridade chat↔tela não fecha aqui: o usuário vê dias-a-cobrar/pleiteável na tela, e o chat responde impedido/previsto.",
+    "notes": "Tool em agent/agents/adm_contratual/tools.py:1104 (get_chuvas_resumo). Retorno do chat também inclui série mensal (campo \"meses\": chuva_prev_mm, chuva_real_mm, dias_parados, dias_prev_5mm, farol) e n_meses; chuva_real_pendente=eixo_real_vazio (real é INPUT, null≠0). A auditoria de paridade (memória chat-paridade-tools) classificou chuvas como \"tool==tela, honesta\" mas comparou contra o mirror chuvas.ts:getChuvas, NÃO contra a tela realmente renderizada (getChuvasPainel) — daí a divergência escapou; ela também flagou \"n_meses 52 = série longa demais (normalização upstream)\". Arquivos-chave: /Users/mateusmilagre/Documents/GitHub/Base-Repository/agent/agents/adm_contratual/tools.py (L1104-1160), /Users/mateusmilagre/Documents/GitHub/Base-Repository/src/lib/supabase/chuvas.ts (mirror órfão do chat), /Users/mateusmilagre/Documents/GitHub/Base-Repository/src/lib/supabase/chuvasPainel.ts (read-model da tela), /Users/mateusmilagre/Documents/GitHub/Base-Repository/src/routes/_app/contracts/$contractId/rma/chuvas.tsx (consome useChuvasPainel)."
+  },
+  {
+    "domain": "Panorama (overview) · C.10 — farol consolidado multidimensional",
+    "chat_tool": "get_panorama",
+    "numeric": true,
+    "chat_headline_fields": [
+      "consolidado (qualitativo, farol)",
+      "frentes_impedidas_rs",
+      "pct_areas_liberadas_pct",
+      "dias_parados_acum",
+      "n_avaliados",
+      "n_dimensoes_em_risco"
+    ],
+    "chat_reads": [
+      "obra_panorama (TIPADA — consolidado + 6 faróis de dimensão + pct_areas_liberadas, dias_parados_acum, frentes_impedidas_rs, status; lê a row mais recente por created_at desc)"
+    ],
+    "screen_readmodel": "src/lib/supabase/panorama.ts:getPanorama",
+    "screen_headline_fields": [
+      "consolidado",
+      "frentesImpedidasRs",
+      "pctAreasLiberadas (fração 0..1; tela faz ×100 no render)",
+      "diasParadosAcum",
+      "nAvaliados"
+    ],
+    "oracle_value": "frentes_impedidas_rs=0; consolidado=risco; n_avaliados=4/6 (cobertura PARCIAL); n_dimensoes_em_risco=2 (projetos, clima)",
+    "oracle_provenance": "Memória v46-normalizacao-andamento.md (linha 26, task \"C.10 Panorama FEITO\" via obra_panorama surgical): registra explicitamente p/ BR-101 consolidado=`risco`, farol_projetos+clima=`risco`, interferencias+suprimentos=`null` (Sem dado), precos=`conforme`, lib_area=`conforme`, frentes_impedidas 14M→0. Daí derivam n_avaliados=4 (parcial 4/6) e n_dimensoes_em_risco=2. Confirmado tb por v46-telas-fase.md (commit f3bc145, \"Atenção→Risco\") e chat-paridade-tools.md (panorama auditado MATCH/honesto, \"já marca parcial\"). LACUNA: os números pct_areas_liberadas e dias_parados_acum NÃO têm valor validado registrado em memória/docs — só viriam por leitura do banco (proibida nesta task); ficam sem oráculo confiável.",
+    "suspected_divergence": "Baixo risco para os números: os campos numéricos (frentes_impedidas_rs, dias_parados_acum, pct_areas_liberadas) e o consolidado vêm da MESMA coluna de obra_panorama nos dois lados, sem recálculo de régua. Dois pontos de atenção: (1) pct — o chat retorna tanto a fração crua (pct_areas_liberadas, 0..1) quanto pré-multiplicada (pct_areas_liberadas_pct, ×100, 1 casa); se o agente citar a fração em vez do _pct, vira 0,X vs a tela que mostra X% — mesma fonte, risco só de apresentação. (2) Assimetria de escopo (não-numérica): a tela getPanorama LÊ obra_panorama + obra_secoes \"C.10%\" (KPIs por dimensão, análise/crosslinks/cláusulas e matriz de nexo), enquanto a tool get_panorama lê SÓ obra_panorama — o conteúdo qualitativo rico (kpis das dimensões, matriz de nexo) não é coberto pelo chat.",
+    "notes": "Headline real do domínio é QUALITATIVO (farol consolidado = risco); marquei numeric=true porque a tool expõe âncoras numéricas gateáveis (frentes_impedidas_rs=0, n_avaliados=4/6, n_dimensoes_em_risco=2) — todas validadas na memória. Ambos os lados tratam farol null = dimensão NÃO avaliada (pendente honesto, nunca verde sobre área cega); a tool ainda emite _aviso_consolidado em cobertura parcial e _aviso_divergencia se consolidado da fonte ≠ pior dos avaliados. Invariante AUDITORIA-PIPELINE.md: \"Situação Geral só fica verde com cobertura 100% (COBERTURA_MINIMA_CONSOLIDADO=6)\". Pequena divergência de chave/ordem entre _PANORAMA_DIMS (py) e DIMS (ts) — chave 'liberacoes' (ts) vs 'liberacoes_area' (py) e ordem diferente — sem efeito sobre valor/contagem. Rota da tela: src/routes/_app/contracts/$contractId/rma/panorama.tsx."
+  },
+  {
+    "domain": "Busca de seções (qualitativo)",
+    "chat_tool": "buscar_secoes",
+    "numeric": false,
+    "chat_headline_fields": [],
+    "chat_reads": [
+      "obra_secoes (select codigo, titulo, modulo, tipo, colunas, dados, n_linhas, coberta; filtro tem_dado=true; or_ ilike em titulo/codigo; order ordem; limit 8)"
+    ],
+    "screen_readmodel": "normalizacao.ts:getObraSecoes",
+    "screen_headline_fields": [],
+    "oracle_value": null,
+    "oracle_provenance": "Domínio qualitativo/de busca: buscar_secoes não tem número-âncora — devolve metadados + linhas VERBATIM das seções que casam o termo (campo `n` = qtd de seções casadas, máx 8, depende da consulta; não é métrica fixa). Logo não há valor de oráculo único. Os números DENTRO de cada seção já vêm conservados pelos gates do splitter (mesma fonte obra_secoes das telas tipadas), mas não há um headline para gate aqui. Para um oráculo de cobertura (ex.: nº total de seções capturadas/cobertas na BR-101) seria preciso contar obra_secoes no banco — proibido neste passo; memórias citam progresso de cobertura do splitter (ex.: splitter-workbook-motor 13/49, v46) mas sem um total cravado e validado para BR-101.",
+    "suspected_divergence": "Mesma tabela (obra_secoes) e mesmas colunas-chave (coberta, n_linhas), ambos LIVE sem filtro de versão — baixo risco numérico. Diferença de propósito/escopo: o chat filtra tem_dado=true, aplica busca ilike titulo/codigo, trunca tabelas grandes (dados[:40]) e limita a 8 linhas, devolvendo os DADOS verbatim; a tela (getObraSecoes) lista TODAS as seções sem filtro de busca/tem_dado e SEM os dados (só catálogo: ordem/codigo/modulo/titulo/tipo/nLinhas/temDado/coberta) como régua de cobertura. Conjuntos de linhas diferentes, mas nenhum produz headline numérico de métrica de negócio, então não há divergência de fórmula a travar.",
+    "notes": "Tool em agent/agents/adm_contratual/tools.py:591 (registrada na lista linha 50/2535). Read-model da tela em src/lib/supabase/normalizacao.ts:48 (getObraSecoes), consumido pela rota src/routes/_app/contracts/$contractId/normalizacao.tsx (Painel de Normalização / régua de cobertura do splitter). A própria descrição da tool avisa que NÃO é o texto do contrato/cláusulas (não está no banco) — só seções de planilha-motor (C.x/D.x/B.x). Como é busca estrutural, o gate de paridade chat↔tela deve ser qualitativo (mesma fonte/colunas), não comparação de número-âncora."
+  },
+  {
+    "domain": "Insumos excedente (cl. 8.8 / D.5 · excedente ao IPCA)",
+    "chat_tool": "get_insumos_excedente",
+    "numeric": true,
+    "chat_headline_fields": [
+      "total_delta_rs",
+      "pct_sobre_pv",
+      "n_acima_teto",
+      "reajuste_pago_acum_rs",
+      "teto_snapshot_pct"
+    ],
+    "chat_reads": ["obra_insumo_excedente", "obra_insumo_excedente_params"],
+    "screen_readmodel": "insumoExcedente.ts:getInsumoExcedente",
+    "screen_headline_fields": [
+      "totalDeltaRs",
+      "pctSobrePv",
+      "insumosAcimaTeto",
+      "reajustePagoAcumRs",
+      "tetoSnapshotPct"
+    ],
+    "oracle_value": "114654.68",
+    "oracle_provenance": "Σ Δ R$ excedente faturável (BR-101) = 114.654,68. Registrado em duas memórias do projeto: chat-paridade-tools.md (\"get_insumos_excedente ... Σ Δ R$ 114.654,68 = oráculo D00, faturado DIRETO cl.8.8 à parte do claim\") e rma-caderno-gap-map.md (\"Σ Δ R$ = 114.654,68 == cards H5/H30/H33, 4 acima do teto, snapshot jan/26, teto +1,57%; vertical obra_insumo_excedente + _params, migration 20260609000005 aplicada + backfill conferido\"). c06-insumos-feito.md confirma os derivados: excedente R$114.655 · teto +1,57% · maior gap +6,13pp · %PV 0,019% · 4 insumos acima do teto · diesel R$88.481. Origem do dado: ingestão determinística local da D.5 da revisão jun/2026 do workbook (fixture workbook_br101v13_d5_excedente.json, pós-correção SICRO/INCC→IPCA); CBUQ/Concreto/Cimento ficam NULL (índice pendente). Gate de derivação: (Δ−teto)⁺×qtd×preço ao centavo, totais == consolidação do _params.",
+    "suspected_divergence": null,
+    "notes": "Chat e tela leem EXATAMENTE as mesmas duas tabelas e o mesmo header de _params; o total vem do campo persistido total_delta_rs (não recomputado por linha), então a paridade é estrutural. n_acima_teto: ambos usam o consolidado insumos_acima_teto com fallback len(acima)/acimaTeto.length — mesma lógica. Há DUAS rotas que consomem o mesmo read-model: src/routes/_app/contracts/$contractId/rma/insumos.tsx (a tela CONSOLIDADA C.6 ABC + D.5, decidida como a oficial) e src/routes/_app/contracts/$contractId/desequilibrio/insumos.tsx (D.5/M3, via hook useInsumoExcedente). Watch de baixo risco, NÃO divergência hoje: a rota desequilibrio calcula repassavel = total − reajuste_pago_acum_rs, mas o card headline exibe `total` (bruto); o chat também devolve total_delta_rs bruto + reajuste_pago_acum_rs separado. Para a BR-101 reajuste_pago_acum_rs = 0, então bruto == líquido e não há divergência; só viraria risco se uma obra tivesse reajuste pago > 0 E a tela trocasse o headline para o líquido. pct_sobre_pv pode vir NULL no _params da BR-101 (gap honesto citado em c06) — a tela tem fallback total/PV via curva, o chat NÃO (retorna pct_sobre_pv direto, possivelmente null); diferença de apresentação, não de oráculo do número-âncora total_delta_rs."
+  },
+  {
+    "domain": "Condutas (C.11)",
+    "chat_tool": "get_condutas",
+    "numeric": false,
+    "chat_headline_fields": [],
+    "chat_reads": ["obra_condutas"],
+    "screen_readmodel": "condutas.ts:getCondutas",
+    "screen_headline_fields": [],
+    "oracle_value": "8",
+    "oracle_provenance": "Domínio qualitativo (catálogo de ações sugeridas pela IA), sem headline financeiro/percentual — o que o usuário pede é a lista (gatilho/categoria/cláusula/documento/prioridade/status). Único número-âncora é a contagem de condutas (campo n_condutas do JSON). Oráculo para BR-101 = 8 condutas, documentado na memória do projeto pipeline-p1-front.md: \"CondutasRealView lê obra_condutas (C.11, 8 condutas na BR-101)\". Não é valor financeiro; é contagem de linhas de obra_condutas para contrato_id fe288319. Não verificado contra banco (proibido), mas registrado como validado na memória.",
+    "suspected_divergence": "Sem divergência de número (ambos leem obra_condutas, mesmo .eq(contrato_id) e .order(\"ordem\")). RISCO de COBERTURA qualitativa, não numérica: o read-model TS getCondutas seleciona 4 colunas a mais — destinatario, responsavel, resultado_esperado, motivo — que a tool get_condutas NÃO seleciona (o tool só pega ordem, gatilho, categoria, clausula, documento, prioridade, status, data_sugerida, dias_aberto). Logo a tela pode mostrar destinatário/responsável/resultado-esperado/motivo de cada conduta e o chat fica cego a esses campos, podendo responder \"não disponível\" onde a tela exibe conteúdo. Tool ainda emite contagens derivadas (n_condutas, n_urgentes, contagem_por_status, contagem_por_prioridade) que a tela não materializa como headline.",
+    "notes": "numeric=false porque o domínio é qualitativo (lista de ações recomendadas); chat_headline_fields e screen_headline_fields vazios conforme regra. Ainda assim há um número-âncora secundário (n_condutas=8) com oráculo confiável, registrado em oracle_value para apoio ao gate. Ambos tratam ausência como [] (não normalizado ≠ erro): tool retorna disponivel=false/n_condutas=0; TS retorna []. Erro de leitura propaga (falha-alto) em ambos. Tela: rota /contracts/$id/condutas (CondutasRealView) consome condutas.ts:getCondutas."
+  },
+  {
+    "domain": "Plano de Ação (C.12) — qualitativo",
+    "chat_tool": "get_plano_acao",
+    "numeric": false,
+    "chat_headline_fields": [],
+    "chat_reads": [
+      "obra_secoes · C.12 Plano de Ação — Quadro (array de tarefas 5W2H)",
+      "obra_secoes · C.12 Plano de Ação — Resumo (contagens por status + farol da aba)",
+      "obra_secoes · C.12 Plano de Ação — Leitura (narrativa IA)"
+    ],
+    "screen_readmodel": "planoAcao.ts:getPlanoAcao",
+    "screen_headline_fields": [],
+    "oracle_value": "15 tarefas (T-01..T-15); resumo 15/14/1/0 (total/a fazer/em andamento/concluídas); 6 críticas; vinculadasAC11=15; atrasadas/vencendo=0 e SLA=null (honestos, v46 sem datas); farol \"● Atenção\" → mapeado para Risco",
+    "oracle_provenance": "Memória do projeto /Users/mateusmilagre/.claude/projects/-Users-mateusmilagre-Documents-GitHub-Base-Repository/memory/v46-normalizacao-andamento.md (linha \"C.12 Plano FEITO\"): obra_secoes RAW é a única fonte (sem tabela tipada); Quadro normalizado para 15 tarefas T-01..T-15, Resumo com contagens 15/14/1/0 + 6 críticas + vinculadasAC11=15, farol \"● Atenção\" (julgamento aprovado: 6 críticas abertas — critério literal daria conforme), atraso/SLA/vencendo = 0/null honestos pois v46 não traz estado de execução nem datas. Cobertura confirmada na memória chat-paridade-tools.md (BR-101 22/23 tools com dado).",
+    "suspected_divergence": null,
+    "notes": "Paridade chat↔tela é 1:1: get_plano_acao (tools.py L1622-1716) e getPlanoAcao (planoAcao.ts L102-151) leem exatamente as mesmas 3 seções de obra_secoes (ilike \"C.12 Plano de Ação — Quadro/Resumo/Leitura\"), com pick()/_pick() idênticos, mesmo mapeamento de farol (mapFarol == _mapfarol: \"atenç\"/\"risco\" → Risco; sem \"Atenção\" no DS) e mesmo guard de pendência (null/_pendente se faltam Quadro E Resumo). Domínio é qualitativo (quadro de tarefas 5W2H operacional) → sem número-âncora único de gate; campos numéricos existem apenas no objeto resumo (total/atrasadas/críticas/SLA/%avanço), todos derivados das MESMAS contagens em ambos os lados. O oracle_value acima documenta os valores validados da BR-101 caso o gate queira checar as contagens do resumo, mas não há fórmula divergente entre chat e tela. Fonte é obra_secoes RAW (exceção consciente: única fonte direta de tela, atualizada surgical no v46)."
+  },
+  {
+    "domain": "Indiretos D.1",
+    "chat_tool": "get_indiretos_detalhe",
+    "numeric": true,
+    "chat_headline_fields": [
+      "desequilibrio_total",
+      "adm_local_cheio",
+      "custo_direto",
+      "desequilibrio_extensao",
+      "metodos[].desequilibrio_rs"
+    ],
+    "chat_reads": ["obra_indiretos_base", "obra_indiretos_metodos"],
+    "screen_readmodel": "indiretos.ts:getIndiretos",
+    "screen_headline_fields": [
+      "desequilibrioTotal",
+      "admLocalCheio",
+      "custoDireto",
+      "desequilibrioExtensao",
+      "metodos[].desequilibrioRs"
+    ],
+    "oracle_value": "2491837",
+    "oracle_provenance": "Memória do projeto d1-indiretos-feito.md (commit 006af7f, 24/jun/2026): desequilibrio_total da D.1 = desequilíbrio do método ATIVO M2.2 (gasto × medido) = R$ 2.491.837, que cruza 1:1 com 'Custos Indiretos' no Painel D.0. Bug histórico era somar cenários (R$ 31.988.709 errado); cenários A/B (redução de escopo / extensão de prazo) alimentam o D.10 e NÃO somam à D.1. Memória registra que o banco bate ao centavo com o mockup D01_CustosIndiretos (align v46, commit 69aa4f5). Não acessei o banco para reconfirmar; valor vem da memória validada, não de comentário de invariante no read-model.",
+    "suspected_divergence": "Ordenação de obra_indiretos_base diverge: o CHAT usa .order(\"created_at\") (default ASC = row MAIS ANTIGA) + limit 1; a TELA usa .order(\"created_at\", {ascending:false}) (DESC = row MAIS NOVA) + maybeSingle. A persistência é 'vigente por obra' (delete-by-contrato + insert), então normalmente há só 1 row e os números coincidem. MAS se alguma vez existir >1 base row (re-normalização/renorm-indiretos que insira sem apagar o vigente, ou execução concorrente), o chat retorna o desequilibrio_total/adm_local antigos (stale) e a tela mostra o atual → headline diverge. Risco adicional secundário (não-headline): o chat NÃO lê obra_indiretos_itens (os 29 grupos da Adm Local) nem as colunas pv/percent_pv/gasto_acum/medido_acum/real_acum/contratado_acum que a tela lê — cobertura menor, mas o número-âncora desequilibrio_total existe em ambos.",
+    "notes": "desequilibrio_total é o número-âncora (= método ativo M2.2, cruza com Custos Indiretos no D.0 = R$ 2.491.837 na BR-101). Ambos lados expõem os 4 métodos paralelos com desequilibrio_rs/defensabilidade. Para fechar o gate de paridade, alinhar a ordenação de obra_indiretos_base entre tool.py e indiretos.ts (ambos para created_at DESC) e idealmente confirmar via banco que existe apenas 1 base row para fe288319. NÃO alterei arquivos. Mockup de referência: D01_CustosIndiretos; tela em src/routes/_app/contracts/$contractId/desequilibrio/indiretos."
+  },
+  {
+    "domain": "BDI desequilíbrio D.2",
+    "chat_tool": "get_bdi_desequilibrio",
+    "numeric": true,
+    "chat_headline_fields": [
+      "desequilibrio_total_rs",
+      "pct_desequilibrio_sobre_pv",
+      "soma_desequilibrio_rubricas_rs",
+      "pv_rs"
+    ],
+    "chat_reads": [
+      "obra_bdi_deseq (params/KPIs · 1 linha)",
+      "obra_bdi_rubrica_tempo (6 rubricas de tempo)",
+      "obra_bdi_perda_mensal (curva BM 1-46)"
+    ],
+    "screen_readmodel": "bdiDeseq.ts:getBdiDeseq (headline) + getBdiRubricasTempo + getBdiPerdaMensal + computeBdiCurvaPerda (curva); orquestrados em src/lib/hooks/useBdiD2.ts:useBdiD2; tela src/routes/_app/contracts/$contractId/desequilibrio/bdi.tsx",
+    "screen_headline_fields": [
+      "desequilibrioRs",
+      "pctSobrePv",
+      "pvRs",
+      "perdaRealFinalRs (endpoint da curva — derivado, NÃO sai de obra_bdi_perda_mensal)"
+    ],
+    "oracle_value": "3058490.92",
+    "oracle_provenance": "Memória do projeto d02-bdi-feito.md: gate de conservação TRIPLA (Σ rubricas deseq == Σ valor == perda acum no BM corrente == desequilíbrio total) fechando em R$ 3.058.490,92 (arredonda p/ R$ 3.058.491 na UI = KPI \"Desequilíbrio BDI acumulado\", perda real acum no BM corrente=3). Corroborado pelos comentários de invariante no read-model bdiDeseq.ts (linhas 6, \"Conservação conferida pelo gate; Σ rubricas == total; perda acum no BM == desequilíbrio\") e pelo comentário-fonte da tool tools.py:1815 (\"Σ rubricas == total; perda acum == deseq\"). Constantes reconciliadas ao centavo na memória: PV=611.357.314 · Σrubricas col D=69.263.603 · gasto/mês=1.505.731 · medição acum BM3=12.875.265.",
+    "suspected_divergence": "O HEADLINE coincide (chat desequilibrio_total_rs e tela desequilibrioRs vêm ambos de obra_bdi_deseq.desequilibrio_rs = 3.058.491). O RISCO está na CURVA/endpoint: a tool do chat devolve perdas_mensais lendo a tabela armazenada obra_bdi_perda_mensal (cujo perda_acum_rs atinge ~3.058.491 no BM corrente), mas o read-model da tela IGNORA essa tabela — computeBdiCurvaPerda recomputa duas curvas (real×teórica) a partir de getFaturamentoCurva, e o endpoint REAL projetado fecha em R$ 1.725.507 (BDI não recuperado, piso). Logo, se o usuário perguntar \"perda final/projetada do BDI\", o chat tende a citar ~3,06M (curva armazenada) enquanto o gráfico mostra 1,73M como estabilização — fórmulas/fontes diferentes para o mesmo conceito de \"curva de perda\".",
+    "notes": "Cuidado para NÃO confundir D.2 (desequilíbrio do BDI não-remunerado, esta tool/tela) com C.1 buildup/composição do BDI (tool get_bdi_buildup, read-model bdi.ts:getBdi) — a própria descrição da tool alerta. bdi_declarado vem como fração 0..1 (0,2975) tanto no chat quanto na tela; pct_sobre_pv em % com 1 casa. Há um bug cosmético inofensivo na tool (tools.py:1927): out[\"soma_desequilibrio_rubricas_rs\"] recebe uma TUPLA por causa de vírgula sobrando no fim da linha (round(...) ,) — serializa como [valor] em vez de número escalar; não afeta o headline desequilibrio_total_rs mas conta para a paridade se o gate comparar esse campo."
+  },
+  {
+    "domain": "Encargos D.3",
+    "chat_tool": "get_encargos_detalhe",
+    "numeric": true,
+    "chat_headline_fields": [
+      "desequilibrioRs",
+      "pctSobrePV",
+      "modTotalReal",
+      "modTotalProposta",
+      "baseFolhaRs"
+    ],
+    "chat_reads": [
+      "obra_secoes (D.3 Encargos Sociais — Bloco 1 · composição 27 rubricas)",
+      "obra_secoes (D.3 Encargos Sociais — Totais · alíquotas/folha-base/desequilíbrio/farol)",
+      "obra_secoes (Cruzamento histograma de recursos × CPU)",
+      "obra_secoes (C.4 — Histograma mensal MOD · Σ MOD Contr. R$)",
+      "obras (nome_interno, valor_contratual)",
+      "obra_faturamento_curvas (custo_total · PV)"
+    ],
+    "screen_readmodel": "encargos.ts:getEncargos",
+    "screen_headline_fields": [
+      "desequilibrioRs",
+      "pctSobrePV",
+      "modTotalReal",
+      "modTotalProposta",
+      "baseFolhaRs"
+    ],
+    "oracle_value": "0",
+    "oracle_provenance": "Oráculo forte e convergente. Headline = desequilíbrio de encargos R$ 0 (Aderente/Conforme) para a BR-101, porque alíquota Real = Proposta (sem mudança legislativa / reoneração Lei 14.973/24). Invariante documentada no topo do read-model encargos.ts (\"hoje Real = Proposta → desequilíbrio R$ 0 (Aderente · Conforme)\") e replicada na nota da tool tools.py (\"Desequilíbrio de encargos só quando alíquota REAL muda; hoje Real = Proposta → desequilíbrio R$ 0\"). Memória [d03-encargos-feito] confirma os valores de folha-base reconciliados ao centavo: baseFolhaRs Histograma R$ 88.249.614 (= modFolhaHist 37.737.769,31 + moiFolha 50.511.844,85; CPU R$ 78.194.692) e alíquota total MOD 0,8584 (85,84%). Memória [chat-paridade-tools] registra get_encargos_detalhe como tool nova portada do read-model TS, auditada MATCH/honesta (0 erros em 24×3 obras). ⚠ Cuidado: R$ 3.058.491 de [d02-bdi-feito] é o desequilíbrio do BDI (D.2), NÃO de encargos.",
+    "suspected_divergence": "Baixo risco no headline, mas há divergência de FONTE no denominador PV (valorContratado): a tool deriva valor_manual = obras.valor_contratual OU valor_pv = obra_faturamento_curvas.custo_total; a tela usa ctx.valorContratado de getDeseqContexto (deseqContexto.ts). O pctSobrePV em si é lido idêntico (campo gravado \"% sobre pv\" da seção Totais), então o % bate; mas o número de PV exibido como referência pode diferir se as duas fontes de PV não coincidirem. Para a BR-101 é inócuo porque desequilibrioRs = 0.",
+    "notes": "Paridade desenhada 1:1: tool e read-model leem as MESMAS seções obra_secoes via match por fragmento de título e a MESMA lógica de split (MOD via Σ histograma C.4 ÷ (1+alíquota MOD); MOI = baseFolha − MOD), com fallback ao \"Cruzamento\" arredondado. Campos do JSON têm nomes idênticos aos do tipo Encargos (desequilibrioRs, pctSobrePV, modTotal*, baseFolhaRs, modFolhaHist/Cpu, moiFolha, farol, statusLabel). Alíquotas em FRAÇÃO (0,8584 = 85,84%). Farol da tela/D.3 = pré-calculado na C.10 (consolidadoPior). Rota: src/routes/_app/contracts/$contractId/desequilibrio/encargos.tsx (consome getEncargos). Tool em tools.py linhas 1950-2126; read-model em src/lib/supabase/encargos.ts:103."
+  },
+  {
+    "domain": "Valor Agregado D.4",
+    "chat_tool": "get_valor_agregado",
+    "numeric": true,
+    "chat_headline_fields": [
+      "total.perda_rs",
+      "total.va_medido_rs",
+      "total.real_alocado_rs",
+      "total.pct_pv"
+    ],
+    "chat_reads": ["obra_valor_agregado", "obra_valor_agregado_servico", "obra_valor_agregado_mes"],
+    "screen_readmodel": "valorAgregado.ts:getValorAgregado",
+    "screen_headline_fields": [
+      "total.perdaRs",
+      "total.vaMedidoRs",
+      "total.realAlocadoRs",
+      "total.pctPv"
+    ],
+    "oracle_value": "Perda 6.702.675; VA medido 976.203 (BR-101 v45)",
+    "oracle_provenance": "Memória do projeto d4-valor-agregado-normalizado.md: \"BR-101 v45 (arquivo 6f511b40): VA 976.203 · Perda 6.702.675 · farol Observação\". Esses valores são travados por gate ao centavo na ingestão (gate.gate_valor_agregado: perda=real−va · TOTAL=MOD+EQP · Σserviço=resumo · Σmensal=resumo) e o read-model só lê as colunas persistidas (va_medido_rs/real_alocado_rs/perda_rs/pct_pv) — não recalcula. Ressalva: o valor é carimbado v45; houve onda v46 de re-normalização da BR-101 depois (memórias v46-normalizacao-andamento / v46-telas-fase) e a memória do D.4 NÃO foi atualizada — re-verificar contra o banco v46 antes de assumir como verdade absoluta (não acessei o banco, conforme regra).",
+    "suspected_divergence": null,
+    "notes": "Paridade chat↔tela é forte: a tool Python e o read-model TS leem as MESMAS 3 tabelas, MESMAS colunas e aplicam a MESMA derivação (perda = real − VA já vem persistida; série mensal com acum por cumsum idêntico; farol só na linha TOTAL; sem normalização → null/PENDENTE, nunca 0). O comentário no topo do tools.py confirma intenção explícita de paridade: \"MESMA fonte do read-model valorAgregado.ts\". Headline real (o que o usuário pede) é a PERDA de produtividade na linha TOTAL (~6,7M) + VA medido (~976k). ATENÇÃO a homônimo de domínio: existe um SEGUNDO \"D.4\" no produto — \"Perda de Produtividade / Total Cost\" (M3.5), que é OUTRA tool/read-model (perdaProdutividade.ts, ativo Total Cost ≈ 791.458, reconcilia 6.838.963, teto D.0 5,96M; memória d04-perda-produtividade-feito). Não confundir: este manifesto cobre get_valor_agregado ↔ valorAgregado.ts (earned value AACE 25R-03), não o Total Cost. Não encontrei número-oráculo do D.4 Valor Agregado em docs/rma (lá \"valor agregado\" aparece só como referência conceitual M3.4); o oráculo confiável é a memória do projeto + os gates de ingestão."
+  },
+  {
+    "domain": "Pontuais D.6",
+    "chat_tool": "get_pontuais",
+    "numeric": true,
+    "chat_headline_fields": [
+      "params.perda_validada_rs",
+      "params.pendente_total_rs",
+      "params.eventos_pendentes",
+      "n_eventos"
+    ],
+    "chat_reads": [
+      "obra_pontuais_evento",
+      "obra_pontuais_chuva_mensal",
+      "obra_pontuais_chuva_dia",
+      "obra_pontuais_params"
+    ],
+    "screen_readmodel": "pontuaisD6.ts:getPontuaisParams",
+    "screen_headline_fields": ["perdaValidadaRs", "pendenteTotalRs", "eventosPendentes"],
+    "oracle_value": "pendente_total_rs=763276.80; perda_validada_rs=0; n_eventos=4; farol=Conforme",
+    "oracle_provenance": "Memória do projeto d6-pontuais-feito.md (valores validados, \"Cards\" da extração: Farol Conforme, validada R$0, pendente R$763.276,80, 4 eventos; conservação conferida ao centavo Σ eventos==763.276,80). Reforçado pelo comentário-invariante no header de src/lib/supabase/pontuaisD6.ts (linhas 1-5): \"resumo dos Cards: validada=0, pendente, nº eventos, farol. Conservação conferida pelo gate (Σ eventos == pendente · validada=0)\". Honestidade central: perda VALIDADA=R$0 (não soma à D.0); pendente fica como DOSSIÊ p/ não dobrar contagem com D.4.",
+    "suspected_divergence": null,
+    "notes": "Mapeamento 1:1 de fonte ÚNICA: o chat lê as 4 tabelas (obra_pontuais_evento/_chuva_mensal/_chuva_dia/_params) e o read-model TS as cobre com 4 funções em pontuaisD6.ts (getPontuaisEventos L76, getPontuaisChuvaMensal L110, getPontuaisChuvaDia L135, getPontuaisParams L160) — mesmas tabelas, mesmas colunas, pass-through sem fórmula. As KPIs/cards do painel (perda validada, pendente total, eventos pendentes, farol) saem todas de obra_pontuais_params em ambos os lados → getPontuaisParams é o equivalente direto do headline. O n_eventos do chat = len(obra_pontuais_evento) (=4), espelhando getPontuaisEventos.length na tela. Atenção a dois campos DISTINTOS de contagem que coexistem: params.eventos_pendentes (valor armazenado nos Cards) vs n_eventos (contagem de linhas) — não conflitam (ambos os lados leem da mesma origem), mas o gate deve comparar campo-a-campo, não tratá-los como o mesmo número. Headline-âncora recomendado p/ o gate: pendente_total_rs (R$763.276,80) e perda_validada_rs (R$0)."
+  }
+]

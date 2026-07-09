@@ -1,0 +1,173 @@
+/* M-Contábil · Análise por Capítulo · tabela hierárquica */
+
+.ctc-secao {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: var(--s-3) var(--s-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+}
+.ctc-secao-head {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.ctc-secao-titulo {
+  font-size: var(--fs-15);
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+  margin: 0;
+}
+.ctc-secao-sub {
+  font-size: 11px;
+  color: var(--text-3);
+  margin: 0;
+}
+
+.ctc-tabela-wrap {
+  overflow-x: auto;
+}
+.ctc-tabela {
+  min-width: 880px;
+  display: flex;
+  flex-direction: column;
+}
+
+.ctc-tabela-head {
+  display: grid;
+  grid-template-columns: 56px minmax(220px, 2fr) minmax(160px, 1.4fr) minmax(140px, 1fr) minmax(
+      110px,
+      1fr
+    ) 60px;
+  gap: var(--s-2);
+  align-items: center;
+  padding: 8px var(--s-2);
+  font-size: 10px;
+  font-weight: var(--fw-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-3);
+  border-bottom: 1px solid var(--border);
+}
+
+.ctc-tabela-linha {
+  display: grid;
+  grid-template-columns: 56px minmax(220px, 2fr) minmax(160px, 1.4fr) minmax(140px, 1fr) minmax(
+      110px,
+      1fr
+    ) 60px;
+  gap: var(--s-2);
+  align-items: center;
+  padding: 10px var(--s-2);
+  font-size: var(--fs-12);
+  border-bottom: 1px solid var(--border);
+}
+.ctc-tabela-linha:last-of-type {
+  border-bottom: 0;
+}
+.ctc-linha-codigo {
+  font-family: var(--font-mono);
+  color: var(--text-3);
+  font-weight: var(--fw-bold);
+  font-size: 11px;
+}
+.ctc-linha-cap {
+  color: var(--text-2);
+  line-height: 1.4;
+}
+.ctc-linha-celula {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.ctc-linha-pago {
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--fw-semibold);
+}
+.ctc-linha-apagar {
+  font-size: 10px;
+  color: var(--text-3);
+  font-variant-numeric: tabular-nums;
+}
+.ctc-linha-desvio {
+  font-weight: var(--fw-bold);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-2);
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1px;
+}
+.ctc-linha-obs {
+  font-size: 10px;
+  font-weight: var(--fw-regular);
+  color: var(--warning);
+}
+.ctc-linha-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+.ctc-col-right {
+  text-align: right;
+}
+.ctc-col-center {
+  text-align: center;
+}
+
+/* ── Linhas de cabeçalho (RECEITA BRUTA, CUSTO DA OBRA, etc) ───── */
+
+.ctc-tabela-cab {
+  display: grid;
+  grid-template-columns: minmax(220px, 1.6fr) minmax(160px, 1fr) 1fr auto;
+  gap: var(--s-2);
+  align-items: center;
+  padding: 10px var(--s-2);
+  font-size: var(--fs-13);
+  font-weight: var(--fw-bold);
+  border-bottom: 1px solid var(--border);
+  border-left: 4px solid;
+  padding-left: 12px;
+  margin-top: 4px;
+}
+.ctc-tabela-cab-success {
+  background: var(--success-bg);
+  border-left-color: var(--success);
+  color: var(--success);
+}
+.ctc-tabela-cab-danger {
+  background: var(--danger-bg);
+  border-left-color: var(--danger);
+  color: var(--danger);
+}
+.ctc-tabela-cab-info {
+  background: var(--info-bg);
+  border-left-color: var(--info);
+  color: var(--info);
+}
+.ctc-tabela-cab-neutral {
+  background: var(--surface-2);
+  border-left-color: var(--text-3);
+  color: var(--text);
+}
+.ctc-cab-titulo {
+  letter-spacing: 0.04em;
+}
+.ctc-cab-valor {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+.ctc-cab-extra {
+  font-size: 11px;
+  font-weight: var(--fw-regular);
+  color: var(--text-2);
+}
+.ctc-cab-desvio {
+  font-size: 11px;
+  font-weight: var(--fw-bold);
+  color: var(--danger);
+}

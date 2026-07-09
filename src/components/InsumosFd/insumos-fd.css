@@ -1,0 +1,513 @@
+/* C.6/D.5 Insumos v53 — visual compartilhado (fiel aos mockups C06/D05, tokens do DS).
+   Mapeamento de cores do mockup → tokens: navy→--ink · blue→--info · amber→--warning ·
+   red→--danger · green→--success · slate→--text-3 · line→--border. Sem tarja em card (regra DS):
+   os KPI usam chip + fundo tingido via color-mix. */
+
+/* ── banner de fonte ──
+   (a antiga .ifd-pbar virou o RmaParamBar compartilhado na C.6 — refino UX) */
+.ifd-srcinfo {
+  background: color-mix(in srgb, var(--info) 7%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--info) 24%, var(--surface));
+  border-radius: var(--r-sm);
+  padding: 11px 15px;
+  margin: 12px 0;
+  font-size: var(--fs-12);
+  color: var(--text-2);
+  line-height: 1.55;
+}
+.ifd-srcinfo b {
+  color: var(--text);
+}
+
+.ifd-secttl {
+  font-size: var(--fs-12);
+  font-weight: var(--fw-bold);
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+  margin: 26px 0 12px;
+}
+.ifd-hint {
+  font-size: 11.5px;
+  color: var(--text-3);
+  margin: 8px 0 0;
+  line-height: 1.5;
+}
+.ifd-hint b {
+  color: var(--text);
+}
+
+/* ── presets ── */
+.ifd-presets {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 14px 0 6px;
+}
+.ifd-preset {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 8px 14px;
+  font-size: 12.5px;
+  font-weight: var(--fw-semibold);
+  color: var(--text-2);
+  cursor: pointer;
+  transition:
+    background 0.15s var(--easing),
+    border-color 0.15s var(--easing);
+}
+.ifd-preset:hover {
+  background: var(--surface-2);
+  border-color: var(--info);
+}
+.ifd-preset:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+.ifd-preset.on {
+  background: var(--ink);
+  color: #fff;
+  border-color: var(--ink);
+}
+.ifd-preset.best {
+  border-color: color-mix(in srgb, var(--success) 40%, var(--surface));
+  color: var(--success);
+}
+.ifd-preset.best.on {
+  background: var(--success);
+  color: #fff;
+  border-color: var(--success);
+}
+.ifd-preset.worst {
+  border-color: color-mix(in srgb, var(--danger) 35%, var(--surface));
+  color: var(--danger);
+}
+.ifd-preset.worst.on {
+  background: var(--danger);
+  color: #fff;
+  border-color: var(--danger);
+}
+.ifd-presethint {
+  font-size: 11.5px;
+  color: var(--text-3);
+  margin: 2px 0 10px;
+  line-height: 1.5;
+}
+.ifd-presethint b {
+  color: var(--text);
+}
+.ifd-recdot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--success);
+  margin-left: 4px;
+  vertical-align: middle;
+}
+
+/* ── KPI cards (chip + fundo tingido · sem tarja) ── */
+.ifd-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-top: 14px;
+}
+.ifd-kpi {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 14px 16px;
+  transition:
+    transform 0.15s var(--easing),
+    border-color 0.15s var(--easing),
+    box-shadow 0.15s var(--easing);
+}
+.ifd-kpi:hover {
+  transform: translateY(-1px);
+  border-color: var(--border-strong);
+  box-shadow: var(--sh-sm);
+}
+.ifd-kpi .kt {
+  font-size: var(--fs-12);
+  color: var(--text-3);
+  font-weight: var(--fw-semibold);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.ifd-kpi .kt .chip {
+  width: 24px;
+  height: 24px;
+  border-radius: var(--r-sm);
+  background: var(--surface-2);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-2);
+  flex-shrink: 0;
+}
+.ifd-kpi.blue .kt .chip {
+  background: color-mix(in srgb, var(--info) 12%, var(--surface));
+  color: var(--info);
+}
+.ifd-kpi.amber .kt .chip {
+  background: color-mix(in srgb, var(--warning) 14%, var(--surface));
+  color: var(--warning);
+}
+.ifd-kpi .kv {
+  font-size: 22px;
+  font-weight: var(--fw-bold);
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+  border-radius: 5px;
+  padding: 0 4px;
+  margin-left: -4px;
+  transition:
+    background 0.15s,
+    color 0.15s;
+}
+.ifd-kpi .kf {
+  font-size: var(--fs-12);
+  color: var(--text-3);
+  margin-top: 5px;
+}
+.ifd-flash {
+  background: var(--warning-bg) !important;
+}
+
+/* ── painel/tabela ── */
+.ifd-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 20px 22px;
+  margin-bottom: 18px;
+}
+.ifd-tblhead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.ifd-viewtoggle {
+  display: inline-flex;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 3px;
+  gap: 2px;
+}
+.ifd-vbtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: none;
+  border-radius: 7px;
+  padding: 7px 13px;
+  font-size: 12.5px;
+  font-weight: var(--fw-semibold);
+  color: var(--text-3);
+  cursor: pointer;
+}
+.ifd-vbtn:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+.ifd-vbtn.on {
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--sh-sm);
+}
+.ifd-wraptable {
+  overflow-x: auto;
+}
+table.ifd-t {
+  width: 100%;
+  /* separate (não collapse): bordas colapsadas não acompanham células sticky no scroll-x */
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: var(--fs-12);
+}
+
+/* colunas # e Insumo congeladas no scroll horizontal — o nome é a âncora da linha (refino UX).
+   Fundo opaco default var(--surface); as regras de linha (zebra/cbuq/medido/catrow/totrow) têm
+   especificidade maior e re-pintam as células sticky com o fundo correto da linha. */
+table.ifd-t th:nth-child(1),
+table.ifd-t td:nth-child(1) {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  background: var(--surface);
+  min-width: 30px;
+  width: 30px;
+}
+table.ifd-t th:nth-child(2),
+table.ifd-t td:nth-child(2) {
+  position: sticky;
+  left: 30px;
+  z-index: 2;
+  background: var(--surface);
+  max-width: 260px;
+  border-right: 1px solid var(--border);
+  box-shadow: 4px 0 6px -4px color-mix(in srgb, var(--ink) 14%, transparent);
+}
+/* a célula do estado "busca sem match" ocupa a linha inteira — não pode congelar nem estreitar */
+table.ifd-t td[colspan] {
+  position: static;
+  width: auto;
+  min-width: 0;
+  max-width: none;
+  border-right: none;
+  box-shadow: none;
+}
+table.ifd-t th {
+  text-align: left;
+  color: var(--text-3);
+  font-weight: var(--fw-semibold);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  padding: 8px 5px;
+  border-bottom: 2px solid var(--border);
+  white-space: nowrap;
+}
+table.ifd-t td {
+  padding: 8px 5px;
+  border-bottom: 1px solid var(--surface-2);
+  font-size: 11px;
+}
+table.ifd-t tbody tr:nth-child(even) td {
+  background: color-mix(in srgb, var(--surface-2) 45%, var(--surface));
+}
+table.ifd-t tr.cbuq td {
+  background: color-mix(in srgb, var(--warning) 8%, var(--surface));
+}
+table.ifd-t tr.medido td {
+  background: color-mix(in srgb, var(--success) 7%, var(--surface));
+}
+table.ifd-t td.r {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+table.ifd-t td.c {
+  text-align: center;
+}
+table.ifd-t td.num {
+  color: var(--text-4);
+  text-align: center;
+  font-size: 11px;
+}
+table.ifd-t td.nm {
+  font-weight: var(--fw-medium);
+}
+table.ifd-t td.pos {
+  color: var(--danger);
+  font-weight: var(--fw-semibold);
+}
+table.ifd-t td.neg {
+  color: var(--success);
+  font-weight: var(--fw-semibold);
+}
+table.ifd-t td.lin {
+  color: var(--text-4);
+  font-weight: var(--fw-semibold);
+}
+table.ifd-t td.qpq,
+table.ifd-t td.qmed {
+  color: var(--text-2);
+}
+table.ifd-t td.vmed,
+table.ifd-t td.rep {
+  color: var(--vault);
+  font-weight: var(--fw-semibold);
+}
+table.ifd-t td.rep {
+  font-weight: var(--fw-bold);
+}
+table.ifd-t td.pmar,
+table.ifd-t td.pmai {
+  color: var(--text-2);
+  white-space: nowrap;
+}
+table.ifd-t td.pmai {
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+}
+table.ifd-t td.potf {
+  font-weight: var(--fw-bold);
+  color: var(--text);
+}
+table.ifd-t td.pot0 {
+  color: var(--text-3);
+}
+.ifd-idxval {
+  color: color-mix(in srgb, var(--warning) 70%, var(--text-2));
+  border-bottom: 1px dotted color-mix(in srgb, var(--warning) 55%, var(--surface));
+  cursor: help;
+}
+.ifd-selbase {
+  font-size: 10.5px;
+  padding: 4px 5px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+  font-weight: var(--fw-semibold);
+  min-width: 98px;
+  font-family: inherit;
+}
+.ifd-selbase:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+.ifd-selbase.rec {
+  border-color: var(--success);
+}
+.ifd-dualtag {
+  background: color-mix(in srgb, var(--warning) 18%, var(--surface));
+  color: color-mix(in srgb, var(--warning) 80%, var(--text));
+  font-size: 9px;
+  font-weight: var(--fw-bold);
+  padding: 2px 5px;
+  border-radius: 8px;
+  margin-left: 4px;
+  white-space: nowrap;
+}
+tr.ifd-catrow td {
+  background: var(--surface-2) !important;
+  border-top: 2px solid var(--border-strong);
+  border-bottom: 1px solid var(--border-strong);
+  padding: 8px 5px;
+}
+.ifd-catname {
+  font-weight: var(--fw-bold);
+  color: var(--text);
+  font-size: 11.5px;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+}
+.ifd-catmeta {
+  color: var(--text-3);
+  font-weight: var(--fw-semibold);
+  font-size: 10px;
+}
+.ifd-catval {
+  font-weight: var(--fw-bold);
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+.ifd-catmed {
+  font-weight: var(--fw-bold);
+  color: var(--vault);
+  font-variant-numeric: tabular-nums;
+}
+.ifd-catpot {
+  font-weight: var(--fw-bold);
+  color: color-mix(in srgb, var(--warning) 80%, var(--text));
+  font-variant-numeric: tabular-nums;
+}
+tr.ifd-totrow td {
+  background: var(--ink) !important;
+  color: #fff !important;
+  font-weight: var(--fw-bold);
+  padding: 11px 5px;
+  border: none;
+  font-size: 11.5px;
+  font-variant-numeric: tabular-nums;
+}
+tr.ifd-totrow td .tsub {
+  font-size: 9.5px;
+  color: color-mix(in srgb, #fff 62%, var(--ink));
+  font-weight: var(--fw-semibold);
+}
+tr.ifd-totrow td.tmed {
+  color: color-mix(in srgb, var(--success) 55%, #fff) !important;
+}
+.ifd-matchpill {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  background: color-mix(in srgb, var(--success) 75%, var(--ink));
+  color: #fff;
+  font-size: 9px;
+  font-weight: var(--fw-bold);
+  padding: 2px 7px;
+  border-radius: 8px;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+.ifd-note {
+  color: var(--text-3);
+  font-size: 11.5px;
+  margin-top: 12px;
+  line-height: 1.55;
+}
+.ifd-note b {
+  color: var(--text);
+}
+
+/* ── responsivo ── */
+@media (max-width: 1100px) {
+  .ifd-kpis {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 720px) {
+  .ifd-kpis {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── dark: peças com fundo/borda navy viram claro (o --ink não adapta) ── */
+[data-theme="dark"] .ifd-preset.on {
+  background: var(--text);
+  color: var(--bg);
+  border-color: var(--text);
+}
+[data-theme="dark"] tr.ifd-totrow td {
+  background: var(--surface-3) !important;
+}
+
+/* chip de classe ABC (A navy · B âmbar · C cinza) */
+.ifd-cls {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 5px;
+  font-weight: var(--fw-bold);
+  font-size: 11.5px;
+  color: #fff;
+  min-width: 22px;
+  height: 20px;
+  padding: 0 5px;
+}
+.ifd-clsA {
+  background: var(--ink);
+}
+.ifd-clsB {
+  background: var(--warning);
+}
+.ifd-clsC {
+  background: var(--text-4);
+}
+[data-theme="dark"] .ifd-clsA {
+  background: var(--ink-600);
+}
+
+/* dark: o teal do vault não adapta — medido/repasse usam o verde semântico */
+[data-theme="dark"] table.ifd-t td.vmed,
+[data-theme="dark"] table.ifd-t td.rep,
+[data-theme="dark"] .ifd-catmed {
+  color: var(--success);
+}

@@ -1,0 +1,202 @@
+/* C.6 Insumos v53 — específico da tela (o grosso do visual vem de InsumosFd/insumos-fd.css).
+   Co-localizado. Tokens-only. */
+
+.c6-wrap {
+  display: flex;
+  flex-direction: column;
+  --c6-navy: var(--ink); /* série navy dos gráficos (adapta no dark) */
+}
+[data-theme="dark"] .c6-wrap {
+  --c6-navy: var(--text);
+}
+
+.c6-titulo {
+  font-size: var(--fs-22, 22px);
+  font-weight: var(--fw-bold);
+  color: var(--text);
+  margin-bottom: 8px;
+}
+
+.c6-sub {
+  color: var(--text-3);
+  font-size: var(--fs-13);
+  margin-bottom: 6px;
+}
+.c6-sub b {
+  color: var(--text);
+}
+
+.c6-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 11px;
+  border-radius: var(--r-pill);
+  font-size: var(--fs-12);
+  font-weight: var(--fw-semibold);
+  background: var(--success-bg);
+  color: var(--success);
+}
+/* dot 8px (substitui o glifo ● textual) — herda o tom da pill via currentColor */
+.c6-pill-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--r-pill);
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+/* barra de parâmetros (RmaParamBar) — respiro entre o sub e os KPIs */
+.c6-pbar {
+  margin: 14px 0 4px;
+}
+/* IPCA em destaque na barra de parâmetros (linha divisória da cláusula 8.8) */
+.c6-hot {
+  color: var(--danger);
+  font-weight: var(--fw-bold);
+  font-variant-numeric: tabular-nums;
+}
+
+/* disclosure do banner metodológico — colapsado por padrão, texto integral dentro (refino UX) */
+.c6-srcinfo {
+  margin: 16px 0 18px;
+}
+.c6-srcinfo summary {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  list-style: none;
+  color: var(--text-2);
+}
+.c6-srcinfo summary::-webkit-details-marker {
+  display: none;
+}
+.c6-srcinfo summary:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+  border-radius: var(--r-sm);
+}
+.c6-srcinfo-mais {
+  color: var(--text-3);
+}
+.c6-srcinfo-chev {
+  margin-left: auto;
+  color: var(--text-3);
+  flex-shrink: 0;
+  transition: transform 0.15s var(--easing);
+}
+.c6-srcinfo[open] .c6-srcinfo-chev {
+  transform: rotate(180deg);
+}
+.c6-srcinfo p {
+  margin: 8px 0 0;
+}
+
+/* legendas dos gráficos (ChartLegend) coladas ao painel */
+.c6-chartlegend {
+  margin-top: 8px;
+}
+
+/* caixa de ligação com a D.5 */
+.c6-linkbox {
+  background: color-mix(in srgb, var(--info) 7%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--info) 24%, var(--surface));
+  border-radius: var(--r-sm);
+  padding: 14px 18px;
+  margin-bottom: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.c6-linkbox .lt {
+  font-size: var(--fs-13);
+  color: var(--text);
+}
+.c6-linkbox .lv {
+  display: flex;
+  gap: 22px;
+  align-items: center;
+}
+.c6-linkbox .lv .it {
+  text-align: right;
+}
+.c6-linkbox .lv .it .il {
+  font-size: var(--fs-12);
+  color: var(--text-3);
+}
+.c6-linkbox .lv .it .iv {
+  font-size: 16px;
+  font-weight: var(--fw-bold);
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+.c6-linkbox .lv .it .iv.amb {
+  color: var(--warning);
+}
+.c6-linkbox a.go {
+  background: var(--info);
+  color: #fff;
+  padding: 8px 15px;
+  border-radius: 7px;
+  text-decoration: none;
+  font-size: 12.5px;
+  font-weight: var(--fw-semibold);
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: filter 0.15s var(--easing);
+}
+.c6-linkbox a.go:hover {
+  filter: brightness(1.08);
+}
+
+/* card da IA (fundo claro · NÃO usar <Card> — vide gotcha do card escuro) */
+.c6-chat {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 18px 22px;
+  margin-bottom: 20px;
+}
+.c6-chat .ch {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.c6-chat .ch .ia {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.c6-chat .ch .ia .badge {
+  background: color-mix(in srgb, var(--info) 10%, var(--surface));
+  color: var(--info);
+  font-size: 11px;
+  font-weight: var(--fw-bold);
+  padding: 4px 9px;
+  border-radius: 6px;
+}
+.c6-chat .ch .ia b {
+  color: var(--text);
+  font-size: var(--fs-13);
+}
+.c6-chat .ch .edit {
+  color: var(--info);
+  font-size: var(--fs-12);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.c6-chat p {
+  font-size: var(--fs-13);
+  color: var(--text-2);
+  line-height: 1.6;
+}
+.c6-chat p b {
+  color: var(--text);
+}

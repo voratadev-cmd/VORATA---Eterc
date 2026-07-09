@@ -1,0 +1,422 @@
+/* D.3 · Encargos Sociais · co-localizado. Tokens-only · sem border-left de farol (Badge/dot). */
+
+.enc-main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+}
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Header ─────────────────────────────────────────────────────── */
+.enc-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--s-4);
+  flex-wrap: wrap;
+}
+.enc-titulo {
+  font-size: var(--fs-28);
+  font-weight: var(--fw-bold);
+  color: var(--text);
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+.enc-sub {
+  font-size: var(--fs-13);
+  color: var(--text-3);
+  margin: 4px 0 0 0;
+  max-width: 78ch;
+  line-height: var(--lh-snug);
+}
+.enc-sub b {
+  color: var(--text-2);
+  font-weight: var(--fw-semibold);
+}
+
+/* ── KPIs ───────────────────────────────────────────────────────── */
+.enc-kpis {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--s-3);
+}
+@media (max-width: 880px) {
+  .enc-kpis {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Seção ──────────────────────────────────────────────────────── */
+.enc-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: var(--s-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+}
+.enc-section-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--s-3);
+}
+.enc-section-title {
+  font-size: var(--fs-15);
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+  margin: 0;
+}
+.enc-section-sub {
+  font-size: 11px;
+  color: var(--text-3);
+  margin: 2px 0 0 0;
+}
+
+/* ── Tabela de composição ───────────────────────────────────────── */
+/* scroll horizontal honesto ≤880px — preserva as 6 colunas em vez de espremê-las */
+.enc-tabela-scroll {
+  overflow-x: auto;
+}
+.enc-tabela {
+  display: flex;
+  flex-direction: column;
+  min-width: 640px;
+}
+.enc-tabela-head,
+.enc-tabela-row {
+  display: grid;
+  grid-template-columns: 2.5fr 1fr 1fr 1fr 1fr 0.7fr;
+  align-items: center;
+  gap: var(--s-3);
+  padding: var(--s-2) var(--s-2);
+}
+.enc-tabela-head {
+  font-size: 11px;
+  font-weight: var(--fw-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--text-3);
+  border-bottom: 1px solid var(--border);
+}
+.enc-tabela-head .r {
+  text-align: right;
+}
+.enc-tabela-head .c {
+  text-align: center;
+}
+.enc-tabela-row {
+  font-size: var(--fs-13);
+  color: var(--text-2);
+  border-bottom: 1px solid var(--border);
+  transition: background 0.12s var(--easing);
+}
+.enc-tabela-row:hover {
+  background: var(--surface-2);
+}
+.enc-tabela-row .r {
+  text-align: right;
+  color: var(--text);
+}
+.enc-tabela-row .c {
+  text-align: center;
+}
+.enc-cell-enc {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.enc-cod {
+  font-family: var(--font-mono);
+  font-size: var(--fs-12);
+  font-weight: var(--fw-semibold);
+  color: var(--text-3);
+  margin-right: 4px;
+}
+
+/* grupo (A/B/D) — cabeçalho */
+.enc-tabela-grupo {
+  font-size: 11px;
+  font-weight: var(--fw-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-3);
+  background: var(--surface-2);
+  padding: var(--s-2) var(--s-2);
+  border-bottom: 1px solid var(--border);
+}
+.enc-tabela-grupo .enc-cod {
+  color: var(--brand-700);
+}
+
+/* divergência (Real ≠ Proposta) */
+.enc-row-div {
+  background: var(--warning-bg);
+}
+.enc-row-div:hover {
+  background: var(--warning-bg);
+}
+.enc-div {
+  color: var(--warning) !important;
+  font-weight: var(--fw-semibold);
+}
+.enc-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: var(--r-pill);
+}
+.enc-dot-ok {
+  background: var(--success);
+}
+.enc-dot-div {
+  background: var(--warning);
+}
+
+/* TOTAL */
+.enc-tabela-tot {
+  border-top: 2px solid var(--border-strong);
+  border-bottom: none;
+  font-weight: var(--fw-bold);
+  color: var(--text);
+}
+.enc-tabela-tot:hover {
+  background: transparent;
+}
+.enc-tabela-tot .r {
+  font-weight: var(--fw-bold);
+}
+
+/* ── Folha-base + simulação ─────────────────────────────────────── */
+.enc-deqgrid {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: var(--s-4);
+  align-items: start;
+}
+@media (max-width: 880px) {
+  .enc-deqgrid {
+    grid-template-columns: 1fr;
+  }
+}
+.enc-deqcard {
+  padding: var(--s-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+.enc-deqcard-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--fs-13);
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+  margin: 0 0 var(--s-2) 0;
+}
+/* Seletor de base da MOD (Histograma/CPU) — agora o Segmented do DS (keynav ARIA de graça). */
+.enc-basetoggle {
+  margin-bottom: var(--s-2);
+  align-self: flex-start;
+}
+.enc-ln {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s-3);
+  font-size: var(--fs-13);
+  color: var(--text-2);
+  padding: var(--s-2) 0;
+  border-bottom: 1px dashed var(--border);
+}
+.enc-ln-sub {
+  font-size: var(--fs-12);
+  color: var(--text-3);
+}
+.enc-ln-sub span:last-child {
+  font-weight: var(--fw-medium);
+}
+.enc-ln span:last-child {
+  color: var(--text);
+  font-weight: var(--fw-semibold);
+}
+.enc-ln-tot span:last-child {
+  font-weight: var(--fw-bold);
+}
+.enc-ln-big {
+  border-bottom: none;
+  margin-top: 2px;
+}
+.enc-ln-big span:last-child {
+  font-size: var(--fs-20);
+  font-weight: var(--fw-bold);
+}
+.enc-ln-sim span:last-child {
+  color: var(--brand-700);
+}
+.enc-fld {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: var(--s-2);
+}
+.enc-fld span {
+  font-size: 11px;
+  color: var(--text-3);
+}
+.enc-fld input {
+  width: 100%;
+  font-family: var(--font);
+  font-size: var(--fs-14);
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: var(--s-2) var(--s-3);
+  transition:
+    box-shadow 0.12s var(--easing),
+    border-color 0.12s var(--easing);
+}
+.enc-fld input:focus {
+  outline: none;
+  border-color: var(--brand);
+  box-shadow: var(--ring);
+}
+/* input inválido (parse falhou) — feedback em vez de simular 0 em silêncio */
+.enc-fld input.enc-in-erro,
+.enc-fld input.enc-in-erro:focus {
+  border-color: var(--danger);
+  box-shadow: 0 0 0 3px var(--danger-bg);
+}
+.enc-fld-err {
+  color: var(--danger) !important;
+  font-weight: var(--fw-medium);
+}
+/* degraus de reoneração (preenchem o campo) */
+.enc-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+  margin-bottom: var(--s-2);
+}
+.enc-deqcard-hint {
+  font-size: 11px;
+  color: var(--text-3);
+  line-height: 1.5;
+  margin: var(--s-2) 0 0 0;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Gráficos (composição por grupo · folha MOD mensal) ─────────── */
+.enc-chartbox {
+  width: 100%;
+}
+.enc-chart-cap {
+  font-size: 11px;
+  color: var(--text-3);
+  line-height: 1.5;
+  margin: var(--s-2) 0 0 0;
+  font-variant-numeric: tabular-nums;
+}
+.enc-chart-cap b {
+  color: var(--text-2);
+  font-weight: var(--fw-semibold);
+}
+/* bloco do gráfico mensal (dentro da seção de simulação, largura cheia) */
+.enc-chartwrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  margin-top: var(--s-2);
+  padding-top: var(--s-4);
+  border-top: 1px dashed var(--border);
+}
+.enc-chartwrap-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-3);
+  flex-wrap: wrap;
+}
+.enc-chartwrap-title {
+  font-size: var(--fs-13);
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+  margin: 0;
+}
+.enc-chartwrap-sub {
+  font-size: 11px;
+  font-weight: var(--fw-regular);
+  color: var(--text-3);
+}
+
+/* ── Notebox ────────────────────────────────────────────────────── */
+.enc-notebox {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-3);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: var(--s-4);
+}
+.enc-notebox svg {
+  flex-shrink: 0;
+  color: var(--text-3);
+  margin-top: 1px;
+}
+.enc-notebox p {
+  font-size: var(--fs-12);
+  color: var(--text-3);
+  line-height: var(--lh-normal);
+  margin: 0;
+}
+.enc-notebox b {
+  color: var(--text-2);
+  font-weight: var(--fw-semibold);
+}
+
+/* ── Leitura IA ─────────────────────────────────────────────────── */
+.enc-ia {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: var(--s-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+.enc-ia-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10.5px;
+  font-weight: var(--fw-bold);
+  letter-spacing: 0.06em;
+  color: var(--brand-700);
+}
+.enc-ia-texto {
+  font-size: var(--fs-13);
+  color: var(--text-2);
+  line-height: var(--lh-normal);
+  margin: 0;
+}
+
+/* ── Skeletons ──────────────────────────────────────────────────── */
+.enc-sk-pbar {
+  height: 40px;
+  border-radius: var(--r-md);
+}
+.enc-sk-kpi {
+  height: 104px;
+  border-radius: var(--r-md);
+}
+.enc-sk-section {
+  height: 300px;
+  border-radius: var(--r-lg);
+}

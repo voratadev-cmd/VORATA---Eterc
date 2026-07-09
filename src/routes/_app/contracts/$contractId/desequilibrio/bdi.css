@@ -1,0 +1,317 @@
+/* D.2 — BDI (desequilíbrio do BDI não remunerado). Co-localizado. Tokens-only.
+   KPI card tingido pelo tom do índice. Texto/traço sobre saturado = --on-accent. */
+
+.d2-page {
+  padding: var(--s-6) var(--s-8);
+}
+
+/* ── Cabeçalho ───────────────────────────────────────────────────────────── */
+.d2-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--s-4);
+}
+.d2-title {
+  font-size: var(--fs-28);
+  font-weight: var(--fw-bold);
+  color: var(--text);
+  letter-spacing: -0.01em;
+}
+.d2-sub {
+  margin-top: var(--s-1);
+  font-size: var(--fs-13);
+  color: var(--text-3);
+  max-width: 880px;
+  line-height: var(--lh-normal);
+}
+.d2-sub b {
+  color: var(--text-2);
+}
+
+.d2-sec {
+  font-size: var(--fs-11);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-3);
+  font-weight: var(--fw-bold);
+  margin: var(--s-6) 0 var(--s-3);
+}
+.d2-exhint {
+  text-transform: none;
+  letter-spacing: 0;
+  font-weight: var(--fw-regular);
+  color: var(--text-4);
+}
+
+/* ── KPIs (tingidos pelo tom) ────────────────────────────────────────────── */
+.d2-kpis {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: var(--s-4);
+}
+.d2-kpc {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: var(--s-4);
+}
+.d2-kpc-success {
+  background: var(--success-bg);
+  border-color: color-mix(in srgb, var(--success) 24%, var(--border));
+}
+.d2-kpc-success .d2-kpc-v {
+  color: var(--success);
+}
+.d2-kpc-danger {
+  background: var(--danger-bg);
+  border-color: color-mix(in srgb, var(--danger) 24%, var(--border));
+}
+.d2-kpc-danger .d2-kpc-v {
+  color: var(--danger);
+}
+.d2-kpc-warning {
+  background: var(--warning-bg);
+  border-color: color-mix(in srgb, var(--warning) 24%, var(--border));
+}
+.d2-kpc-warning .d2-kpc-v {
+  color: var(--warning);
+}
+.d2-kpc-info {
+  background: var(--info-bg);
+  border-color: color-mix(in srgb, var(--info) 24%, var(--border));
+}
+.d2-kpc-info .d2-kpc-v {
+  color: var(--info);
+}
+.d2-kpc-l {
+  font-size: var(--fs-12);
+  color: var(--text-3);
+}
+.d2-kpc-v {
+  font-size: var(--fs-20);
+  font-weight: var(--fw-bold);
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+  margin-top: 4px;
+}
+.d2-kpc-s {
+  font-size: var(--fs-11);
+  color: var(--text-3);
+  margin-top: 4px;
+}
+
+/* ── Basebar ─────────────────────────────────────────────────────────────── */
+.d2-basebar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-3) var(--s-6);
+  margin-top: var(--s-3);
+  padding: var(--s-3) var(--s-4);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+}
+.d2-base-it {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.d2-base-l {
+  font-size: var(--fs-11);
+  color: var(--text-3);
+}
+.d2-base-v {
+  font-size: var(--fs-14);
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Card / tabela ───────────────────────────────────────────────────────── */
+.d2-card {
+  padding: var(--s-4);
+}
+.d2-t {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-12);
+}
+.d2-t th {
+  text-align: left;
+  color: var(--text-3);
+  font-weight: var(--fw-semibold);
+  font-size: var(--fs-11);
+  padding: 7px 8px;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+.d2-t td {
+  padding: 7px 8px;
+  border-bottom: 1px solid var(--surface-2);
+  color: var(--text-2);
+}
+.d2-t td.r,
+.d2-t th.r {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.d2-t .d2-deq {
+  color: var(--danger);
+  font-weight: var(--fw-semibold);
+}
+.d2-t .d2-tot td {
+  font-weight: var(--fw-bold);
+  color: var(--text);
+  border-top: 2px solid var(--border);
+  border-bottom: none;
+}
+.d2-note {
+  font-size: var(--fs-12);
+  color: var(--text-3);
+  margin-top: var(--s-2);
+  line-height: var(--lh-normal);
+}
+.d2-note b {
+  color: var(--text-2);
+}
+
+/* ── Curva ───────────────────────────────────────────────────────────────── */
+.d2-chartbox {
+  width: 100%;
+}
+/* ── Calculadora ─────────────────────────────────────────────────────────── */
+.d2-calcwrap {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--s-4);
+  align-items: start;
+}
+.d2-calc {
+  padding: var(--s-4);
+}
+.d2-calc h4 {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--fs-14);
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+  margin-bottom: var(--s-3);
+}
+.d2-fld {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: var(--s-3);
+}
+.d2-fld span {
+  font-size: var(--fs-11);
+  color: var(--text-3);
+}
+.d2-fld input {
+  font-size: var(--fs-14);
+  font-weight: var(--fw-semibold);
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  outline: none;
+  transition: box-shadow 0.15s var(--easing);
+}
+.d2-fld input:focus {
+  box-shadow: var(--ring);
+  border-color: var(--brand);
+}
+.d2-out {
+  border-top: 1px solid var(--border);
+  padding-top: var(--s-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+.d2-ln {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--s-3);
+  font-size: var(--fs-12);
+  color: var(--text-2);
+}
+.d2-ln span:last-child {
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--fw-semibold);
+  white-space: nowrap;
+}
+.d2-ln.d2-big {
+  margin-top: var(--s-1);
+  padding-top: var(--s-2);
+  border-top: 1px dashed var(--border);
+  font-size: var(--fs-14);
+}
+.d2-ln.d2-big span:last-child {
+  color: var(--danger);
+  font-weight: var(--fw-bold);
+}
+.d2-ln.d2-rem span:last-child {
+  color: var(--success);
+  font-weight: var(--fw-bold);
+}
+.d2-chint {
+  font-size: var(--fs-11);
+  color: var(--text-3);
+  margin-top: var(--s-3);
+  line-height: var(--lh-normal);
+}
+
+/* ── IA ──────────────────────────────────────────────────────────────────── */
+.d2-ia {
+  padding: var(--s-4);
+  margin-top: var(--s-6);
+}
+.d2-ia-h {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  margin-bottom: var(--s-2);
+}
+.d2-ia-badge {
+  background: var(--brand-50);
+  color: var(--brand);
+  font-size: var(--fs-11);
+  font-weight: var(--fw-bold);
+  padding: 2px 9px;
+  border-radius: var(--r-pill);
+}
+.d2-pt {
+  font-size: var(--fs-15);
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+}
+.d2-ia p {
+  font-size: var(--fs-13);
+  color: var(--text-2);
+  line-height: var(--lh-normal);
+  margin-top: var(--s-2);
+}
+.d2-ia b {
+  color: var(--text);
+}
+
+/* ── Responsivo ──────────────────────────────────────────────────────────── */
+@media (max-width: 1100px) {
+  .d2-kpis {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .d2-calcwrap {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 720px) {
+  .d2-kpis {
+    grid-template-columns: 1fr;
+  }
+}

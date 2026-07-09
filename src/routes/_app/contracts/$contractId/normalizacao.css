@@ -1,0 +1,249 @@
+/* Tela Normalização · painel de controle (snapshot + 4 tabs) — co-localizado. */
+
+.norm-stepper {
+  margin: var(--s-5) 0 var(--s-6);
+}
+
+/* ── Snapshot · 4 KPIs ─────────────────────────────────────────── */
+
+.norm-kpis-hero {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--s-3);
+  margin-bottom: var(--s-4);
+}
+@media (max-width: 1100px) {
+  .norm-kpis-hero {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 720px) {
+  .norm-kpis-hero {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Tabs + painéis ────────────────────────────────────────────── */
+
+.norm-tabs {
+  margin-top: var(--s-2);
+}
+.norm-tab-painel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+  min-width: 0;
+  margin-top: var(--s-4);
+}
+.norm-sub {
+  font-size: var(--fs-13);
+  color: var(--text-3);
+  line-height: var(--lh-normal);
+  margin: 0 0 var(--s-3) 0;
+  max-width: 95ch;
+}
+
+/* ── Motor (2 trilhos) ─────────────────────────────────────────── */
+
+.norm-motor-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--s-4);
+}
+@media (max-width: 1100px) {
+  .norm-motor-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.norm-motor-trilho {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: var(--s-4);
+  transition: border-color 0.18s var(--easing);
+}
+.norm-motor-trilho.ativo {
+  background: var(--brand-50);
+  border-color: var(--brand-100);
+}
+[data-theme="dark"] .norm-motor-trilho.ativo {
+  background: var(--surface-3);
+  border-color: var(--border-strong);
+}
+.norm-motor-trilho-head {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  flex-wrap: wrap;
+  font-size: var(--fs-14);
+  color: var(--text);
+  margin-bottom: var(--s-2);
+}
+.norm-motor-trilho-head svg {
+  color: var(--text-3);
+  flex-shrink: 0;
+}
+.norm-motor-trilho p {
+  font-size: var(--fs-13);
+  color: var(--text-2);
+  line-height: var(--lh-normal);
+  margin: 0;
+}
+.norm-motor-nota {
+  font-size: var(--fs-12);
+  color: var(--text-3);
+  line-height: var(--lh-normal);
+  margin: var(--s-3) 0 0 0;
+  padding-top: var(--s-3);
+  border-top: 1px dashed var(--border);
+}
+
+/* ── Contribuições ─────────────────────────────────────────────── */
+
+.norm-contrib-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+.norm-contrib-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-3);
+  padding: var(--s-3) var(--s-2);
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+.norm-contrib-item:last-child {
+  border-bottom: 0;
+}
+.norm-contrib-main {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+.norm-contrib-nome {
+  font-size: var(--fs-14);
+  font-weight: var(--fw-medium);
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.norm-contrib-meta {
+  font-size: var(--fs-12);
+  color: var(--text-3);
+}
+.norm-contrib-erro {
+  color: var(--warning);
+}
+.norm-contrib-acoes {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  flex-wrap: wrap;
+}
+
+/* ── Rotas do motor ────────────────────────────────────────────── */
+
+.norm-rota-nome {
+  font-size: var(--fs-13);
+  font-weight: var(--fw-medium);
+  color: var(--text);
+}
+.norm-rota-tabelas {
+  font-size: var(--fs-12);
+  font-family: var(--font-mono);
+  color: var(--text-4);
+  margin-top: 1px;
+}
+
+/* ── Cobertura do RMA ──────────────────────────────────────────── */
+
+.norm-cob-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+.norm-cob-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-3);
+  padding: var(--s-3) var(--s-2);
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+.norm-cob-item:last-child {
+  border-bottom: 0;
+}
+.norm-cob-main {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+.norm-cob-nome {
+  font-size: var(--fs-14);
+  font-weight: var(--fw-medium);
+  color: var(--text);
+}
+.norm-cob-det {
+  font-size: var(--fs-12);
+  color: var(--text-3);
+  font-variant-numeric: tabular-nums;
+}
+.norm-cob-acoes {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+}
+
+/* ── Seções / Tabelas ──────────────────────────────────────────── */
+
+.norm-sec-toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+}
+.norm-sec-titulo {
+  display: block;
+  font-size: var(--fs-13);
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.norm-sec-tipo {
+  font-size: var(--fs-12);
+  color: var(--text-3);
+}
+.norm-tbl-label {
+  font-size: var(--fs-13);
+  font-weight: var(--fw-medium);
+  color: var(--text);
+}
+.norm-tbl-code {
+  font-size: var(--fs-12);
+  color: var(--text-4);
+  font-family: var(--font-mono);
+  margin-top: 1px;
+}
+.norm-tbl-n {
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+}
+.norm-tbl-zero {
+  font-size: var(--fs-12);
+  color: var(--text-4);
+}
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
