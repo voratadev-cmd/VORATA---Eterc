@@ -20,7 +20,7 @@ services:
     dockerfile_path: agent/Dockerfile
     source_dir: agent
     github:
-      repo: voratadev-cmd/Base-Repository
+      repo: voratadev-cmd/VORATA---Eterc
       branch: main
       deploy_on_push: false # ligue quando os secrets estiverem configurados
     instance_count: 1
@@ -42,7 +42,7 @@ workers:
     dockerfile_path: agent/Dockerfile
     source_dir: agent
     github:
-      repo: voratadev-cmd/Base-Repository
+      repo: voratadev-cmd/VORATA---Eterc
       branch: main
       deploy_on_push: false
     instance_count: 1
@@ -60,7 +60,7 @@ workers:
     dockerfile_path: agent/Dockerfile
     source_dir: agent
     github:
-      repo: voratadev-cmd/Base-Repository
+      repo: voratadev-cmd/VORATA---Eterc
       branch: main
       deploy_on_push: false
     instance_count: 1
