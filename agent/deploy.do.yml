@@ -30,7 +30,7 @@ services:
     health_check:
       http_path: /api/health
     envs:
-      - { key: SUPABASE_URL, value: https://SUPABASE_REF_ETERC_AQUI.supabase.co, scope: RUN_TIME }
+      - { key: SUPABASE_URL, value: https://rruhfhcvtlnuqmskxbpr.supabase.co, scope: RUN_TIME }
       - { key: SUPABASE_SERVICE_KEY, scope: RUN_TIME, type: SECRET }
       - { key: VPS_SECRET, scope: RUN_TIME, type: SECRET }
       - { key: ANTHROPIC_API_KEY, scope: RUN_TIME, type: SECRET }
@@ -49,7 +49,7 @@ workers:
     instance_size_slug: basic-xs
     run_command: python -m agents.mapeamento.job
     envs:
-      - { key: SUPABASE_URL, value: https://SUPABASE_REF_ETERC_AQUI.supabase.co, scope: RUN_TIME }
+      - { key: SUPABASE_URL, value: https://rruhfhcvtlnuqmskxbpr.supabase.co, scope: RUN_TIME }
       - { key: SUPABASE_SERVICE_KEY, scope: RUN_TIME, type: SECRET }
       - { key: VPS_SECRET, scope: RUN_TIME, type: SECRET }
       - { key: ANTHROPIC_API_KEY, scope: RUN_TIME, type: SECRET }
@@ -67,7 +67,7 @@ workers:
     instance_size_slug: basic-s # extração é mais pesada (PyMuPDF/pycel/pandas)
     run_command: python -m agents.extracao.job
     envs:
-      - { key: SUPABASE_URL, value: https://SUPABASE_REF_ETERC_AQUI.supabase.co, scope: RUN_TIME }
+      - { key: SUPABASE_URL, value: https://rruhfhcvtlnuqmskxbpr.supabase.co, scope: RUN_TIME }
       - { key: SUPABASE_SERVICE_KEY, scope: RUN_TIME, type: SECRET }
       - { key: VPS_SECRET, scope: RUN_TIME, type: SECRET }
       - { key: ANTHROPIC_API_KEY, scope: RUN_TIME, type: SECRET }

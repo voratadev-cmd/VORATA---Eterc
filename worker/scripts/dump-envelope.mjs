@@ -3,7 +3,7 @@
 // casam em agent/agents/normalizacao/fixtures/. Reusa o session pooler IPv4 da vorata.
 //
 // Uso (de dentro de worker/, com pg instalado):
-//   SUPABASE_DB_URL='postgresql://postgres.<ref>:<SENHA>@aws-1-us-east-1.pooler.supabase.com:5432/postgres' \
+//   SUPABASE_DB_URL='postgresql://postgres.<ref>:<SENHA>@aws-0-us-east-1.pooler.supabase.com:5432/postgres' \
 //     node scripts/dump-envelope.mjs            # só inventário
 //   ...                                          node scripts/dump-envelope.mjs rdo   # + dumpa RDOs
 
@@ -15,8 +15,8 @@ import { fileURLToPath } from "node:url";
 import pg from "pg";
 
 const OBRA = "5dd81834-f02c-4f34-8b7d-c186883acd75"; // Aeroporto Sorriso (teste real)
-const REF = "SUPABASE_REF_ETERC_AQUI"; // projeto Supabase da vorata
-const POOLER = "aws-1-us-east-1.pooler.supabase.com:5432";
+const REF = "rruhfhcvtlnuqmskxbpr"; // projeto Supabase da vorata
+const POOLER = "aws-0-us-east-1.pooler.supabase.com:5432";
 const __dir = dirname(fileURLToPath(import.meta.url)); // worker/scripts
 const FIX = join(__dir, "..", "..", "agent", "agents", "normalizacao", "fixtures");
 const pad = (process.argv[2] || "").toLowerCase();

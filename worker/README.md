@@ -13,7 +13,7 @@ Sobrou aqui só o que ainda é usado: os **scripts de migration** do Supabase.
 ```bash
 cd worker && npm i pg --no-save   # uma vez
 
-SUPABASE_DB_URL='postgresql://postgres.<ref>:<SENHA>@aws-1-us-east-1.pooler.supabase.com:5432/postgres' \
+SUPABASE_DB_URL='postgresql://postgres.<ref>:<SENHA>@aws-0-us-east-1.pooler.supabase.com:5432/postgres' \
   node scripts/apply-migration.mjs ../supabase/migrations/<arquivo>.sql
 
 # conferir:

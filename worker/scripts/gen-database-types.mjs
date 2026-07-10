@@ -5,7 +5,7 @@
 // e não enxerga o projeto vorata.
 //
 // Uso:
-//   cd worker && SUPABASE_DB_URL='postgresql://postgres.<ref>:<SENHA>@aws-1-us-east-1.pooler.supabase.com:5432/postgres' \
+//   cd worker && SUPABASE_DB_URL='postgresql://postgres.<ref>:<SENHA>@aws-0-us-east-1.pooler.supabase.com:5432/postgres' \
 //     node scripts/gen-database-types.mjs [saida.ts]
 //
 // Default de saída: ../src/lib/supabase/database.types.ts

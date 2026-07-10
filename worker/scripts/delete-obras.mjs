@@ -10,7 +10,7 @@
 //   node scripts/delete-obras.mjs <padrão-do-nome>            → dry-run (só lista)
 //   node scripts/delete-obras.mjs <padrão-do-nome> --apply    → deleta de verdade
 //
-//   SUPABASE_DB_URL='postgresql://postgres.<ref>:<senha>@aws-1-us-east-1.pooler.supabase.com:5432/postgres' \
+//   SUPABASE_DB_URL='postgresql://postgres.<ref>:<senha>@aws-0-us-east-1.pooler.supabase.com:5432/postgres' \
 //     node scripts/delete-obras.mjs sorriso --apply
 //
 // Requer `pg` instalado (npm i pg --no-save).
@@ -19,8 +19,8 @@ import { createInterface } from "node:readline";
 
 import pg from "pg";
 
-const REF = "SUPABASE_REF_ETERC_AQUI"; // projeto Supabase da vorata
-const POOLER = "aws-1-us-east-1.pooler.supabase.com:5432";
+const REF = "rruhfhcvtlnuqmskxbpr"; // projeto Supabase da vorata
+const POOLER = "aws-0-us-east-1.pooler.supabase.com:5432";
 const BUCKET = "rma-docs";
 
 function askHidden(question) {

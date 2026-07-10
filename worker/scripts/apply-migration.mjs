@@ -12,8 +12,8 @@ import { createInterface } from "node:readline";
 
 import pg from "pg";
 
-const REF = "SUPABASE_REF_ETERC_AQUI"; // projeto Supabase da vorata
-const POOLER = "aws-1-us-east-1.pooler.supabase.com:5432";
+const REF = "rruhfhcvtlnuqmskxbpr"; // projeto Supabase da vorata
+const POOLER = "aws-0-us-east-1.pooler.supabase.com:5432";
 
 // Pergunta a senha sem ecoar — evita colar URL/senha no comando.
 function askHidden(question) {

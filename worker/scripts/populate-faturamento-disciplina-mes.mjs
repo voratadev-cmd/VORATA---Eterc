@@ -4,7 +4,7 @@
 //
 // Uso (de dentro de worker/):
 //   cd agent && venv/bin/python -m agents.normalizacao.build_faturamento_matriz_payload
-//   SUPABASE_DB_URL='postgresql://…@aws-1-us-east-1.pooler.supabase.com:5432/postgres' \
+//   SUPABASE_DB_URL='postgresql://…@aws-0-us-east-1.pooler.supabase.com:5432/postgres' \
 //     node scripts/populate-faturamento-disciplina-mes.mjs
 import { readFileSync } from "node:fs";
 import pg from "pg";

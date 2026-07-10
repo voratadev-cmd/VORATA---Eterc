@@ -52,7 +52,7 @@ cp .env.example .env
 
 # 5) Aplicar a migration do chat (uma vez) · usa o runner do worker:
 #    (do repo root)
-cd ../worker && SUPABASE_DB_URL='postgresql://postgres.SUPABASE_REF_ETERC_AQUI:<SENHA>@aws-1-us-east-1.pooler.supabase.com:5432/postgres' \
+cd ../worker && SUPABASE_DB_URL='postgresql://postgres.rruhfhcvtlnuqmskxbpr:<SENHA>@aws-0-us-east-1.pooler.supabase.com:5432/postgres' \
   node scripts/apply-migration.mjs ../supabase/migrations/20260601000002_adm_chat.sql
 cd ../agent
 

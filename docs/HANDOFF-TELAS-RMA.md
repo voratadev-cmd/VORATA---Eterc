@@ -51,7 +51,7 @@ corretos (pode haver pequenas divergências). É interativo: toggles, listas que
 - **Obra de teste**: BR-101 v45 · `contrato_id = fe288319-ff4f-4564-a459-139dfb021265` ·
   `arquivo_id = 6f511b40-2c64-4387-9cf5-480d03a6f80d` (v45 normalizado).
 - **Banco** (senha o usuário passa — nunca commitar): Session pooler IPv4
-  `postgresql://postgres.SUPABASE_REF_ETERC_AQUI:<SENHA>@aws-1-us-east-1.pooler.supabase.com:5432/postgres`.
+  `postgresql://postgres.rruhfhcvtlnuqmskxbpr:<SENHA>@aws-0-us-east-1.pooler.supabase.com:5432/postgres`.
   Query via `worker/` + `pg` (`npm i pg --no-save` se faltar). Migration: `worker/scripts/apply-migration.mjs`.
 - **Re-normalizar o v45** após um resolver novo: setar o arquivo `status='verified', normalize_attempts=0` +
   `cd agent && PYTHONPATH=. ./venv/bin/python -m agents.normalizacao.job --once`.

@@ -2,7 +2,7 @@
 // Bootstrap do primeiro master + base do futuro "master gerencia usuários".
 //
 // Uso (a partir de worker/):
-//   SUPABASE_DB_URL='postgresql://postgres.<ref>:<SENHA>@aws-1-us-east-1.pooler.supabase.com:5432/postgres' \
+//   SUPABASE_DB_URL='postgresql://postgres.<ref>:<SENHA>@aws-0-us-east-1.pooler.supabase.com:5432/postgres' \
 //     node scripts/grant-role.mjs <email> <master|admin|regular>
 //
 // O usuário precisa já existir no Supabase Auth (painel → Authentication → Add user,

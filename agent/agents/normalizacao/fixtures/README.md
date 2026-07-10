@@ -10,7 +10,7 @@ O golden-test (`test_fatia1.py`) precisa deles localmente. Para **regenerar**:
 2. Conexão = session pooler IPv4 da vorata (ver `CLAUDE.md` · senha do banco vem na hora):
 
 ```
-DB_URL='postgresql://postgres.<ref>:<SENHA>@aws-1-us-east-1.pooler.supabase.com:5432/postgres' \
+DB_URL='postgresql://postgres.<ref>:<SENHA>@aws-0-us-east-1.pooler.supabase.com:5432/postgres' \
 NODE_PATH="$PWD/worker/node_modules" node <<'JS'
 const pg = require('pg'); const fs = require('fs')
 ;(async () => {

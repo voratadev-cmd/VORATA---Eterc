@@ -1,7 +1,7 @@
 # Plataforma de Administração Contratual IA — regras do projeto
 
 > **INSTÂNCIA ETERC** — fork limpo do produto (09/jul/2026), sem dados de outras obras/clientes.
-> Supabase próprio: substituir `SUPABASE_REF_ETERC_AQUI` pelo ref real do projeto Eterc.
+> Supabase próprio: substituir `rruhfhcvtlnuqmskxbpr` pelo ref real do projeto Eterc.
 
 ## Princípio fundamental · "Design e usabilidade são tudo"
 
@@ -42,18 +42,18 @@ A lista de obras (`/contracts`) é o **template canônico** desse padrão — qu
 
 ### Supabase · projeto da vorata
 
-- Projeto: `SUPABASE_REF_ETERC_AQUI` (`https://SUPABASE_REF_ETERC_AQUI.supabase.co`), região **us-east-1**.
+- Projeto: `rruhfhcvtlnuqmskxbpr` (`https://rruhfhcvtlnuqmskxbpr.supabase.co`), região **us-east-1**.
 - **NÃO usar o MCP do Supabase** — falha de rede aqui (`net::ERR_FAILED`) e aponta pra conta errada.
 - A Supabase CLI local está logada na conta **viverdeia** (não enxerga o projeto vorata) → `supabase link`/`db push --linked` falham.
 - **Conexão que FUNCIONA daqui** = Session pooler IPv4 (a Direct `db.<ref>.supabase.co:5432` é IPv6-only, não conecta):
   ```
-  postgresql://postgres.SUPABASE_REF_ETERC_AQUI:<SENHA>@aws-1-us-east-1.pooler.supabase.com:5432/postgres
+  postgresql://postgres.rruhfhcvtlnuqmskxbpr:<SENHA>@aws-0-us-east-1.pooler.supabase.com:5432/postgres
   ```
   ⚠️ Prefixo é **`aws-1`** (não `aws-0`), porta **5432**, user **`postgres.<ref>`**.
 - **Aplicar migration** (sem MCP, sem CLI link): runner em `worker/scripts/apply-migration.mjs` (usa `pg`, roda o `.sql` como transação única):
   ```
   cd worker && npm i pg --no-save
-  SUPABASE_DB_URL='postgresql://postgres.SUPABASE_REF_ETERC_AQUI:<SENHA>@aws-1-us-east-1.pooler.supabase.com:5432/postgres' \
+  SUPABASE_DB_URL='postgresql://postgres.rruhfhcvtlnuqmskxbpr:<SENHA>@aws-0-us-east-1.pooler.supabase.com:5432/postgres' \
     node scripts/apply-migration.mjs ../supabase/migrations/<arquivo>.sql
   ```
   Verificar com `worker/scripts/verify-migration.mjs`. Migrations são idempotentes (`if not exists`/`drop ... if exists`).

@@ -4,7 +4,7 @@
 // (necessária pro login por e-mail) + profile + papel. Idempotente.
 //
 // Uso (a partir de worker/):
-//   SUPABASE_DB_URL='postgresql://postgres.<ref>:<SENHA>@aws-1-us-east-1.pooler.supabase.com:5432/postgres' \
+//   SUPABASE_DB_URL='postgresql://postgres.<ref>:<SENHA>@aws-0-us-east-1.pooler.supabase.com:5432/postgres' \
 //     node scripts/create-user.mjs <email> <senha> <master|admin|regular>
 
 import pg from "pg";

@@ -3,7 +3,7 @@
 import pg from "pg";
 
 const pwd = process.env.DBPASS;
-const ref = "SUPABASE_REF_ETERC_AQUI";
+const ref = "rruhfhcvtlnuqmskxbpr";
 if (!pwd) {
   console.error("DBPASS ausente");
   process.exit(1);

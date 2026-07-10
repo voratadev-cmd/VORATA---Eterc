@@ -114,5 +114,5 @@ CORS travado, segredos fora do git, todos os endpoints autenticados (só `/api/h
    `slowapi` no FastAPI) + teto de gasto na conta Anthropic.
 
 **Pra o piloto (controlável):** `.env` `chmod 600`, firewall 22/80/443, SSH só por chave, Droplet
-só seu. ⚠️ A service key é do **MESMO projeto Supabase do app real** (`SUPABASE_REF_ETERC_AQUI`) — um
+só seu. ⚠️ A service key é do **MESMO projeto Supabase do app real** (`rruhfhcvtlnuqmskxbpr`) — um
 RCE no agente expõe os dados de produção. Para produção, considerar projeto/keys Supabase separados.

@@ -3,7 +3,7 @@
 # QUANDO rodar: após mudar um read-model (deploy/CI) OU após (re)normalizar uma obra (dado mudou).
 # Sem isto o chat lê canônico stale — o gate de paridade pega, mas o certo é manter fresco.
 #
-#   SUPABASE_DB_URL='postgresql://…@aws-1-us-east-1.pooler.supabase.com:5432/postgres' \
+#   SUPABASE_DB_URL='postgresql://…@aws-0-us-east-1.pooler.supabase.com:5432/postgres' \
 #     bash scripts/refresh_kpis.sh
 #   (LEITURA das telas = .env.local/anon · ESCRITA = pooler. Precisa de bun.)
 set -euo pipefail

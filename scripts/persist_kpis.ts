@@ -3,7 +3,7 @@
 // O CHAT (tools.py) passa a LER de obra_kpis → chat == tela por construção. Reexecutar após mudar um
 // read-model (senão o chat lê canônico stale; o gate de paridade pega se esquecer).
 //
-//   SUPABASE_DB_URL='postgresql://…@aws-1-us-east-1.pooler.supabase.com:5432/postgres' \
+//   SUPABASE_DB_URL='postgresql://…@aws-0-us-east-1.pooler.supabase.com:5432/postgres' \
 //     bun run scripts/persist_kpis.ts [obra_id]
 //   (LEITURA via read-models = .env.local/anon; ESCRITA via pooler = pg, bypassa RLS como as migrations)
 import { SQL } from "bun";
