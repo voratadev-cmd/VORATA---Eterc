@@ -172,7 +172,7 @@ def eh_doctype_reajuste(doc_type: str | None) -> bool:
 # com TODAS as seções num envelope só. Roteado p/ o SPLITTER (fan-out 1→N seções). Distinto dos
 # docs SEPARADOS do Sorriso (1 doc = 1 entidade). Matcher amplo (qualquer uma das marcas casa).
 _DOCTYPE_WORKBOOK_MOTOR = (
-    "workbook-fonte", "motor de cálculo", "motor de calculo",
+    "workbook-fonte", "workbook-motor", "workbook motor", "motor de cálculo", "motor de calculo",
     "plataforma de administração contratual", "plataforma de administracao contratual",
 )
 
