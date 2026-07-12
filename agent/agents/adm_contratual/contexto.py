@@ -127,6 +127,74 @@ def coletar_fatos(obra_id: str) -> dict:
                             fis["real_acumulado_pct"] - fis["previsto_acumulado_pct"], 2)
             fatos["fisico"] = fis
 
+    # Fallback SEM doc de medição (workbook-motor: a curva JÁ é o BM oficial · caso SBSO).
+    corte_fb = None
+    if "faturamento" not in fatos:
+        curvas = (supabase.table("obra_faturamento_curvas").select("id, custo_total")
+                  .eq("contrato_id", obra_id).order("created_at", desc=True).limit(1).execute().data or [])
+        mfat = (supabase.table("obra_faturamento_meses")
+                .select("ano, mes, real_rs, real_rs_acumulado, contratado_rs_acumulado")
+                .eq("curva_id", curvas[0]["id"]).execute().data if curvas else []) or []
+        mfat.sort(key=lambda m: (m.get("ano") or 0, m.get("mes") or 0))
+        idx_corte = None
+        for i, m in enumerate(mfat):
+            if (_num(m.get("real_rs")) or 0) > 0:
+                idx_corte = i
+        if idx_corte is not None:
+            ult = mfat[idx_corte]
+            corte_fb = (ult["ano"], ult["mes"])
+            realizado = _num(ult.get("real_rs_acumulado"))
+            contratado = _num(curvas[0].get("custo_total")) or max(
+                (x for x in (_num(m.get("contratado_rs_acumulado")) for m in mfat) if x is not None), default=None)
+            fat = {"bm_corte": idx_corte + 1}
+            if realizado is not None:
+                fat["realizado_acumulado_rs"] = round(realizado, 2)
+            if contratado is not None:
+                fat["contratado_total_rs"] = round(contratado, 2)
+            if realizado and contratado:
+                fat["avanco_financeiro_pct"] = round(realizado / contratado * 100, 2)
+            ct_corte = _num(ult.get("contratado_rs_acumulado"))
+            if realizado and ct_corte:
+                ader = round(realizado / ct_corte * 100, 2)
+                fat["aderencia_vs_previsto_pct"] = ader
+                fat["desvio_faturamento_pp"] = round(ader - 100, 2)
+                fat["farol_faturamento"] = _farol_faturamento_desvio(round(ader - 100, 2))
+            fatos["faturamento"] = fat
+
+    if "fisico" not in fatos and corte_fb:
+        crons = (supabase.table("obra_cronogramas").select("id")
+                 .eq("contrato_id", obra_id).execute().data or [])
+        best, bestn = None, -1
+        for cr in crons:
+            n = len(supabase.table("obra_cronograma_meses").select("id")
+                    .eq("cronograma_id", cr["id"]).execute().data or [])
+            if n > bestn:
+                bestn, best = n, cr["id"]
+        if best:
+            cmeses = (supabase.table("obra_cronograma_meses")
+                      .select("ano, mes, previsto_pct_acumulado, real_pct_acumulado")
+                      .eq("cronograma_id", best).execute().data or [])
+            pm = next((m for m in cmeses if m["ano"] == corte_fb[0] and m["mes"] == corte_fb[1]), None)
+            rl = _num((pm or {}).get("real_pct_acumulado"))
+            pv = _num((pm or {}).get("previsto_pct_acumulado"))
+            if rl is not None:
+                fis = {"real_acumulado_pct": round(rl * 100, 2)}
+                if pv is not None:
+                    fis["previsto_acumulado_pct"] = round(pv * 100, 2)
+                    fis["atraso_fisico_pp"] = round(fis["real_acumulado_pct"] - fis["previsto_acumulado_pct"], 2)
+                fatos["fisico"] = fis
+
+    # Desequilíbrio (D.0) — teto quantificado + maior categoria (sempre que houver painel).
+    des = (supabase.table("obra_desequilibrio").select("categoria, tela, valor_rs")
+           .eq("contrato_id", obra_id).execute().data or [])
+    _dv = [(d, _num(d.get("valor_rs"))) for d in des]
+    _soma = sum(v for _, v in _dv if v)
+    if des and _soma:
+        _top = max((x for x in _dv if x[1]), key=lambda x: x[1])
+        fatos["desequilibrio"] = {"total_rs": round(_soma, 2), "n_categorias": len(des),
+                                  "maior_categoria": str(_top[0].get("categoria"))[:60],
+                                  "maior_tela": _top[0].get("tela"), "maior_rs": round(_top[1], 2)}
+
     # Insumos de faturamento direto (v53 · PQ C.04 c/ BDI) — Curva ABC por valor de contrato.
     ins = (supabase.table("obra_insumos_fd").select("valor_contrato_bdi, valor_medido_bdi")
            .eq("contrato_id", obra_id).execute().data or [])
@@ -144,6 +212,15 @@ def coletar_fatos(obra_id: str) -> dict:
         fatos["insumos"] = {"n_insumos": len(ins), "contrato_fd_bdi_rs": round(total, 2),
                             "medido_bdi_rs": round(medido, 2),
                             "n_concentram_80pct_do_valor": n80}
+
+    # Produtividade econômica (HH) — fallback quando não há física normalizada.
+    pe = (supabase.table("obra_produtividade_economica").select("hh_previsto, hh_real")
+          .eq("contrato_id", obra_id).execute().data or [])
+    if pe:
+        hhp = sum(_num(x.get("hh_previsto")) or 0 for x in pe)
+        hhr = sum(_num(x.get("hh_real")) or 0 for x in pe)
+        if hhp:
+            fatos["produtividade_hh"] = {"hh_previsto_total": round(hhp), "hh_real_acum": round(hhr)}
 
     # Produtividade física.
     pr = (supabase.table("obra_produtividade")
@@ -207,6 +284,13 @@ def build_data_context(obra_id) -> str:  # noqa: ANN001
                       f"{ins['n_concentram_80pct_do_valor']} concentram 80% do contrato "
                       f"({_fmt_rs(ins['contrato_fd_bdi_rs'])}; medido até o BM "
                       f"{_fmt_rs(ins['medido_bdi_rs'])})")
+    des = fatos.get("desequilibrio", {})
+    if des:
+        linhas.append(f"- Desequilíbrio quantificado (D.0): {_fmt_rs(des['total_rs'])} · maior categoria "
+                      f"{des['maior_categoria']} ({des['maior_tela']} · {_fmt_rs(des['maior_rs'])})")
+    ph = fatos.get("produtividade_hh", {})
+    if ph:
+        linhas.append(f"- HH (C.7): previsto total {ph['hh_previsto_total']:,} · real acumulado {ph['hh_real_acum']:,}".replace(",", "."))
     pr = fatos.get("produtividade", {})
     if pr.get("kg_por_pessoa_hora") is not None:
         linhas.append(f"- Produtividade física (armação): {pr['kg_por_pessoa_hora']} kg por pessoa-hora"
