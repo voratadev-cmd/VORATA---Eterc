@@ -1346,13 +1346,30 @@ def extrair_cronograma_curva_fisica(secoes: list[dict]) -> dict:
     # se >1 seção física casar. 'Físico Previsto Acum.' existe na C.5 (v11 e v45), não na C.2.
     sec = _achar_secao_serie(secoes, max_cols_uteis=6, coluna_ancora=("fisico previsto",),
                              exige=[("fisico previsto",), ("fisico real",)])
+    if sec is None:
+        # dialeto SBSO: "Previsto % acum (cronograma) - FISICO" / "Real % acum (FISICO)"
+        for s2 in secoes:
+            if not isinstance(s2, dict) or not s2.get("linhas"):
+                continue
+            cols2 = s2.get("colunas") or []
+            tem_pf = any("previsto" in _norm_key(str(c)) and "fisico" in _norm_key(str(c)) for c in cols2)
+            tem_rf = any("real" in _norm_key(str(c)) and "fisico" in _norm_key(str(c)) for c in cols2)
+            if tem_pf and tem_rf and _achar_coluna(cols2, "mes", "mês") is not None:
+                sec = s2
+                break
     findings: list[dict] = []
     if sec is None:
         findings.append({"severity": "error", "campo": "curva", "msg": "curva física do Prazo não localizada"})
         return {"meses": [], "final_previsto": None, "n_meses": 0, "status": "needs_review", "findings": findings}
     cols = sec.get("colunas") or []
-    c_prev = _achar_coluna(cols, "fisico previsto")
-    c_real = _achar_coluna(cols, "fisico real")
+    c_prev = (_achar_coluna(cols, "fisico previsto")
+              or next((c for c in cols if "previsto" in _norm_key(str(c)) and "fisico" in _norm_key(str(c))), None))
+    c_real = (_achar_coluna(cols, "fisico real")
+              or next((c for c in cols if "real" in _norm_key(str(c)) and "fisico" in _norm_key(str(c))), None))
+    # Escala: BR-101 emite percentual (0–100); SBSO emite FRAÇÃO (0–1). Detecta pelo teto do acumulado.
+    _vals = [_num_limpo(r.get(c_prev)) for _a, _m, _l, r in _iterar_meses(sec)] if c_prev else []
+    _vals = [v for v in _vals if isinstance(v, float)]
+    _div = 1.0 if (_vals and max(_vals) <= 1.5) else 100.0
     meses: list[dict] = []
     prev_acum_ant = 0.0
     for ano, mes, _label, r in _iterar_meses(sec):
@@ -1361,8 +1378,8 @@ def extrair_cronograma_curva_fisica(secoes: list[dict]) -> dict:
         if "ERRO_REF" in (pa, ra):
             findings.append({"severity": "error", "campo": "celula", "msg": f"#REF! em {ano}-{mes:02d}"})
             continue
-        pa_f = pa / 100.0 if isinstance(pa, float) else None       # percentual → fração
-        ra_f = ra / 100.0 if isinstance(ra, float) else None
+        pa_f = pa / _div if isinstance(pa, float) else None       # percentual|fração → fração
+        ra_f = ra / _div if isinstance(ra, float) else None
         p_mes = round(pa_f - prev_acum_ant, 6) if pa_f is not None else None
         if pa_f is not None:
             prev_acum_ant = pa_f
@@ -2540,7 +2557,7 @@ def extrair_chuvas(secoes: list[dict]) -> dict:
             continue
         t = _norm_key(s.get("titulo") or "")
         cols = s.get("colunas") or []
-        if ("chuvas" in t and "acompanhamento" in t
+        if ("chuvas" in t and ("acompanhamento" in t or "analise" in t or "inmet" in t)
                 and _achar_coluna(cols, "chuva prev (mm)", "chuva prev") is not None):
             sec = s
             break
@@ -2557,7 +2574,7 @@ def extrair_chuvas(secoes: list[dict]) -> dict:
             "mo": _achar_coluna(cols, "mes obra", "mês obra"),
             "pa": _achar_coluna(cols, "mes/ano", "mês/ano"),
             "pv": _achar_coluna(cols, "chuva prev (mm)", "chuva prev"),
-            "rl": _achar_coluna(cols, "chuva real (mm)", "chuva real"),
+            "rl": _achar_coluna(cols, "chuva real (mm)", "chuva real", "real inmet", "real rdo"),
             "pac": _achar_coluna(cols, "chuva prev acum"),
             "rac": _achar_coluna(cols, "chuva real acum"),
             "dp": _achar_coluna(cols, "dias parados"),
