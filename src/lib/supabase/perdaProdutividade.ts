@@ -103,12 +103,12 @@ export async function getPerdaProdutividade(
   contractId: string,
 ): Promise<PerdaProdutividade | null> {
   const [cards, ajuste, params, milhaParams, milhaResumo, leitura, cardsCat] = await Promise.all([
-    getSecaoDados(contractId, "D.4 Produtividade — Cards"),
-    getSecaoDados(contractId, "D.4 Produtividade — Tabela de ajuste"),
-    getSecaoDados(contractId, "D.4 Produtividade — Parâmetros"),
+    getSecaoDados(contractId, "D.4%Cards"),
+    getSecaoDados(contractId, "D.4%Tabela de ajuste"),
+    getSecaoDados(contractId, "D.4%Parâmetros"),
     getSecaoDados(contractId, "D.4 Milha — Parâmetros"),
     getSecaoDados(contractId, "D.4 Milha — Resumo"),
-    getSecaoDados(contractId, "D.4 Produtividade — Leitura IA"),
+    getSecaoDados(contractId, "D.4%Leitura IA"),
     getSecaoDados(contractId, "Cards por Categoria"),
   ]);
 
@@ -130,13 +130,22 @@ export async function getPerdaProdutividade(
   const categorias: TotalCostCategoria[] = ajusteRows
     .map((r) => {
       const rec = str(pick(r, "recurso")) ?? "";
-      const cat = /eqp|equip/i.test(rec) ? "EQP" : /mod|mão|mao/i.test(rec) ? "MOD" : rec;
+      // linha "Total (MOD + EQP)" não é categoria — descartada (o total é derivado/consistido acima)
+      const cat = /total/i.test(rec)
+        ? "TOTAL"
+        : /eqp|equip/i.test(rec)
+          ? "EQP"
+          : /mod|mão|mao/i.test(rec)
+            ? "MOD"
+            : rec;
       return {
         categoria: cat,
-        realRs: num(pick(r, "real total")),
-        contratadoCheioRs: num(pick(r, "contratado total")),
-        contratadoAjustadoRs: num(pick(r, "contratado ajustado")),
-        totalCostRs: num(pick(r, "total cost (real")),
+        realRs: num(pick(r, "real total", "realtotal")),
+        contratadoCheioRs: num(pick(r, "contratado total", "contratadototal")),
+        contratadoAjustadoRs: num(pick(r, "contratado ajustado", "contratadoajustado")),
+        totalCostRs: num(
+          pick(r, "total cost (real", "totalcostrealmenosajustado", "totalcostreal"),
+        ),
       };
     })
     .filter((c) => c.categoria === "MOD" || c.categoria === "EQP");

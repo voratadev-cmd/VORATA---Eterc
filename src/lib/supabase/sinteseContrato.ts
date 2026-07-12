@@ -145,14 +145,20 @@ export async function getSinteseContrato(contractId: string): Promise<SinteseCon
   ] = await Promise.all([
     getSecaoTabela(contractId, "Resumo dos contratos"),
     getSecaoTabela(contractId, "Painel 5: Equipe e Contatos"),
-    getSecaoTabela(contractId, "Trechos × Valor"),
+    getSecaoTabela(contractId, "Trechos × Valor").then(
+      (v) => v ?? getSecaoTabela(contractId, "Segmentação física por edificação"),
+    ),
     getSegmentos(contractId),
     getSecaoTabela(contractId, "Painel 4: Premissas de Orçamento"),
     getSecaoTabela(contractId, "BDI Detalhe — Rubricas"),
     getSecaoObj(contractId, "Estaqueamento / Extensão"),
-    getSecaoObj(contractId, "Painel 6: Documentos-chave"),
+    getSecaoObj(contractId, "Painel 6: Documentos-chave").then(
+      (v) => v ?? getSecaoObj(contractId, "%Documentos-chave"),
+    ),
     getSecaoObj(contractId, "Painel Administração Contratual"),
-    getSecaoObj(contractId, "D.5 Insumos — Parâmetros"),
+    getSecaoObj(contractId, "D.5 Insumos — Parâmetros").then(
+      (v) => v ?? getSecaoObj(contractId, "D.5%Parâmetros e Resumo"),
+    ),
     getSecaoObj(contractId, "Painel 1: Identificação Legal"),
     getSecaoObj(contractId, "Painel 2: Prazos"),
   ]);
@@ -194,11 +200,13 @@ export async function getSinteseContrato(contractId: string): Promise<SinteseCon
   const fmtKm = (v: number | null) =>
     v == null ? null : v.toLocaleString("pt-BR", { maximumFractionDigits: 2 });
   const trechos: SinteseTrecho[] = trechoSecao
-    ? trechoSecao.map((r) => ({
-        trecho: String(pick(r, "trecho", "item") ?? "").trim(),
-        km: str(pick(r, "km")),
-        valor: num(pick(r, "valor")),
-      }))
+    ? trechoSecao
+        .map((r) => ({
+          trecho: String(pick(r, "trecho", "item", "edifica", "frente") ?? "").trim(),
+          km: str(pick(r, "km")),
+          valor: num(pick(r, "valor")),
+        }))
+        .filter((t) => t.trecho.toLowerCase() !== "total")
     : (segRows ?? []).map((r) => {
         const ki = fmtKm(num(pick(r, "km_inicio")));
         const kf = fmtKm(num(pick(r, "km_fim")));
