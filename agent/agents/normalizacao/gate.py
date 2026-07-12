@@ -391,10 +391,15 @@ def gate_indiretos(res: dict, total_d0: float | None = None) -> dict:
     (redução/extensão alimentam o D.10). Sem D.0 → warn. Falha-alto na divergência."""
     findings: list[dict] = list(res.get("findings", []))
     total = res.get("desequilibrio_total")
+    canteiro = res.get("canteiro_rs")
     if total_d0 is not None and total is not None:
-        if abs(total - total_d0) > max(1.0, abs(total_d0) * 0.0001):
+        # O D.0 compõe Adm Local (método ativo) + Canteiro quando a obra o quantifica em separado.
+        composto = total + (canteiro if isinstance(canteiro, float) else 0.0)
+        if abs(composto - total_d0) > max(1.0, abs(total_d0) * 0.0001):
             findings.append({"severity": "error", "campo": "composicao",
-                             "msg": f"composição D.1 ({total:.2f}) ≠ Custos Indiretos no D.0 ({total_d0:.2f})"})
+                             "msg": (f"composição D.1 (ativo {total:.2f}"
+                                     + (f" + canteiro {canteiro:.2f}" if isinstance(canteiro, float) else "")
+                                     + f" = {composto:.2f}) ≠ Custos Indiretos no D.0 ({total_d0:.2f})")})
     elif total_d0 is None:
         findings.append({"severity": "warn", "campo": "composicao", "msg": "sem D.0 — composição NÃO cruzada"})
     status = "needs_review" if any(f["severity"] == "error" for f in findings) else "ok"

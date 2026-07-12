@@ -385,19 +385,22 @@ def processar_workbook_motor(arquivo_id: str, contrato_id: str, nome: str,
     if res_deq["categorias"]:
         # cross-check independente: o total do desequilíbrio declarado em algum card/Dashboard
         def _scan_deseq() -> float | None:
-            # 1ª passada ESTRITA: só o total consolidado (teto/pleiteável/total). Sem isso, o
-            # primeiro card 'desequilibrio*' de UMA categoria (D.1/D.2/D.7 têm os seus) casa
-            # antes do total do painel e o gate reprova a soma CERTA (caso real: SBSO).
-            for estrito in (True, False):
+            # Passadas ORDENADAS do total consolidado. Um card de UMA categoria pode conter
+            # 'total'+'desequilibrio' (ex.: totalBDINaoRemuneradoAteBM_desequilibrio da D.2) e
+            # casar antes do teto do painel — por isso 'total' sozinho NÃO basta na estrita.
+            passes = (
+                lambda kk: "pleiteavel" in kk or "teto" in kk,       # desequilibrioTotalPleiteavelTeto
+                lambda kk: kk.startswith("desequilibriototal"),       # desequilibrioTotal…
+                lambda kk: True,                                       # legado (ordem do envelope)
+            )
+            for aceita in passes:
                 for s in secoes:
                     dd = s.get("dados") if isinstance(s, dict) else None
                     if not isinstance(dd, dict):
                         continue
                     for k, v in dd.items():
                         kk = _norm_key(k)
-                        if "desequilibrio" not in kk or "pct" in kk:
-                            continue
-                        if estrito and not ("total" in kk or "teto" in kk or "pleiteavel" in kk):
+                        if "desequilibrio" not in kk or "pct" in kk or not aceita(kk):
                             continue
                         n = _num_limpo(v)
                         if isinstance(n, float) and n > 1000:

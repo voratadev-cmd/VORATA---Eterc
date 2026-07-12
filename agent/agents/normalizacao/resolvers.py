@@ -2386,9 +2386,20 @@ def extrair_indiretos(secoes: list[dict]) -> dict:
         elif len(flagged) != 1:
             findings.append({"severity": "error", "campo": "metodoAtivo",
                              "msg": f"esperado 1 método ativo (={metodo_ativo}), achou {len(flagged)}"})
+    # Canteiro (quando a obra o quantifica em separado, ex.: SBSO): NÃO soma no total do método
+    # ativo (regra: o ativo governa a D.1); vai como campo próprio — o D.0 costuma compor
+    # Adm Local + Canteiro na categoria Custos Indiretos, e o gate cruza com essa soma.
+    cant_kv = _kv(lambda d: any("desequilibrio" in _norm_key(k) and "canteiro" in _norm_key(k) for k in d))
+    canteiro_rs = None
+    if cant_kv:
+        for k, v in cant_kv.items():
+            if "desequilibrio" in _norm_key(k) and "canteiro" in _norm_key(k):
+                canteiro_rs = _num_limpo(v) if not isinstance(v, float) else v
+                break
+
     status = "needs_review" if any(f["severity"] == "error" for f in findings) else "ok"
     return {"metodos": metodos, "base": base, "itens": itens,
-            "desequilibrio_total": total, "n_metodos": len(metodos),
+            "desequilibrio_total": total, "canteiro_rs": canteiro_rs, "n_metodos": len(metodos),
             "n_itens": len(itens), "status": status, "findings": findings}
 
 
