@@ -2257,6 +2257,64 @@ def extrair_indiretos(secoes: list[dict]) -> dict:
             _met(3, "M3", "Contábil (AGM)", "apropriação contábil", None, None, None, pend=True),
         ]
 
+    # ── Variante TABELA+CARDS (caso SBSO/Sorriso) ────────────────────────────────────────────
+    # Em obras cujo workbook emite o Bloco 2 como TABELA (linhas metodo/desequilibrio/
+    # componente1..2) e o ativo+total nos CARDS (metodoAtivo/desequilibrioAcumuladoMetodoAtivo),
+    # o KV canônico acima não existe. Só ativa nesse caso — BR-101 permanece no caminho v2.
+    if not metodos:
+        cards_kv = _kv(lambda d: "metodoAtivo" in d
+                       and ("desequilibrioAcumuladoMetodoAtivo" in d or "desequilibrioMetodoAtivo" in d))
+        sec_met = next(
+            (s for s in secoes if isinstance(s, dict) and isinstance(s.get("linhas"), list) and s.get("linhas")
+             and isinstance(s["linhas"][0], dict) and "metodo" in s["linhas"][0]
+             and "desequilibrio" in s["linhas"][0] and "componente1_valor" in s["linhas"][0]),
+            None,
+        )
+        if cards_kv and sec_met is not None:
+            metodo_ativo = str(cards_kv.get("metodoAtivo") or "").strip()[:16] or None
+            total = _g(cards_kv, "desequilibrioAcumuladoMetodoAtivo", "desequilibrioMetodoAtivo")
+            for i, r in enumerate(sec_met.get("linhas") or []):
+                if not isinstance(r, dict):
+                    continue
+                rot = str(r.get("metodo") or "").strip()
+                codigo = (rot.split("—")[0].split("-")[0].strip()[:8]) or f"M{i + 1}"
+                nome = rot.split("—", 1)[1].strip() if "—" in rot else rot
+                nome = re.sub(r"\s*\(ativo\)\s*$", "", nome, flags=re.I).strip()
+                va = _num_limpo(r.get("componente1_valor"))
+                vb = _num_limpo(r.get("componente2_valor"))
+                des = _num_limpo(r.get("desequilibrio"))
+                c1 = str(r.get("componente1_label") or "").strip()
+                c2 = str(r.get("componente2_label") or "").strip()
+                # bases dos KPIs pelo rótulo dos componentes (determinístico)
+                if isinstance(va, float):
+                    la = c1.lower()
+                    if "gasto" in la:
+                        gasto = va if gasto is None else gasto
+                    elif "real" in la:
+                        real = va if real is None else real
+                    elif "contratada" in la or "contratado" in la:
+                        contratado = va if contratado is None else contratado
+                if isinstance(vb, float):
+                    lb = c2.lower()
+                    if "medida" in lb or "medido" in lb or "boletim" in lb:
+                        medido = vb if medido is None else medido
+                    elif "contratada" in lb or "contratado" in lb:
+                        contratado = vb if contratado is None else contratado
+                # invariante da tela: valor_a − valor_b == desequilíbrio (minuendo/subtraendo).
+                # Se o workbook listou os componentes na ordem inversa, troca (com os rótulos).
+                if (isinstance(va, float) and isinstance(vb, float) and isinstance(des, float)
+                        and abs((va - vb) - des) > 0.01 and abs((vb - va) - des) <= 0.01):
+                    va, vb, c1, c2 = vb, va, c2, c1
+                metodos.append({
+                    "ordem": i, "codigo": codigo, "metodo": (nome or codigo)[:120],
+                    "comparacao": (f"{c1} − {c2}"[:160] if c1 and c2 else None),
+                    "valor_a": va if isinstance(va, float) else None,
+                    "valor_b": vb if isinstance(vb, float) else None,
+                    "desequilibrio_rs": des if isinstance(des, float) else None,
+                    "medido_rs": None, "defensabilidade": None,
+                    "ativo": metodo_ativo == codigo, "pendente": des is None, "obs": None,
+                })
+
     # 29 grupos da Adm Local (tabela Bloco 3 · M2 contratado × real)
     itens: list[dict] = []
     sec_it = next(
@@ -2298,9 +2356,9 @@ def extrair_indiretos(secoes: list[dict]) -> dict:
         "adm_local_mensal": _g(base_kv, "admLocalMensalCheio") or _g(det_kv, "admLocalMensalCheio"),
         "custo_direto": _g(base_kv, "custoDiretoCD") or _g(det_kv, "custoDiretoCD"),
         "pv": _g(det_kv, "precoVendaPV"),
-        "percent_pv": _g(kpi_kv, "percentSobreOPV"),
+        "percent_pv": _g(kpi_kv, "percentSobreOPV") or _g(base_kv, "percentSobrePV"),
         "prazo_meses": _i(_g(base_kv, "prazoContratualMeses") or _g(det_kv, "prazoOriginalMeses")),
-        "bm_corrente": _i(_g(base_kv, "bmCorrenteMesNo")),
+        "bm_corrente": _i(_g(base_kv, "bmCorrenteMesNo") or _g(base_kv, "bmCorrente")),
         "gasto_acum": gasto, "medido_acum": medido, "real_acum": real, "contratado_acum": contratado,
         "metodo_ativo": metodo_ativo,
         # cenários (alimentam D.10 · NÃO somam à D.1):

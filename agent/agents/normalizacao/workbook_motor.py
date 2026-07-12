@@ -217,7 +217,12 @@ def processar_workbook_motor(arquivo_id: str, contrato_id: str, nome: str,
     pendentes: list[str] = []
 
     # ── Rota C.6 Insumos · Curva ABC (preço orçado por insumo) ──────────────────────────────
-    sec_ins = _achar_secao(secoes, "insumos", "curva abc")
+    # Estrito primeiro: a ABC de MATERIAIS da C.6 (a que o companion 'total de materiais' rege).
+    # Sem isso, um workbook com FONTE-curva-abc GERAL (todas as classes, ex.: SBSO) casa antes e
+    # a conservação Σ==materiais quebra por premissa errada.
+    sec_ins = (_achar_secao(secoes, "c.6", "curva abc")
+               or _achar_secao(secoes, "curva abc", "materiais")
+               or _achar_secao(secoes, "insumos", "curva abc"))
     if sec_ins is not None:
         total = _total_materiais(secoes)
         res = extrair_insumos_curva_abc(sec_ins, total_declarado=total)
@@ -380,14 +385,23 @@ def processar_workbook_motor(arquivo_id: str, contrato_id: str, nome: str,
     if res_deq["categorias"]:
         # cross-check independente: o total do desequilíbrio declarado em algum card/Dashboard
         def _scan_deseq() -> float | None:
-            for s in secoes:
-                dd = s.get("dados") if isinstance(s, dict) else None
-                if isinstance(dd, dict):
+            # 1ª passada ESTRITA: só o total consolidado (teto/pleiteável/total). Sem isso, o
+            # primeiro card 'desequilibrio*' de UMA categoria (D.1/D.2/D.7 têm os seus) casa
+            # antes do total do painel e o gate reprova a soma CERTA (caso real: SBSO).
+            for estrito in (True, False):
+                for s in secoes:
+                    dd = s.get("dados") if isinstance(s, dict) else None
+                    if not isinstance(dd, dict):
+                        continue
                     for k, v in dd.items():
-                        if "desequilibrio" in _norm_key(k) and "pct" not in _norm_key(k):
-                            n = _num_limpo(v)
-                            if isinstance(n, float) and n > 1000:
-                                return n
+                        kk = _norm_key(k)
+                        if "desequilibrio" not in kk or "pct" in kk:
+                            continue
+                        if estrito and not ("total" in kk or "teto" in kk or "pleiteavel" in kk):
+                            continue
+                        n = _num_limpo(v)
+                        if isinstance(n, float) and n > 1000:
+                            return n
             return None
         g = gate_desequilibrio(res_deq, total_declarado=_scan_deseq() or res_deq["soma_rs"])
         upsert_desequilibrio(
