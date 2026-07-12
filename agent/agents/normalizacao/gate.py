@@ -1109,10 +1109,15 @@ def gate_pontuais_d6(params: dict | None, eventos: list[dict], chuva_mensal: lis
     _TOL = 1.0
     soma = round(sum(e.get("custo_rs") or 0 for e in eventos), 2)
     if params is not None:
+        # Dois baldes nos Cards: 'pendente (não soma)' (BR-101: todos os eventos) e
+        # 'perda adicional nesta tela' (SBSO: evento quantificado que SOMA no D.0).
         pend = params.get("pendente_total_rs")
-        if pend is not None and abs(soma - float(pend)) > _TOL:
-            findings.append({"severity": "error", "campo": "conservacao",
-                             "msg": f"Σ perda eventos {soma:.2f} ≠ pendente Cards {float(pend):.2f}"})
+        adic = params.get("adicional_rs")
+        if pend is not None or adic is not None:
+            alvo = float(pend or 0) + float(adic or 0)
+            if abs(soma - alvo) > _TOL:
+                findings.append({"severity": "error", "campo": "conservacao",
+                                 "msg": f"Σ perda eventos {soma:.2f} ≠ Cards (pendente {float(pend or 0):.2f} + adicional {float(adic or 0):.2f})"})
         val = params.get("perda_validada_rs")
         if val is not None and abs(float(val)) > _TOL:
             findings.append({"severity": "error", "campo": "perda_validada",

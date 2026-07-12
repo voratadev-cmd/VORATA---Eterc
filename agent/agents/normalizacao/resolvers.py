@@ -1761,7 +1761,10 @@ def extrair_bdi_deseq(secoes: list[dict]) -> dict:
     for s in secoes:
         if not isinstance(s, dict) or s.get("tipo") != "chave_valor":
             continue
-        if "d2bdi" not in _norm_key(s.get("titulo") or ""):
+        t = _norm_key(s.get("titulo") or "")
+        # 'd2bdi' colado (BR-101) OU 'd2'+'bdi' separados no título (ex.: SBSO
+        # "D.2 — Parâmetros, Base Contratual e Cards do BDI").
+        if not ("d2bdi" in t or ("d2" in t and "bdi" in t)):
             continue
         dados = s.get("dados") or {}
         if isinstance(dados, dict):
@@ -1770,31 +1773,39 @@ def extrair_bdi_deseq(secoes: list[dict]) -> dict:
     if not out:
         return {"params": None, "status": "ok", "findings": []}
 
-    def _f(k):
-        n = _num_limpo(out.get(k))
-        return n if isinstance(n, float) else None
+    def _f(*ks):  # 1º float entre as chaves candidatas (dialetos BR-101 e SBSO)
+        for k in ks:
+            n = _num_limpo(out.get(k))
+            if isinstance(n, float):
+                return n
+        return None
 
-    def _i(k):
-        n = _num_limpo(out.get(k))
-        return int(n) if isinstance(n, float) else None
+    def _i(*ks):
+        n = _f(*ks)
+        return int(round(n)) if isinstance(n, float) else None
 
-    mm = re.findall(r"\d+", str(out.get("mesesdecorridosxcontratuais") or ""))
+    # Prazo contratual: preferir o card 'prazo' quando existir — o rótulo
+    # 'mesesDecorridosXContratuais' pode carregar resíduo de template ("9 / 46").
+    _prazo = _i("prazo")
+    if _prazo is None:
+        mm = re.findall(r"\d+", str(out.get("mesesdecorridosxcontratuais") or ""))
+        _prazo = int(mm[-1]) if mm else None
     params = {
-        "pv_rs": _f("precovendapv"),
+        "pv_rs": _f("precovendapv", "precodevendapv"),
         "bdi_declarado": _f("bdideclarado"),
         "custo_direto_rs": _f("custodiretocd"),
         "custo_indireto_rs": _f("custoindiretoci"),
-        "bm_corrente": _i("bmcorrentemesno"),
-        "meses_contratuais": int(mm[-1]) if mm else None,
+        "bm_corrente": _i("bmcorrentemesno", "bmcorrente"),
+        "meses_contratuais": _prazo,
         "medicao_acum_rs": _f("medicaopvacumuladaatebm"),
-        "meses_extensao": _i("mesesextensaoprojetada"),
+        "meses_extensao": _i("mesesextensaoprojetada", "mesesextensaoprojetados"),
         "desequilibrio_rs": _f("desequilibriobdiacumuladorealizado"),
-        "pct_sobre_pv": _f("percentsobreopv"),
-        "custo_mensal_tempo_rs": _f("customensaltempoincorridomes"),
-        "gasto_teorico_acum_rs": _f("gastoteoricoacum"),
-        "remunerado_acum_rs": _f("remuneradoacum"),
-        "valor_total_contrato_rs": _f("valortotalnocontrator"),
-        "overhead_mes_rs": _f("bloco4overheaddetempoxmesesextensao"),
+        "pct_sobre_pv": _f("percentsobreopv", "percentsobrepv"),
+        "custo_mensal_tempo_rs": _f("customensaltempoincorridomes", "customensaltempoincorrido"),
+        "gasto_teorico_acum_rs": _f("gastoteoricoacum", "totalbdinaoremuneradoatebmgastoteoricoacum"),
+        "remunerado_acum_rs": _f("remuneradoacum", "totalbdinaoremuneradoatebmremuneradoacum"),
+        "valor_total_contrato_rs": _f("valortotalnocontrator", "totalbdinaoremuneradoatebmvalortotalcontrato"),
+        "overhead_mes_rs": _f("bloco4overheaddetempoxmesesextensao", "overheadtempoextensao"),
         "projecao_extensao_rs": _f("desequilibriomaisprojecaoextensao"),
         "delta_reducao_rs": _f("bloco5deltabdiporreducaoescopo"),
         "farol": (_limpa_glifo(out.get("farol")) or None) if out.get("farol") else None,
@@ -1810,7 +1821,7 @@ def extrair_bdi_rubricas_tempo(secoes: list[dict]) -> dict:
         if not isinstance(s, dict) or s.get("tipo") != "tabela":
             continue
         t = _norm_key(s.get("titulo") or "")
-        if "d2bdi" in t and "rubricasdetempo" in t:
+        if ("d2bdi" in t or ("d2" in t and "bdi" in t)) and "rubricasdetempo" in t:
             sec = s
             break
     if sec is None:
@@ -1828,6 +1839,14 @@ def extrair_bdi_rubricas_tempo(secoes: list[dict]) -> dict:
         if not isinstance(r, dict) or eh_linha_rotulo(r):
             continue
         nome = str(r.get(c["rub"]) or "").strip() if c["rub"] else ""
+        # Só rubricas de TEMPO (propósito da tabela): a fonte pode anexar o GRUPO B
+        # (ISS/PIS/COFINS · % sobre medição) e a linha consolidada 'BDI' — ficam fora
+        # (a conservação Σ==desequilíbrio total é só das tempo-dependentes).
+        _tipo_raw = str(r.get(c["tipo"]) or "").strip() if c["tipo"] else ""
+        if _tipo_raw and _norm_key(_tipo_raw) != "tempo":
+            continue
+        if not _tipo_raw and _norm_key(nome) in ("iss", "pis", "cofins", "cprb", "bdi"):
+            continue
         if not nome or "total" in _norm_key(nome):
             continue
         rubricas.append({
@@ -1852,7 +1871,8 @@ def extrair_bdi_perda_mensal(secoes: list[dict]) -> dict:
         if not isinstance(s, dict) or s.get("tipo") != "tabela":
             continue
         t = _norm_key(s.get("titulo") or "")
-        if "d2bdi" in t and "perdamensal" in t:
+        eh_d2 = "d2bdi" in t or ("d2" in t and "bdi" in t)
+        if eh_d2 and ("perdamensal" in t or ("perda" in t and ("porbm" in t or "curva" in t))):
             sec = s
             break
     if sec is None:
@@ -2019,17 +2039,19 @@ def extrair_pontuais_eventos(secoes: list[dict]) -> dict:
         if not isinstance(s, dict) or s.get("tipo") != "tabela":
             continue
         t = _norm_key(s.get("titulo") or "")
-        if "d6pontuais" in t and "tabeladeeventos" in t:
+        if ("d6pontuais" in t or "d6" in t) and "tabeladeeventos" in t:
             sec = s
             break
     if sec is None:
         return {"eventos": [], "n": 0, "status": "ok", "findings": []}
     cols = sec.get("colunas") or []
-    c = {"data": _achar_coluna_exata(cols, "data"), "dur": _achar_coluna(cols, "duração", "duracao"),
+    c = {"data": _achar_coluna_exata(cols, "data") or _achar_coluna(cols, "período", "periodo"),
+         "dur": _achar_coluna(cols, "duração", "duracao"),
          "desc": _achar_coluna(cols, "descrição", "descricao"), "cat": _achar_coluna(cols, "categoria"),
          "hh": _achar_coluna(cols, "hh mod parad", "hh mod"), "rmod": _achar_coluna(cols, "custo hh"),
          "heq": _achar_coluna(cols, "heq ocioso", "heq"), "reqp": _achar_coluna(cols, "custo heq"),
-         "perda": _achar_coluna(cols, "perda"), "fonte": _achar_coluna(cols, "fonte"),
+         "perda": _achar_coluna(cols, "perda (r$)", "perda r$", "perda"),
+         "fonte": _achar_coluna(cols, "fonte"),
          "status": _achar_coluna(cols, "status")}
     imps = _impedimentos_breakdown(secoes)
     usados: set = set()
@@ -2098,10 +2120,12 @@ def extrair_pontuais_params(secoes: list[dict]) -> dict:
     ceqp = _num_limpo(raw.get("custohoraeqprh"))
     cards: dict = {}
     for s in secoes:
-        if isinstance(s, dict) and s.get("tipo") == "chave_valor" and "d6pontuaiscards" in _norm_key(s.get("titulo") or ""):
+        _t6 = _norm_key(s.get("titulo") or "") if isinstance(s, dict) else ""
+        if isinstance(s, dict) and s.get("tipo") == "chave_valor" and ("d6pontuaiscards" in _t6 or ("d6" in _t6 and "cards" in _t6)):
             cards = {_norm_key(k): v for k, v in (s.get("dados") or {}).items()}
             break
-    validada = _num_limpo(cards.get("perdatotalacumulada"))
+    validada = _num_limpo(next((v for k, v in cards.items() if k.startswith("perdatotalacumulada")), None))
+    adicional = _num_limpo(next((v for k, v in cards.items() if k.startswith("perdaadicional")), None))
     pendente = _num_limpo(cards.get("pendenteemanalisenaosoma"))
     n_pend = _num_limpo(cards.get("eventospendentesderevisao"))
     farol = _limpa_glifo(str(cards.get("farol") or "").strip()) or "Conforme"
@@ -2111,6 +2135,7 @@ def extrair_pontuais_params(secoes: list[dict]) -> dict:
         "custo_hora_eqp_rs": ceqp if isinstance(ceqp, float) else None,
         "perda_validada_rs": validada if isinstance(validada, float) else 0.0,
         "pendente_total_rs": pendente if isinstance(pendente, float) else None,
+        "adicional_rs": adicional if isinstance(adicional, float) else None,
         "eventos_pendentes": int(n_pend) if isinstance(n_pend, float) else None,
         "farol": farol,
     }, "status": "ok", "findings": []}
