@@ -3710,6 +3710,43 @@ def extrair_prazo_marcos(secoes: list[dict]) -> dict:
             sec = s
             break
     if sec is None:
+        # dialeto SBSO: "Marcos de prazo por disciplina (previsto × real)" — Disciplina/Término/% Real/Status
+        for s2 in secoes:
+            if not isinstance(s2, dict):
+                continue
+            t2 = _norm_key(s2.get("titulo") or "")
+            cols2 = s2.get("colunas") or []
+            if ("marcos" in t2 and "disciplina" in t2
+                    and _achar_coluna(cols2, "disciplina") is not None
+                    and _achar_coluna(cols2, "termino previsto", "término previsto") is not None):
+                marcos2 = []
+                cD = _achar_coluna(cols2, "disciplina")
+                cT = _achar_coluna(cols2, "termino previsto", "término previsto")
+                cP = _achar_coluna(cols2, "% real")
+                cS = _achar_coluna(cols2, "status")
+                cN = _achar_coluna(cols2, "natureza")
+                for r in (s2.get("linhas") or []):
+                    if not isinstance(r, dict) or eh_linha_rotulo(r):
+                        continue
+                    disc = str(r.get(cD) or "").strip()
+                    if not disc or "total" in _norm_key(disc):
+                        continue
+                    pr = _num_limpo(r.get(cP)) if cP else None
+                    # convenção do produto: marcos em 0–100 (SBSO emite fração 0–1)
+                    if isinstance(pr, float) and pr <= 1.5:
+                        pr = round(pr * 100.0, 2)
+                    st_raw = str(r.get(cS) or "").strip() if cS else ""
+                    marcos2.append({
+                        "ordem": len(marcos2), "categoria": disc[:60],
+                        "trecho": (str(r.get(cN) or "").strip()[:120] or None) if cN else None,
+                        "data_limite": str(r.get(cT) or "").strip()[:20] or None,
+                        "pct_concluido": pr if isinstance(pr, float) else None,
+                        "farol": (_limpa_glifo(st_raw)[:30] or None) if st_raw else None,
+                    })
+                if marcos2:
+                    eixo_vazio2 = not any((m["pct_concluido"] or 0) > 0 for m in marcos2)
+                    return {"marcos": marcos2, "n_marcos": len(marcos2), "eixo_pct_vazio": eixo_vazio2,
+                            "status": "ok", "findings": []}
         return {"marcos": [], "n_marcos": 0, "status": "needs_review",
                 "findings": [{"severity": "error", "campo": "marcos", "msg": "C.5 Marcos detalhados não localizado"}]}
     cols = sec.get("colunas") or []
