@@ -54,6 +54,7 @@ from .gate import (
 )
 from .guia_contrato import cobertura_atomica, parse_guia_contrato
 from .persist import (
+    upsert_orcamento,
     upsert_insumos_fd,
     upsert_medicao,
     upsert_avanco_fisico_disciplina_mes,
@@ -244,6 +245,28 @@ def processar_workbook_motor(arquivo_id: str, contrato_id: str, nome: str,
                 routed.append("C.6 Insumos: eixo de preço REAL vazio → farol de desvio PENDENTE (honesto)")
         else:
             pendentes.append("C.6 Insumos·CurvaABC: nenhum insumo extraível")
+
+    # ── Rota ORÇAMENTO (header) — cards C.1/Anexo XIV → obra_orcamentos (PV/CD/CI/BDI) ─────────
+    _kv_orc = {}
+    for s in secoes:
+        dd = s.get("dados") if isinstance(s, dict) else None
+        if isinstance(dd, dict):
+            for k, v in dd.items():
+                _kv_orc.setdefault(_norm_key(k), v)
+    _pv_orc = _num_limpo(_kv_orc.get("valorinicialdocontratopv")) or _num_limpo(
+        _kv_orc.get("precodevendapv")) or _num_limpo(_kv_orc.get("precovendapv"))
+    _cd_orc = _num_limpo(_kv_orc.get("custodiretocd")) or _num_limpo(_kv_orc.get("custodireto"))
+    _ci_orc = _num_limpo(_kv_orc.get("custoindiretoci")) or _num_limpo(_kv_orc.get("bdiemvalor"))
+    _bdi_orc = _num_limpo(_kv_orc.get("bdideclarado")) or _num_limpo(_kv_orc.get("bdi"))
+    if _pv_orc and _cd_orc:
+        upsert_orcamento(
+            contrato_id=contrato_id, arquivo_id=arquivo_id, extracao_version=version,
+            config_version=CONFIG_VERSION_WORKBOOK, status="ok",
+            resumo={"preco_venda": _pv_orc, "custo_direto": _cd_orc, "custo_indireto": _ci_orc,
+                    "custo_total_atividades": _cd_orc, "receita": _pv_orc, "bdi": _bdi_orc},
+            itens=[],
+        )
+        routed.append(f"Orçamento: PV {_pv_orc/1e6:.1f}M · CD {_cd_orc/1e6:.1f}M · BDI {(_bdi_orc or 0)*100:.1f}%")
 
     # ── Rota MEDIÇÕES — FONTE-MEDICAO* → obra_medicoes/itens/totais (canônica por BM) ──────────
     res_med = extrair_medicoes_workbook(secoes)

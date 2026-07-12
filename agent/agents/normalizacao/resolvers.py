@@ -1730,6 +1730,54 @@ def extrair_bdi_detalhe(secoes: list[dict]) -> dict:
             alvo = s
             break
     if alvo is None:
+        # Variante SBSO: a fonte não traz R$ por rubrica no Anexo XIV (só % da fórmula composta),
+        # mas DECLARA os valores por rubrica na tabela de rubricas do BDI (Tempo + GRUPO B) e os
+        # cards do Anexo ([23]: custoDireto/bdiEmValor/PV). Deriva %CD e %receita de bases explícitas.
+        cards23 = None
+        for s2 in secoes:
+            dd = s2.get("dados") if isinstance(s2, dict) else None
+            if isinstance(dd, dict) and "bdiEmValor" in dd and "custoDireto" in dd:
+                cards23 = dd
+                break
+        sec_rub = None
+        for s2 in secoes:
+            if not isinstance(s2, dict) or s2.get("tipo") != "tabela":
+                continue
+            cols2 = s2.get("colunas") or []
+            if (_achar_coluna(cols2, "rubrica") is not None
+                    and _achar_coluna(cols2, "valor total no contrato") is not None):
+                sec_rub = s2
+                break
+        if cards23 and sec_rub is not None:
+            cd0 = _num_limpo(cards23.get("custoDireto"))
+            pv0 = _num_limpo(cards23.get("valorContratoPrecoGlobal"))
+            cols2 = sec_rub.get("colunas") or []
+            cR = _achar_coluna(cols2, "rubrica")
+            cV = _achar_coluna(cols2, "valor total no contrato")
+            rubs2: list[dict] = []
+            for r in (sec_rub.get("linhas") or []):
+                if not isinstance(r, dict):
+                    continue
+                nome2 = str(r.get(cR) or "").strip()
+                v2 = _num_limpo(r.get(cV))
+                nk2 = _norm_key(nome2)
+                if not nome2 or not isinstance(v2, float) or v2 <= 0 or "total" in nk2 or nk2 == "bdi":
+                    continue
+                rubs2.append({
+                    "ordem": len(rubs2), "descricao": nome2[:120],
+                    "pct_receita": (v2 / pv0) if isinstance(pv0, float) and pv0 else None,
+                    "pct_custo_direto": (v2 / cd0) if isinstance(cd0, float) and cd0 else None,
+                    "valor_rs": v2, "pct_receita_implicito": None, "eh_subtotal": False,
+                })
+            if rubs2:
+                soma2 = round(sum(x["valor_rs"] for x in rubs2), 2)
+                bdi_val = _num_limpo(cards23.get("bdiEmValor"))
+                if isinstance(bdi_val, float) and abs(soma2 - bdi_val) > max(1000.0, bdi_val * 0.005):
+                    findings.append({"severity": "warn", "campo": "conservacao",
+                                     "msg": f"Σ rubricas {soma2:,.2f} ≠ bdiEmValor {bdi_val:,.2f}"})
+                return {"rubricas": rubs2, "soma_folhas_rs": soma2,
+                        "cd_implicito": cd0 if isinstance(cd0, float) else None,
+                        "n_rubricas": len(rubs2), "status": "ok", "findings": findings}
         findings.append({"severity": "error", "campo": "bdi", "msg": "C.1 BDI Detalhe não localizada"})
         return {"rubricas": [], "soma_folhas_rs": None, "cd_implicito": None, "n_rubricas": 0,
                 "status": "needs_review", "findings": findings}
@@ -3017,6 +3065,60 @@ def extrair_faturamento_serie_mes(secoes: list[dict], dim: str,
 
     sec_p = achar("previsto")
     if sec_p is None:
+        # ── Variante BASELINE LONGO (SBSO auxiliar_C.3): atividades × Bloco(Contratado/Real) ×
+        # Métrica('R$ Mês') × meses wide, com Disciplina/Frente/Folha por linha. Σ folhas == PV.
+        sec_b = None
+        for s2 in secoes:
+            if not isinstance(s2, dict) or not s2.get("linhas"):
+                continue
+            cols2 = s2.get("colunas") or []
+            if (_achar_coluna(cols2, "bloco") is not None and _achar_coluna(cols2, "metrica", "métrica") is not None
+                    and _achar_coluna(cols2, "folha") is not None and _achar_coluna(cols2, dim) is not None):
+                sec_b = s2
+                break
+        if sec_b is not None:
+            cols2 = sec_b.get("colunas") or []
+            cDim = _achar_coluna(cols2, dim)
+            cBlo = _achar_coluna(cols2, "bloco")
+            cMet = _achar_coluna(cols2, "metrica", "métrica")
+            cFol = _achar_coluna(cols2, "folha")
+            mes_cols = [(int(re.sub(r"\D", "", str(c))), c) for c in cols2
+                        if re.match(r"^m[eê]s\s*\d+$", str(c).strip().lower())]
+            mes_cols.sort()
+            comp2 = {i + 1: (m.get("ano"), m.get("mes")) for i, m in enumerate(meses_curva)} if meses_curva else {}
+            acc: dict[tuple[str, int], dict] = {}
+            for r in (sec_b.get("linhas") or []):
+                if not isinstance(r, dict):
+                    continue
+                if str(r.get(cFol) or "").strip().upper() != "S":
+                    continue
+                if str(r.get(cMet) or "").strip().lower() not in ("r$ mês", "r$ mes"):
+                    continue
+                bloco2 = _norm_key(str(r.get(cBlo) or ""))
+                if bloco2 not in ("contratado", "real"):
+                    continue
+                item2 = str(r.get(cDim) or "").strip() or "—"
+                for n_mes, colname in mes_cols:
+                    v2 = _num_limpo(r.get(colname))
+                    if not isinstance(v2, float) or v2 == 0:
+                        continue
+                    ch = (item2, n_mes)
+                    if ch not in acc:
+                        a2, m2 = comp2.get(n_mes, (None, None))
+                        acc[ch] = {"item": item2, "mes_num": n_mes, "ano": a2, "mes": m2,
+                                   "previsto_rs": None, "real_rs": None}
+                    campo2 = "previsto_rs" if bloco2 == "contratado" else "real_rs"
+                    acc[ch][campo2] = round((acc[ch][campo2] or 0.0) + v2, 2)
+            if acc:
+                linhas2 = [{"ordem": i, **v} for i, v in enumerate(
+                    sorted(acc.values(), key=lambda x: (x["item"], x["mes_num"])))]
+                soma_p2 = round(sum(x["previsto_rs"] or 0 for x in linhas2), 2)
+                soma_r2 = round(sum(x["real_rs"] or 0 for x in linhas2), 2)
+                itens2 = {x["item"] for x in linhas2}
+                meses2 = {x["mes_num"] for x in linhas2}
+                return {"linhas": linhas2, "soma_previsto": soma_p2, "soma_real": soma_r2,
+                        "n_itens": len(itens2), "n_meses": len(meses2), "dim": dim,
+                        "real_pendente": soma_r2 == 0, "status": "ok", "findings": findings}
         return {"linhas": [], "soma_previsto": None, "soma_real": None, "n_itens": 0, "n_meses": 0,
                 "dim": dim, "real_pendente": True, "status": "needs_review",
                 "findings": [{"severity": "error", "campo": "matriz",
