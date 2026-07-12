@@ -5061,3 +5061,142 @@ def extrair_insumos_fd(secoes: list[dict]) -> dict:
                  next((v for k, v in kv.items() if k.startswith("materiaisvalororcadototal")), None))}
     return {"insumos": insumos, "fontes": fontes, "reeq": reeq, "serie": serie, "cards": cards,
             "n": len(insumos), "status": "ok", "findings": []}
+
+
+# ── MEDIÇÕES DO WORKBOOK — FONTE-MEDICAO01..NN → obra_medicoes/itens/totais ─────────────────────
+_MESES_PT = {"jan": 1, "fev": 2, "mar": 3, "abr": 4, "mai": 5, "jun": 6,
+             "jul": 7, "ago": 8, "set": 9, "out": 10, "nov": 11, "dez": 12}
+
+
+def _edt_depoison(v) -> str | None:  # noqa: ANN001
+    """Código EDT que o Excel converteu em data ('01.01.01'→2001-01-01) volta a código.
+    dd.mm.aa ← (day, month, year−2000). Strings normais passam intactas."""
+    if v is None:
+        return None
+    s = str(v).strip()
+    m = re.match(r"^(\d{4})-(\d{2})-(\d{2})", s)
+    if m and int(m.group(1)) < 2100:
+        y, mo, d = int(m.group(1)), int(m.group(2)), int(m.group(3))
+        if 2000 <= y <= 2099:
+            return f"{d:02d}.{mo:02d}.{y - 2000:02d}"
+    return s[:40] or None
+
+
+def extrair_medicoes_workbook(secoes: list[dict]) -> dict:
+    """BMs consolidados no workbook (FONTE-MEDICAO*) → medições canônicas. Duas gramáticas:
+    export MS-Project (Item/Nome da Tarefa/Custo…) e planilha oficial (ITEM/DESCRIÇÃO/PREÇO…).
+    Totais por BM = faturas da D.7 (valor bruto · determinístico) com acumulado=cumsum; físico
+    acumulado = curva física (Real % acum FISICO) no mês do BM. Códigos EDT des-envenenados."""
+    findings: list[dict] = []
+    # faturas da D.7 → {bm: valor_bruto}
+    fat_bm: dict[int, float] = {}
+    for s in secoes:
+        if not isinstance(s, dict) or not s.get("linhas"):
+            continue
+        cols = s.get("colunas") or []
+        if _achar_coluna(cols, "valor bruto") is None or _achar_coluna(cols, "bm / m", "bm/m", "bm") is None:
+            continue
+        cbm = _achar_coluna(cols, "nf / fatura", "nf/fatura") or _achar_coluna(cols, "bm / m", "bm")
+        cv = _achar_coluna(cols, "valor bruto")
+        for row in s["linhas"]:
+            if not isinstance(row, dict):
+                continue
+            mnum = re.search(r"(\d+)", str(row.get(cbm) or ""))
+            v = _num_limpo(row.get(cv))
+            if mnum and isinstance(v, float):
+                fat_bm[int(mnum.group(1))] = v
+        if fat_bm:
+            break
+    # curva física → {(ano,mes): real_fisico_acum (fração)}
+    fis_mes: dict[tuple[int, int], float] = {}
+    for s in secoes:
+        if not isinstance(s, dict) or not s.get("linhas"):
+            continue
+        cols = s.get("colunas") or []
+        c_rf = next((c for c in cols if "real" in _norm_key(str(c)) and "fisico" in _norm_key(str(c))), None)
+        c_ms = _achar_coluna(cols, "mês", "mes")
+        if c_rf is None or c_ms is None:
+            continue
+        for row in s["linhas"]:
+            if not isinstance(row, dict):
+                continue
+            lbl = str(row.get(c_ms) or "").strip().lower()
+            m2 = re.match(r"^([a-zç]{3})[/-](\d{2})$", lbl)
+            v = _num_limpo(row.get(c_rf))
+            if m2 and m2.group(1)[:3] in _MESES_PT and isinstance(v, float):
+                fis_mes[(2000 + int(m2.group(2)), _MESES_PT[m2.group(1)[:3]])] = v if v <= 1.5 else v / 100.0
+        if fis_mes:
+            break
+
+    medicoes: list[dict] = []
+    for s in secoes:
+        if not isinstance(s, dict):
+            continue
+        t = s.get("titulo") or ""
+        mbm = re.search(r"boletim de medi[çc][aã]o\s*0?(\d+)", t.lower())
+        if not mbm or not s.get("linhas"):
+            continue
+        bm = int(mbm.group(1))
+        mper = re.search(r"[–-](\d{2})/(\d{2})/(\d{4})", t)
+        ano = int(mper.group(3)) if mper else None
+        mes = int(mper.group(2)) if mper else None
+        data_corte = f"{mper.group(3)}-{mper.group(2)}-{mper.group(1)}" if mper else None
+        cols = s.get("colunas") or []
+        c = {
+            "num": _achar_coluna(cols, "item"),
+            "desc": _achar_coluna(cols, "nome da tarefa", "descrição do serviço", "descricao do servico"),
+            "und": _achar_coluna(cols, "und", "unid"),
+            "qt": _achar_coluna(cols, "quantidade total", "quant."),
+            "pu": _achar_coluna(cols, "custo unitário", "custo unitario", "preço unitário", "preco unitario"),
+            "vc": _achar_coluna(cols, "custo total", "preço total", "preco total"),
+            "qp": _achar_coluna(cols, "quantidade no período", "quantidade no periodo"),
+            "vp": _achar_coluna(cols, "valor (r$) no período", "valor no periodo"),
+            "qa": _achar_coluna(cols, "quantidade acumulada"),
+            "va": _achar_coluna(cols, "valor (r$) acumulado", "valor acumulado"),
+        }
+        if c["num"] is None or c["desc"] is None:
+            continue
+        itens: list[dict] = []
+        for row in s["linhas"]:
+            if not isinstance(row, dict):
+                continue
+            num = _edt_depoison(row.get(c["num"]))
+            desc = str(row.get(c["desc"]) or "").strip()
+            if not num and not desc:
+                continue
+            def g(k, _r=row):  # noqa: ANN001
+                v = _num_limpo(_r.get(c[k])) if c[k] else None
+                return v if isinstance(v, float) else None
+            itens.append({
+                "ordem": len(itens), "numero_item": (num or "—")[:40],
+                "nivel": (num.count(".") + 1) if num else None,
+                "descricao": desc[:300] or None,
+                "unidade": (str(row.get(c["und"])).strip()[:20] if c["und"] and row.get(c["und"]) else None),
+                "quantidade_contratada": g("qt"), "preco_unitario": g("pu"),
+                "valor_contratado": g("vc"), "quantidade_periodo": g("qp"),
+                "valor_medido_periodo": g("vp"), "quantidade_acumulada": g("qa"),
+                "valor_medido_acumulado": g("va"), "percentual_executado": None,
+            })
+        if not itens:
+            continue
+        medicoes.append({"bm_numero": bm, "ano": ano, "mes": mes, "data_corte": data_corte,
+                         "itens": itens})
+    medicoes.sort(key=lambda m: m["bm_numero"])
+    acum = 0.0
+    for m in medicoes:
+        vper = fat_bm.get(m["bm_numero"])
+        if vper is not None:
+            acum = round(acum + vper, 2)
+        fis = fis_mes.get((m["ano"], m["mes"])) if m["ano"] and m["mes"] else None
+        m["totais"] = {
+            "total_periodo_valor": vper,
+            "total_acumulado_valor": acum if vper is not None else None,
+            "fisico_pct_periodo": None,
+            "fisico_pct_acumulado": fis,
+            "fonte": "workbook-motor (faturas D.7 + curva física)",
+        }
+        if vper is None:
+            findings.append({"severity": "warn", "campo": f"bm{m['bm_numero']}",
+                             "msg": f"BM {m['bm_numero']}: sem valor bruto na D.7 — totais pendentes"})
+    status = "needs_review" if any(f["severity"] == "error" for f in findings) else "ok"
+    return {"medicoes": medicoes, "n": len(medicoes), "status": status, "findings": findings}

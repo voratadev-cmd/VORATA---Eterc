@@ -55,6 +55,7 @@ from .gate import (
 from .guia_contrato import cobertura_atomica, parse_guia_contrato
 from .persist import (
     upsert_insumos_fd,
+    upsert_medicao,
     upsert_avanco_fisico_disciplina_mes,
     upsert_bdi_rubricas,
     upsert_bdi_deseq,
@@ -138,6 +139,7 @@ from .resolvers import (
     extrair_indiretos,
     extrair_insumos_curva_abc,
     extrair_insumos_fd,
+    extrair_medicoes_workbook,
     extrair_produtividade_economica,
     extrair_produtividade_params,
     extrair_produtividade_fisica,
@@ -242,6 +244,21 @@ def processar_workbook_motor(arquivo_id: str, contrato_id: str, nome: str,
                 routed.append("C.6 Insumos: eixo de preço REAL vazio → farol de desvio PENDENTE (honesto)")
         else:
             pendentes.append("C.6 Insumos·CurvaABC: nenhum insumo extraível")
+
+    # ── Rota MEDIÇÕES — FONTE-MEDICAO* → obra_medicoes/itens/totais (canônica por BM) ──────────
+    res_med = extrair_medicoes_workbook(secoes)
+    if res_med["medicoes"]:
+        for med in res_med["medicoes"]:
+            upsert_medicao(
+                contrato_id=contrato_id, arquivo_id=arquivo_id, extracao_version=version,
+                config_version=CONFIG_VERSION_WORKBOOK, status=res_med["status"],
+                comp={"bm_numero": med["bm_numero"], "ano": med["ano"], "mes": med["mes"],
+                      "data_corte": med["data_corte"]},
+                itens=med["itens"], totais=med["totais"],
+            )
+        ult = res_med["medicoes"][-1]
+        routed.append(f"Medições: {res_med['n']} BMs · acum BM{ult['bm_numero']} "
+                      f"{(ult['totais'].get('total_acumulado_valor') or 0)/1e6:.2f}M (status={res_med['status']})")
 
     # ── Rota C.6/D.5 fd — modelo multifonte que as TELAS leem (fd/fontes/reeq/ipca_serie) ──────
     res_fd = extrair_insumos_fd(secoes)

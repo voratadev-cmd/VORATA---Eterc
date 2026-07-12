@@ -77,6 +77,12 @@ def coletar_fatos(obra_id: str) -> dict:
                   .in_("medicao_id", ids).eq("numero_item", "1").execute().data or [])
         contratado = max((x for x in (_num(r.get("valor_contratado")) for r in raizes) if x is not None),
                          default=None)
+        # workbook-motor: a raiz "1" pode ser só a 1ª disciplina — o CFF da curva é o total oficial
+        _cv = (supabase.table("obra_faturamento_curvas").select("custo_total")
+               .eq("contrato_id", obra_id).order("created_at", desc=True).limit(1).execute().data or [])
+        _ct_curva = _num((_cv[0] if _cv else {}).get("custo_total"))
+        if _ct_curva and (not contratado or contratado < _ct_curva * 0.5):
+            contratado = _ct_curva
         fat = {"bm_corte": ult["bm_numero"]}
         if realizado is not None:
             fat["realizado_acumulado_rs"] = round(realizado, 2)
