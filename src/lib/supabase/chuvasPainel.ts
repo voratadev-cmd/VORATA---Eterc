@@ -133,7 +133,64 @@ export async function getChuvasPainel(contractId: string): Promise<ChuvasPainel 
   ]);
 
   const acomp = arr(acompS);
-  if (acomp.length === 0) return null;
+  if (acomp.length === 0) {
+    // Fallback (obras sem as seções de dias>5mm, ex.: SBSO): painel básico da série normalizada
+    // obra_chuvas_meses (mm previsto baseline × mm real). Dias >5mm/apuração ficam PENDENTES
+    // honestos (a fonte não traz RDO diário) — mm real ≠ dias impeditivos, nunca converter.
+    const { data: cm, error: cmErr } = await untypedTable("obra_chuvas_meses")
+      .select("ordem, mes_obra, periodo, chuva_prev_mm, chuva_real_mm, farol")
+      .eq("contrato_id", contractId)
+      .order("ordem", { ascending: true });
+    if (cmErr) throw new Error(cmErr.message);
+    const rows = (cm ?? []) as Row[];
+    if (rows.length === 0) return null;
+
+    const serie: ChuvaSerieMes[] = rows.map((r) => ({
+      mesAno: String(r.periodo ?? r.mes_obra ?? "").trim(),
+      diasProp: null,
+      diasReal: null,
+      delta: null,
+      cobrarAcum: null,
+      chuvaMmReal: num(r.chuva_real_mm),
+      farol: str(r.farol),
+    }));
+    // baseline por mês-calendário = média dos meses homônimos da série prevista (out/25, out/26…)
+    const porMes = new Map<string, number[]>();
+    for (const r of rows) {
+      const rot = String(r.periodo ?? "")
+        .slice(0, 3)
+        .toUpperCase();
+      const mm = num(r.chuva_prev_mm);
+      if (rot && mm != null) porMes.set(rot, [...(porMes.get(rot) ?? []), mm]);
+    }
+    const baseline: ChuvaBaselineMes[] = MESES_CAL.map((mes) => {
+      const vals = porMes.get(mes) ?? [];
+      return {
+        mes,
+        mm: vals.length
+          ? Math.round((vals.reduce((a, b) => a + b, 0) / vals.length) * 100) / 100
+          : null,
+      };
+    });
+    return {
+      serieMensal: serie,
+      kpis: {
+        diasPropostaAcum: 0,
+        diasRealAcum: 0,
+        deltaNet: 0,
+        diasACobrar: 0,
+        pleiteavelRs: null,
+        nMesesReais: 0,
+      },
+      baselineMm: baseline,
+      diasChuva: MESES_CAL.map((mes) => ({ mes, total: null, impeditivos: null, cal: [] })),
+      calTotais: [0, 0, 0, 0, 0, 0],
+      apuracao: [],
+      totais: null,
+      sintese: null,
+      leituraIA: null,
+    };
+  }
 
   // série mensal (52) — proposta sempre; real só nos meses já lançados (RDO)
   const serieMensal: ChuvaSerieMes[] = acomp.map((r) => ({
