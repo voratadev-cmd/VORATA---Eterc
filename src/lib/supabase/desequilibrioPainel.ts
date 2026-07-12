@@ -172,10 +172,10 @@ export async function getDesequilibrioPainel(
 ): Promise<DesequilibrioPainel | null> {
   const [ctx, bloco1, bloco3, memoSec, leituraSec, chuvaTotais] = await Promise.all([
     getDeseqContexto(contractId),
-    getSecaoDados(contractId, "D.0 — Bloco 1"),
-    getSecaoDados(contractId, "D.0 — Bloco 3"),
-    getSecaoDados(contractId, "D.0 — Memo"),
-    getSecaoDados(contractId, "D.0 — Leitura IA"),
+    getSecaoDados(contractId, "D.0%Bloco 1"),
+    getSecaoDados(contractId, "D.0%Bloco 3"),
+    getSecaoDados(contractId, "D.0%Memo"),
+    getSecaoDados(contractId, "D.0%Leitura IA"),
     getSecaoDados(contractId, "auxiliar_D.6 Chuva — Totais"),
   ]);
   if (!ctx.deseq) return null;

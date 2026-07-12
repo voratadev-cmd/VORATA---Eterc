@@ -2701,7 +2701,7 @@ def _farol_nivel(v) -> str | None:  # noqa: ANN001
     s = _norm_key(str(v or ""))
     if "conforme" in s:
         return "conforme"
-    if "observ" in s:
+    if "observ" in s or "atencao" in s:  # "Atenção" (não-canônico da fonte) → Observação
         return "observacao"
     if "risco" in s:
         return "risco"
@@ -2715,24 +2715,42 @@ def extrair_panorama(secoes: list[dict]) -> dict:
     kv = None
     for s in secoes:
         dd = s.get("dados") if isinstance(s, dict) else None
-        if isinstance(dd, dict) and "consolidadoPior" in dd:
-            kv = dd
+        if isinstance(dd, dict) and any(str(k).startswith("consolidadoPior") for k in dd):
+            kv = dict(dd)
             break
+    if kv is not None:
+        # merge das demais KVs do C.10 (ex.: SBSO separa Farol e KPIs em seções) — 1º valor vence
+        for s in secoes:
+            if not isinstance(s, dict):
+                continue
+            if "c10" not in _norm_key(s.get("titulo") or ""):
+                continue
+            dd = s.get("dados")
+            if isinstance(dd, dict):
+                for k, v in dd.items():
+                    kv.setdefault(k, v)
     if kv is None:
         return {"farois": {}, "n_avaliados": 0, "status": "needs_review",
                 "findings": [{"severity": "error", "campo": "panorama", "msg": "C.10 panorama não localizado"}]}
+    def _g10(*nomes):  # 1º valor entre chaves candidatas (lookup normalizado · dialetos BR-101/SBSO)
+        idx10 = {_norm_key(k): v for k, v in kv.items()}
+        for nm in nomes:
+            if _norm_key(nm) in idx10:
+                return idx10[_norm_key(nm)]
+        return None
+
     farois = {
-        "projetos": _farol_nivel(kv.get("farolProjetos")),
-        "interferencias": _farol_nivel(kv.get("farolInterferencias")),
-        "liberacoes_area": _farol_nivel(kv.get("farolLiberacoesArea")),
-        "clima_forca_maior": _farol_nivel(kv.get("farolClimaForcaMaior")),
-        "precos_quantidades": _farol_nivel(kv.get("farolPrecosQuantidades")),
-        "suprimentos_material": _farol_nivel(kv.get("farolSuprimentosMaterial")),
+        "projetos": _farol_nivel(_g10("farolProjetos", "projetos")),
+        "interferencias": _farol_nivel(_g10("farolInterferencias", "interferenciasDivPontuais")),
+        "liberacoes_area": _farol_nivel(_g10("farolLiberacoesArea", "liberacoesDeArea")),
+        "clima_forca_maior": _farol_nivel(_g10("farolClimaForcaMaior", "clima")),
+        "precos_quantidades": _farol_nivel(_g10("farolPrecosQuantidades", "precosEQuantidades")),
+        "suprimentos_material": _farol_nivel(_g10("farolSuprimentosMaterial", "suprimentosMaterial")),
     }
-    consolidado = _farol_nivel(kv.get("consolidadoPior"))
-    pct = _num_limpo(kv.get("liberacoes_pctAreasLiberadas"))
-    dias = _num_limpo(kv.get("clima_diasParadosAcumulados"))
-    imp = _num_limpo(kv.get("liberacoes_frentesImpedidasHojeRS"))
+    consolidado = _farol_nivel(next((v for k, v in kv.items() if str(k).startswith("consolidadoPior")), None))
+    pct = _num_limpo(_g10("liberacoes_pctAreasLiberadas", "liberacoesArea_percAreasLiberadas"))
+    dias = _num_limpo(_g10("clima_diasParadosAcumulados", "clima_diasParados", "diasParadosAcum"))
+    imp = _num_limpo(_g10("liberacoes_frentesImpedidasHojeRS", "liberacoesArea_frentesImpedidasHoje_RS"))
     n_avaliados = sum(1 for v in farois.values() if v is not None)
     return {
         "farois": farois,

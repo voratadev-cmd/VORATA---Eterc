@@ -83,7 +83,8 @@ export type Desequilibrio = {
 
 /** Desequilíbrio (composição D.0) de uma obra. Null se ainda não normalizado (M3 não rodado). */
 export async function getDesequilibrio(contractId: string): Promise<Desequilibrio | null> {
-  const b2 = await getSecaoDados(contractId, "D.0 — Bloco 2");
+  // multi-%: casa "D.0 — Bloco 2…" (BR-101) e "D.0 — Composição … (Bloco 2 · Tab 6.2)" (SBSO)
+  const b2 = await getSecaoDados(contractId, "D.0%Bloco 2");
   if (!Array.isArray(b2) || b2.length === 0) return null;
 
   const cats = (b2 as Row[]).map((r) => {
@@ -91,7 +92,7 @@ export async function getDesequilibrio(contractId: string): Promise<Desequilibri
     const categoria = str(pick(r, "categoria")) ?? (tela ? CAT_NOME[tela] : null) ?? "—";
     // SEMPRE a coluna "Valor (R$)" da fonte (a "R$ desequilíbrio" do bloco está corrompida — ex.: a D.2
     // vem negativa). Sem override por categoria: a D.4 usa o 736.740,88 da própria Bloco 2.
-    const valorRs = num(pick(r, "valor (r", "valor (r$)"));
+    const valorRs = num(pick(r, "valor (r", "valor (r$)", "valor"));
     return { categoria, tela, valorRs };
   });
 
