@@ -23,6 +23,7 @@ from __future__ import annotations
 
 from .configs import CONFIG_VERSION_WORKBOOK
 from .gate import (
+    gate_insumos_fd,
     gate_avanco_fisico_disciplina,
     gate_bdi,
     gate_bdi_deseq,
@@ -53,6 +54,7 @@ from .gate import (
 )
 from .guia_contrato import cobertura_atomica, parse_guia_contrato
 from .persist import (
+    upsert_insumos_fd,
     upsert_avanco_fisico_disciplina_mes,
     upsert_bdi_rubricas,
     upsert_bdi_deseq,
@@ -135,6 +137,7 @@ from .resolvers import (
     extrair_faturamento_frente_trecho,
     extrair_indiretos,
     extrair_insumos_curva_abc,
+    extrair_insumos_fd,
     extrair_produtividade_economica,
     extrair_produtividade_params,
     extrair_produtividade_fisica,
@@ -239,6 +242,19 @@ def processar_workbook_motor(arquivo_id: str, contrato_id: str, nome: str,
                 routed.append("C.6 Insumos: eixo de preço REAL vazio → farol de desvio PENDENTE (honesto)")
         else:
             pendentes.append("C.6 Insumos·CurvaABC: nenhum insumo extraível")
+
+    # ── Rota C.6/D.5 fd — modelo multifonte que as TELAS leem (fd/fontes/reeq/ipca_serie) ──────
+    res_fd = extrair_insumos_fd(secoes)
+    if res_fd["insumos"]:
+        g = gate_insumos_fd(res_fd)
+        upsert_insumos_fd(
+            contrato_id=contrato_id, arquivo_id=arquivo_id, extracao_version=version,
+            config_version=CONFIG_VERSION_WORKBOOK, status=g["status"],
+            insumos=res_fd["insumos"], fontes=res_fd["fontes"], reeq=res_fd["reeq"], serie=res_fd["serie"],
+        )
+        tag = (f"C.6/D.5 fd: {res_fd['n']} insumos · fonte {res_fd['fontes'][0]['rotulo'][:22] if res_fd['fontes'] else '—'} "
+               f"(status={g['status']})")
+        (em_revisao if g["status"] == "needs_review" else routed).append(tag)
 
     # ── Rota C.4 Recursos (MOD/MOI/EQP) — plano contratado item a item + histograma mensal ───
     # O histograma é roteado INDEPENDENTE dos itens: um workbook com a curva de mobilização mas sem

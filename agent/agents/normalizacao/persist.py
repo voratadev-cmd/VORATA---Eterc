@@ -1283,3 +1283,39 @@ def upsert_timeline_params(
         supabase.table("obra_timeline_params").insert(row).execute()
         return 1
     return 0
+
+
+_FD_COLS = ("ordem_abc", "nome", "unidade", "classe", "categoria", "ordem_pq", "qtd_pq",
+            "preco_unit_bdi", "valor_contrato_bdi", "qtd_medida", "valor_medido_bdi", "fonte_recomendada")
+_FD_FONTE_COLS = ("insumo_ordem", "ordem_opcao", "fonte_id", "fonte", "rotulo", "codigo", "tipo",
+                  "valor_os", "valor_atual", "delta_pct", "is_recomendada")
+_FD_REEQ_COLS = ("ipca_periodo", "data_os", "data_verificacao", "data_assinatura", "data_proposta",
+                 "data_reajuste_aniversario", "data_verificacao_reeq", "contrato_cheio_bdi",
+                 "medido_acumulado", "saldo_a_executar", "reajuste_acumulado", "ipca_atual", "cenario_m1_ativo")
+
+
+def upsert_insumos_fd(*, contrato_id, arquivo_id, extracao_version, config_version, status,
+                      insumos, fontes, reeq, serie):  # noqa: ANN001
+    """Modelo fd das telas C.6/D.5 (4 tabelas) · replace POR OBRA."""
+    supabase.table("obra_insumos_fd_fontes").delete().eq("contrato_id", contrato_id).execute()
+    supabase.table("obra_insumos_fd").delete().eq("contrato_id", contrato_id).execute()
+    supabase.table("obra_insumos_reeq").delete().eq("contrato_id", contrato_id).execute()
+    supabase.table("obra_ipca_serie").delete().eq("contrato_id", contrato_id).execute()
+    if insumos:
+        rows = [{"contrato_id": contrato_id, "arquivo_id": arquivo_id, "extracao_version": extracao_version,
+                 "config_version": config_version, "status": status,
+                 **{k: i.get(k) for k in _FD_COLS}} for i in insumos]
+        supabase.table("obra_insumos_fd").insert(rows).execute()
+    if fontes:
+        rows = [{"contrato_id": contrato_id, "status": status,
+                 **{k: f.get(k) for k in _FD_FONTE_COLS}} for f in fontes]
+        supabase.table("obra_insumos_fd_fontes").insert(rows).execute()
+    if reeq:
+        supabase.table("obra_insumos_reeq").insert({
+            "contrato_id": contrato_id, "status": status,
+            **{k: reeq.get(k) for k in _FD_REEQ_COLS}}).execute()
+    if serie:
+        rows = [{"contrato_id": contrato_id, **{k: s.get(k) for k in
+                 ("mes", "indice", "cenario_id", "cenario_nome", "cenario_desc")}} for s in serie]
+        supabase.table("obra_ipca_serie").insert(rows).execute()
+    return len(insumos or [])

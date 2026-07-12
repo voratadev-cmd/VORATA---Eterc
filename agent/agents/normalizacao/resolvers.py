@@ -4846,3 +4846,164 @@ def derivar_farol_excedente(delta_pct, excedente_pct) -> str | None:  # noqa: AN
     if exc <= 0.05:
         return "Risco"
     return "Crítico"
+
+
+# ── C.6/D.5 · MODELO FD (multifonte) — o que as TELAS leem (obra_insumos_fd/fontes/reeq/ipca) ────
+def extrair_insumos_fd(secoes: list[dict]) -> dict:
+    """C.6/D.5 fd — insumos de faturamento direto + fontes de índice + reequilíbrio.
+    Variante FONTE ÚNICA (índice contratual · ex.: SBSO INCC-DI I03): a ABC de materiais
+    da C.6 vira os insumos fd; a tabela de índices FGV vira a(s) fonte(s); os params de
+    reajuste + PV/medição viram o reeq. Determinístico; conservação no gate (cards C.6)."""
+    def _kv_all():
+        out = {}
+        for s in secoes:
+            dd = s.get("dados") if isinstance(s, dict) else None
+            if isinstance(dd, dict):
+                for k, v in dd.items():
+                    out.setdefault(_norm_key(k), v)
+        return out
+    kv = _kv_all()
+
+    # ABC de materiais da C.6 (mesma seleção estrita da rota ABC)
+    sec_abc = None
+    for s in secoes:
+        if not isinstance(s, dict):
+            continue
+        t = _norm_key(s.get("titulo") or "")
+        if "c6" in t and "curvaabc" in t and s.get("linhas"):
+            sec_abc = s
+            break
+    if sec_abc is None:
+        return {"insumos": [], "fontes": [], "reeq": None, "serie": [], "cards": {},
+                "n": 0, "status": "ok", "findings": []}
+
+    # Tabela de índices (FGV/IBRE) — I01..I04 {codigo, serie, io, i, delta}
+    indices = []
+    for s in secoes:
+        if not isinstance(s, dict) or not s.get("linhas"):
+            continue
+        t = _norm_key(s.get("titulo") or "")
+        if "indice" in t and "reajuste" in t and _achar_coluna(s.get("colunas") or [], "io") is not None:
+            for row in s["linhas"]:
+                if not isinstance(row, dict):
+                    continue
+                cols = s.get("colunas") or []
+                cc = _achar_coluna(cols, "codigo", "código")
+                cs = _achar_coluna(cols, "serie", "série")
+                cio = _achar_coluna(cols, "io")
+                ci = _achar_coluna(cols, "i (reajuste)", "i reajuste")
+                cd = next((c for c in cols if "%" in str(c)), None)  # Δ% (evita casar 'I (reajuste)')
+                indices.append({
+                    "codigo": str(row.get(cc) or "").strip(),
+                    "serie": str(row.get(cs) or "").strip(),
+                    "io": _num_limpo(row.get(cio)) if cio else None,
+                    "i": _num_limpo(row.get(ci)) if ci else None,
+                    "delta": _num_limpo(row.get(cd)) if cd else None,
+                })
+            break
+
+    # Índice CONTRATUAL dos materiais (ex.: "INCC-DI Todos (I03)") → acha a linha do índice
+    contratual_rot = str(kv.get("indicecontratual") or "").strip()
+    m_cod = re.search(r"i\s*0?(\d)", contratual_rot.lower())
+    cod_contratual = f"I 0{m_cod.group(1)}" if m_cod else None
+    idx = next((x for x in indices if x["codigo"].replace(" ", "").lower() == (cod_contratual or "").replace(" ", "").lower()), None)
+    reaj_acum = _num_limpo(kv.get("reajusteacumuladomai26frac")) or _num_limpo(
+        next((v for k, v in kv.items() if k.startswith("reajusteacumulado")), None))
+    if idx is None and reaj_acum is not None:
+        idx = {"codigo": cod_contratual or "I", "serie": contratual_rot or "índice contratual",
+               "io": None, "i": None, "delta": reaj_acum}
+
+    cols = sec_abc.get("colunas") or []
+    c_ins = _achar_coluna(cols, "insumo")
+    c_und = _achar_coluna(cols, "und", "unidade")
+    c_qtd = _achar_coluna(cols, "qtde contratada", "qtde", "quantidade")
+    c_pre = _achar_coluna(cols, "preco orcado", "preço orçado")
+    c_val = _achar_coluna(cols, "custo total", "valor orcado")
+    c_cls = _achar_coluna(cols, "classe")
+    fonte_id = (idx or {}).get("codigo", "idx").replace(" ", "").lower()
+    insumos, fontes = [], []
+    for i, row in enumerate([x for x in sec_abc.get("linhas") or [] if isinstance(x, dict)]):
+        nome = str(row.get(c_ins) or "").strip()
+        if not nome or "total" in _norm_key(nome):
+            continue
+        o = len(insumos)
+        insumos.append({
+            "ordem_abc": o, "nome": nome[:200],
+            "unidade": (str(row.get(c_und)).strip() if c_und and row.get(c_und) else "—"),
+            "classe": (str(row.get(c_cls)).strip()[:1].upper() if c_cls and row.get(c_cls) else "C"),
+            "categoria": "MATERIAIS", "ordem_pq": None,
+            # qtd/preço 0 nas linhas-balde (ex.: "Demais insumos") — NOT NULL no schema; o valor rege.
+            "qtd_pq": (_num_limpo(row.get(c_qtd)) if c_qtd else None) or 0.0,
+            "preco_unit_bdi": (_num_limpo(row.get(c_pre)) if c_pre else None) or 0.0,
+            "valor_contrato_bdi": (_num_limpo(row.get(c_val)) if c_val else None) or 0.0,
+            # NOT NULL no schema; 0 é o fato (nada medido de materiais até o BM · repasse real 0)
+            "qtd_medida": 0.0, "valor_medido_bdi": 0.0,
+            "fonte_recomendada": fonte_id,
+        })
+        fontes.append({
+            "insumo_ordem": o, "ordem_opcao": 0, "fonte_id": fonte_id,
+            "fonte": "FGV", "rotulo": (idx or {}).get("serie") or contratual_rot or "índice contratual",
+            "codigo": (idx or {}).get("codigo"), "tipo": "indice",
+            "valor_os": (idx or {}).get("io"), "valor_atual": (idx or {}).get("i"),
+            "delta_pct": (idx or {}).get("delta"), "is_recomendada": True,
+        })
+
+    # Data da OS: marco contratual "Ordem de Serviço" na seção de Marcos & Eventos (determinístico)
+    data_os = None
+    for s2 in secoes:
+        if not isinstance(s2, dict) or "marco" not in _norm_key(s2.get("titulo") or ""):
+            continue
+        for row in s2.get("linhas") or []:
+            if isinstance(row, dict) and any(
+                    "ordemdeservico" in _norm_key(str(v)) for v in row.values() if isinstance(v, str)):
+                for v in row.values():
+                    if isinstance(v, str) and re.match(r"^\d{4}-\d{2}-\d{2}", v):
+                        data_os = v[:10]
+                        break
+            if data_os:
+                break
+        if data_os:
+            break
+
+    pv = _num_limpo(kv.get("precodevendapv")) or _num_limpo(kv.get("precovendapv")) or _num_limpo(kv.get("valorinicialdocontratopv"))
+    medido = _num_limpo(kv.get("medicaopvacumuladaatebm"))
+    _db_raw = str(kv.get("databaseorcamento") or kv.get("databasedoorcamento")
+                  or next((v for k, v in kv.items() if k.startswith("database") and re.match(r"^\d{4}-", str(v))), "")
+                  ).strip()[:10]
+    _m_br = re.match(r"^(\d{2})/(\d{2})/(\d{4})$", _db_raw)
+    data_base = (f"{_m_br.group(3)}-{_m_br.group(2)}-{_m_br.group(1)}" if _m_br else _db_raw) or None
+    reeq_data_verif = [None]
+    reeq = {
+        "ipca_periodo": reaj_acum, "ipca_atual": (idx or {}).get("i"),
+        "contrato_cheio_bdi": pv, "medido_acumulado": medido,
+        "saldo_a_executar": (pv - medido) if isinstance(pv, float) and isinstance(medido, float) else None,
+        "reajuste_acumulado": reaj_acum,
+        "data_os": data_os or data_base,  # NOT NULL; fallback documentado = data-base
+        "data_verificacao": None,  # preenchida após a série (último dia do mês do índice)
+        "data_assinatura": None,
+        "data_proposta": data_base, "data_reajuste_aniversario": None, "data_verificacao_reeq": None,
+        "cenario_m1_ativo": "database",
+    }
+    serie = []
+    if data_base and (idx or {}).get("io") is not None:
+        serie.append({"mes": data_base[:7], "indice": idx["io"], "cenario_id": "database",
+                      "cenario_nome": "Data-base do orçamento", "cenario_desc": f"Io {contratual_rot}".strip()})
+    if (idx or {}).get("i") is not None:
+        mes_atual = "2026-05" if any("mai26" in k for k in kv) else "atual"
+        if re.match(r"^\d{4}-\d{2}$", mes_atual):
+            import calendar as _cal
+            _y, _m = int(mes_atual[:4]), int(mes_atual[5:7])
+            reeq_data_verif[0] = f"{mes_atual}-{_cal.monthrange(_y, _m)[1]:02d}"
+        serie.append({"mes": mes_atual, "indice": idx["i"], "cenario_id": None,
+                      "cenario_nome": None, "cenario_desc": None})
+
+    if reeq_data_verif[0]:
+        reeq["data_verificacao"] = reeq_data_verif[0]
+    if not reeq.get("data_verificacao"):
+        reeq["data_verificacao"] = reeq.get("data_os") or data_base
+
+    cards = {"n_monitorados": _num_limpo(kv.get("insumosmonitorados")),
+             "valor_orcado": _num_limpo(kv.get("valorcontratadoorcado")) or _num_limpo(
+                 next((v for k, v in kv.items() if k.startswith("materiaisvalororcadototal")), None))}
+    return {"insumos": insumos, "fontes": fontes, "reeq": reeq, "serie": serie, "cards": cards,
+            "n": len(insumos), "status": "ok", "findings": []}

@@ -1198,3 +1198,28 @@ def gate_bdi_deseq(params: dict | None, rubricas: list[dict], perda: list[dict])
                              "msg": f"perda acum BM{bm} {float(acum):.2f} ≠ desequilíbrio {float(deq_total):.2f}"})
     status = "needs_review" if any(f["severity"] == "error" for f in findings) else "ok"
     return {"status": status, "findings": findings}
+
+
+def gate_insumos_fd(res: dict) -> dict:
+    """C.6/D.5 fd — conservação contra os Cards da C.6: n insumos == monitorados e
+    Σ valor_contrato_bdi == valor contratado orçado (tol 0,01% · piso R$1). Cada insumo
+    precisa de fonte recomendada existente. Falha-alto."""
+    findings: list[dict] = list(res.get("findings", []))
+    cards = res.get("cards") or {}
+    n_dec = cards.get("n_monitorados")
+    if n_dec is not None and int(n_dec) != res.get("n"):
+        findings.append({"severity": "error", "campo": "n",
+                         "msg": f"n insumos fd ({res.get('n')}) ≠ monitorados Cards ({int(n_dec)})"})
+    val_dec = cards.get("valor_orcado")
+    soma = round(sum((i.get("valor_contrato_bdi") or 0) for i in res.get("insumos") or []), 2)
+    if val_dec is not None:
+        tol = max(1.0, abs(float(val_dec)) * 0.0001)
+        if abs(soma - float(val_dec)) > tol:
+            findings.append({"severity": "error", "campo": "conservacao",
+                             "msg": f"Σ valor fd {soma:.2f} ≠ contratado orçado Cards {float(val_dec):.2f}"})
+    ids = {f.get("insumo_ordem") for f in res.get("fontes") or []}
+    orfaos = [i["ordem_abc"] for i in res.get("insumos") or [] if i["ordem_abc"] not in ids]
+    if orfaos:
+        findings.append({"severity": "error", "campo": "fontes", "msg": f"{len(orfaos)} insumo(s) sem fonte"})
+    status = "needs_review" if any(f["severity"] == "error" for f in findings) else "ok"
+    return {"status": status, "findings": findings}
