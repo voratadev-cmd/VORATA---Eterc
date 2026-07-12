@@ -4639,6 +4639,21 @@ def extrair_cronograma_tarefas_c13(secoes: list[dict]) -> dict:
     NÍVEL). Casa por título 'cron project' / 'cronograma ms project' + colunas. Datas ISO. Eixo real
     pendente (pré-execução) chega NULL. ZERO hardcode de obra."""
     findings: list[dict] = []
+
+    # dialeto SBSO (FONTE-CRONOGRAMA-FISICO · MS-Project): EDT/Início/Término/Nome — sem eixo real.
+    def _data_br(v):  # 'Ter 16/09/25' | '16/09/2025' | ISO → ISO
+        if v is None:
+            return None
+        s2 = str(v).strip()
+        mi = re.search(r"(\d{4})-(\d{2})-(\d{2})", s2)
+        if mi:
+            return f"{mi.group(1)}-{mi.group(2)}-{mi.group(3)}"
+        mb = re.search(r"(\d{2})/(\d{2})/(\d{2,4})", s2)
+        if mb:
+            y = mb.group(3)
+            y = f"20{y}" if len(y) == 2 else y
+            return f"{y}-{mb.group(2)}-{mb.group(1)}"
+        return None
     sec = None
     for s in secoes:
         if not isinstance(s, dict) or s.get("tipo") != "tabela":
@@ -4651,6 +4666,49 @@ def extrair_cronograma_tarefas_c13(secoes: list[dict]) -> dict:
                 and _achar_coluna(cols, "início real", "inicio real")):
             sec = s
             break
+    if sec is None:
+        for s2 in secoes:
+            if not isinstance(s2, dict) or not s2.get("linhas"):
+                continue
+            cols2 = s2.get("colunas") or []
+            if (_achar_coluna(cols2, "edt") is not None and _achar_coluna(cols2, "nome da tarefa") is not None
+                    and _achar_coluna(cols2, "início", "inicio") is not None):
+                cE = _achar_coluna(cols2, "edt")
+                cN = _achar_coluna(cols2, "nome da tarefa")
+                cI = _achar_coluna(cols2, "início", "inicio")
+                cT = _achar_coluna(cols2, "término", "termino")
+                tarefas2 = []
+                for row in s2["linhas"]:
+                    if not isinstance(row, dict):
+                        continue
+                    nome2 = str(row.get(cN) or "").strip()
+                    edt = str(row.get(cE) or "").strip()
+                    if not nome2:
+                        continue
+                    di = _data_br(row.get(cI))
+                    dt2 = _data_br(row.get(cT)) or di
+                    if not di:  # linha de agrupamento/cabeçalho sem data — não é barra de Gantt
+                        continue
+                    dur = None
+                    if di and dt2:
+                        from datetime import date as _d
+                        try:
+                            _a = _d(*[int(x) for x in di.split("-")])
+                            _b = _d(*[int(x) for x in dt2.split("-")])
+                            dur = (_b - _a).days + 1
+                        except ValueError:
+                            dur = None
+                    tarefas2.append({
+                        "ordem": len(tarefas2), "numero_item": edt[:40] or None, "codigo": edt[:40] or None,
+                        "nivel": (edt.count(".") + 1) if edt else None, "nome": nome2[:300],
+                        "unidade": None, "quantidade": None, "duracao_dias": dur,
+                        "data_inicio": di, "data_termino": dt2,
+                        "data_inicio_real": None, "data_termino_real": None,
+                        "desvio_dias": None, "pct_concluido": None,
+                        "eh_marco": bool(di and dt2 and di == dt2),
+                    })
+                if tarefas2:
+                    return {"tarefas": tarefas2, "n": len(tarefas2), "status": "ok", "findings": []}
     if sec is None:
         return {"tarefas": [], "n": 0, "status": "ok", "findings": []}
     cols = sec.get("colunas") or []
@@ -4723,20 +4781,20 @@ def extrair_eventos_prazo(secoes: list[dict]) -> dict:
         if not isinstance(s, dict) or s.get("tipo") != "tabela":
             continue
         t = _norm_key(s.get("titulo") or "")
-        if "registrodeeventos" in t:
+        if "registrodeeventos" in t or ("marcos" in t and "eventos" in t):
             sec = s
             break
     if sec is None:
         return {"eventos": [], "n": 0, "status": "ok", "findings": []}
     cols = sec.get("colunas") or []
     c = {"id": _achar_coluna(cols, "id (ev", "id (ev…"),
-         "tit": _achar_coluna(cols, "título", "titulo"),
-         "cat": _achar_coluna(cols, "categoria"),
-         "ini": _achar_coluna(cols, "data início", "data inicio"),
+         "tit": _achar_coluna(cols, "título", "titulo", "marco / evento", "marco/evento", "marco"),
+         "cat": _achar_coluna(cols, "categoria", "tipo"),
+         "ini": _achar_coluna(cols, "data início", "data inicio") or _achar_coluna_exata(cols, "data"),
          "fim": _achar_coluna(cols, "data fim"),
          "frente": _achar_coluna(cols, "frente/trecho", "frente"),
          "crit": _achar_coluna(cols, "crítico", "critico"),
-         "clau": _achar_coluna(cols, "cláusula", "clausula"),
+         "clau": _achar_coluna(cols, "cláusula", "clausula", "descrição / observação", "descricao"),
          "stat": _achar_coluna(cols, "status análise", "status analise"),
          "matriz": _achar_coluna(cols, "matriz"),
          "imp": _achar_coluna(cols, "impacta")}
@@ -4780,7 +4838,41 @@ def extrair_timeline_params(secoes: list[dict]) -> dict:
             for k, v in dados.items():
                 out[_norm_key(k)] = v
     if not out:
+        # dialeto SBSO: painel C.5 (inicioOSreal/bmCorrente/desvio_pp) + término contratual dos marcos
+        kvp = None
+        for s in secoes:
+            dd = s.get("dados") if isinstance(s, dict) else None
+            if isinstance(dd, dict) and any(_norm_key(k) == "inicioosreal" for k in dd):
+                kvp = {_norm_key(k): v for k, v in dd.items()}
+                break
+        if kvp:
+            term = None
+            for s in secoes:
+                if not isinstance(s, dict) or "marco" not in _norm_key(s.get("titulo") or ""):
+                    continue
+                for row in s.get("linhas") or []:
+                    if isinstance(row, dict) and any(
+                            "terminocontratual" in _norm_key(str(v)) for v in row.values() if isinstance(v, str)):
+                        for v in row.values():
+                            if isinstance(v, str) and re.match(r"^\d{4}-\d{2}-\d{2}", v):
+                                term = v[:10]
+                                break
+                if term:
+                    break
+            _dpp = _num_limpo(kvp.get("desviopp"))
+            _bm = _num_limpo(kvp.get("bmcorrente"))
+            params2 = {
+                "os_real": str(kvp.get("inicioosreal") or "")[:10] or None,
+                "os_original": None, "termino_contratual": term,
+                "inicio_execucao": str(kvp.get("inicioosreal") or "")[:10] or None,
+                "termino_previsto": term,
+                "mes_corte_indice": int(_bm) if isinstance(_bm, float) else None,
+                "delta_impacto_fisico_pp": round(_dpp, 2) if isinstance(_dpp, float) else None,
+                "windows_obs": None,
+            }
+            return {"params": params2, "status": "ok", "findings": []}
         return {"params": None, "status": "ok", "findings": []}
+
 
     def _i(k):  # int ou None
         n = _num_limpo(out.get(k))
