@@ -119,7 +119,7 @@ test("bridge faturamento · calc+real → FaturamentoBM (KPIs/curva reais, IA pe
   expect(fat.aderenciaFarol).toBe("observacao");
   expect(fat.aderenciaAcumuladoPct).toBe(95);
   expect(fat.totalExecutadoPct).toBe(38); // real acum 38 mi ÷ contratado total 100 mi
-  expect(fat.saldoFaturarLabel).toBe("R$ 62 mi");
+  expect(fat.saldoFaturarLabel).toBe("R$ 62,00 mi");
   expect(fat.saldoFaturarPct).toBe(62);
   expect(fat.saldoFaturarBmsRestantes).toBe(3); // 3 meses forecast (mar, abr, mai)
 

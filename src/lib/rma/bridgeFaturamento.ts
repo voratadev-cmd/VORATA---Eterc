@@ -214,7 +214,7 @@ export function buildFaturamentoBm(
     aderenciaAcumuladoPct: calc.aderenciaAcum ?? null,
     aderenciaFarol: calc.farol ?? undefined,
     totalExecutadoPct: calc.avancoRealizadoPct ?? null,
-    saldoFaturarLabel: real.saldoFaturar != null ? formatBRLAbbreviated(real.saldoFaturar) : "—",
+    saldoFaturarLabel: real.saldoFaturar != null ? fmtMiExato(real.saldoFaturar) : "—",
     saldoFaturarPct,
     saldoFaturarBmsRestantes: bmsRestantes,
     periodo,
