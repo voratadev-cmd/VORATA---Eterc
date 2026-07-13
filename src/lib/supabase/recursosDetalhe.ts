@@ -156,7 +156,47 @@ export async function getRecursosDetalhe(contractId: string): Promise<RecursosDe
     getDados(contractId, "auxiliar_C.4 EQP Detalhe"),
     getDados(contractId, "D.1 Adm Local Detalhe"),
   ]);
-  if (!mod && !eqp && !moi) return null;
+  if (!mod && !eqp && !moi) {
+    // Dialeto SBSO (workbook-motor): sem histogramas auxiliares BR-101, o detalhe por função vive
+    // nos "C.4 — Comparativo MOD/MOI/EQP (Contratado × Real … totais do contrato)". Eixo de
+    // quantidade = PESSOAS/EQUIP ("(q)_2" · L59 O/V da aba) — o "(q)" simples é Hh e NÃO é o
+    // rótulo QTD que a tela mostra. R$ = acumulado até o BM (Contratado/Real/Δ prontos na fonte).
+    const [cMod, cMoi, cEqp] = await Promise.all([
+      getDados(contractId, "Comparativo MOD"),
+      getDados(contractId, "Comparativo MOI"),
+      getDados(contractId, "Comparativo EQP"),
+    ]);
+    if (!cMod && !cMoi && !cEqp) return null;
+    const doCmp = (rows: Row[] | null, categoria: RecursoTipo): RecursoDetalheItem[] =>
+      (rows ?? [])
+        .map((r) => {
+          const funcao = str(pick(r, "recurso / função", "recurso", "equipamento", "função"));
+          // eixo-qtde por dialeto: "(q)_2" = pessoas (MOD/EQP) · "(Hh)" = único eixo do MOI ·
+          // "(q)" cru por último (no MOD é Hh — nunca preferir).
+          const cq =
+            num(pick(r, "contratado (q)_2")) ??
+            num(pick(r, "contratado (hh)")) ??
+            num(pick(r, "contratado (q)"));
+          const rq =
+            num(pick(r, "real (q)_2")) ?? num(pick(r, "real (hh)")) ?? num(pick(r, "real (q)"));
+          const cr = num(pick(r, "contratado (r$)", "contratado (r"));
+          const rr = num(pick(r, "real (r$)", "real (r"));
+          const d = num(pick(r, "δ (r$)", "δ (r")) ?? (rr != null && cr != null ? rr - cr : null);
+          return {
+            categoria,
+            funcao: funcao ?? "",
+            unidade: "qtd",
+            contratadoQtde: cq,
+            realQtde: rq,
+            contratadoRs: null,
+            contratadoRsBM: cr,
+            realRs: rr,
+            desvioRsBM: d,
+          };
+        })
+        .filter((i) => i.funcao && !/^total/i.test(i.funcao));
+    return { MOD: doCmp(cMod, "MOD"), MOI: doCmp(cMoi, "MOI"), EQP: doCmp(cEqp, "EQP") };
+  }
 
   return {
     MOD: parsePares(mod, "MOD", ["FUNÇÃO", "FUNCAO"], "h×mês", {

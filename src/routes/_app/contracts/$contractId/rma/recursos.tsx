@@ -49,7 +49,7 @@ import { useFaturamentoBm } from "@/lib/hooks/useFaturamentoBm";
 import { useRmaCorte, useRmaCorteEfetivo } from "@/lib/hooks/useRmaCorte";
 import { useValorAgregadoD4 } from "@/lib/hooks/useValorAgregado";
 import type { CategoriaResumo, RecursoDesvio, RecursoTipo } from "@/lib/supabase/recursos";
-import type { RecursosDetalhe } from "@/lib/supabase/recursosDetalhe";
+import type { RecursoDetalheItem, RecursosDetalhe } from "@/lib/supabase/recursosDetalhe";
 import type { ValorAgregadoResumo } from "@/lib/supabase/valorAgregado";
 import { classificarPorRegra, FAROL_TONE, type FarolLevel } from "@/lib/rma/farol";
 import { farolLabel, formatBRL, formatBRLAbbreviated } from "@/lib/mocks/contracts";
@@ -240,7 +240,7 @@ function RecursosAba() {
             )}
           </div>
           <aside className="rec-histo-side">
-            <RecResumoCat cat={cat} corte={corte} />
+            <RecResumoCat cat={cat} corte={corte} det={detalhe?.[tipo] ?? null} />
             <RecMaioresDesvios
               desvios={desviosCat}
               cat={cat}
@@ -347,13 +347,31 @@ function RecKpis({
 
 // ── Resumo da categoria (ao lado do histograma · acum até o BM) ──────────────────────────────────
 
-function RecResumoCat({ cat, corte }: { cat: CategoriaResumo; corte: CorteMes | null }) {
+function RecResumoCat({
+  cat,
+  corte,
+  det,
+}: {
+  cat: CategoriaResumo;
+  corte: CorteMes | null;
+  det: RecursoDetalheItem[] | null;
+}) {
   const a = corte ? acumRecAteCorte(cat, corte) : null;
+  // Qtde OFICIAL = Σ do detalhe por função (eixo QTD/pessoas · L59 O/V) quando existe — o
+  // histograma do MOD guarda Hh, que não é o "QTD" da aba (spec C.4). Sem detalhe → histograma.
+  const detCq = det?.length ? det.reduce((acc, i) => acc + (i.contratadoQtde ?? 0), 0) : null;
+  const detRq = det?.length
+    ? det.some((i) => i.realQtde != null)
+      ? det.reduce((acc, i) => acc + (i.realQtde ?? 0), 0)
+      : null
+    : null;
+  const cq = detCq ?? a?.cq ?? null;
+  const rq = detCq != null ? detRq : (a?.rq ?? null);
   const signedQ = (v: number | null) =>
     v != null ? `${v > 0 ? "+" : v < 0 ? "−" : ""}${fmtQtde(Math.abs(v))}` : "—";
   const signedRs = (v: number | null) =>
     v != null ? `${v > 0 ? "+" : v < 0 ? "−" : ""}${formatBRLAbbreviated(Math.abs(v))}` : "—";
-  const dq = a && a.rq != null ? a.rq - a.cq : null;
+  const dq = cq != null && rq != null ? rq - cq : null;
   const drs = a && a.rr != null ? a.rr - a.cr : null;
   return (
     <Card>
@@ -375,8 +393,8 @@ function RecResumoCat({ cat, corte }: { cat: CategoriaResumo; corte: CorteMes | 
         <tbody>
           <tr>
             <td>Qtde</td>
-            <td className="v">{a ? fmtQtde(a.cq) : "—"}</td>
-            <td className="v">{a && a.rq != null ? fmtQtde(a.rq) : "—"}</td>
+            <td className="v">{cq != null ? fmtQtde(cq) : "—"}</td>
+            <td className="v">{rq != null ? fmtQtde(rq) : "—"}</td>
             <td className="v">{signedQ(dq)}</td>
           </tr>
           <tr>
@@ -513,6 +531,23 @@ function RecMaioresDesvios({
                     </td>
                   </tr>
                 ))}
+                {!fallbackGlobal && n > 1 ? (
+                  <tr className="rec-md-totalrow">
+                    <td>TOTAL · {cat.label}</td>
+                    <td className="v">
+                      {formatBRLAbbreviated(desvios.reduce((s, d) => s + (d.contratadoRs ?? 0), 0))}
+                    </td>
+                    <td className="v">
+                      {formatBRLAbbreviated(desvios.reduce((s, d) => s + (d.realRs ?? 0), 0))}
+                    </td>
+                    <td className="v">
+                      {(() => {
+                        const t = desvios.reduce((s, d) => s + (d.desvioRs ?? 0), 0);
+                        return `${t > 0 ? "+" : t < 0 ? "−" : ""}${formatBRLAbbreviated(Math.abs(t))}`;
+                      })()}
+                    </td>
+                  </tr>
+                ) : null}
               </tbody>
             </table>
           )}

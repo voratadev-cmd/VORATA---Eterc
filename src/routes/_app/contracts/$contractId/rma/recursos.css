@@ -731,3 +731,10 @@
 .rec-comp-sw-r {
   background: var(--info);
 }
+
+/* Linha TOTAL do ranking de desvios (Σ da categoria · L59 da aba C.4) */
+.rec-md-tab .rec-md-totalrow td {
+  border-top: 1px solid var(--border-strong);
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+}
