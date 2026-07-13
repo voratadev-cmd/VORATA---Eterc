@@ -121,7 +121,14 @@ function SintesePage() {
     : (id?.prazoMeses ?? null);
   const inicio = fmtMesAno(prazo?.inicioISO);
   const fim = fmtMesAno(prazo?.fimContratualISO);
-  const fatMedioMensal = pv != null && prazoMeses ? pv / prazoMeses : null;
+  const fin = sintese.financeiro;
+  // faturamento médio = PV inicial ÷ prazo (spec C.1 · 39.766.038/18 = 2.209.224)
+  const fatMedioMensal =
+    (fin?.pvInicialRs ?? pv) != null && prazoMeses ? (fin?.pvInicialRs ?? pv)! / prazoMeses : null;
+  // resumo curto do reajuste p/ o card ("+7,21% (PSP reajustada 09/08/2025) — …" → "reajuste +7,21%")
+  const reajusteResumo = fin?.reajustesAplicados
+    ? `reajuste ${fin.reajustesAplicados.split(" ")[0]}`
+    : null;
   const est = sintese.estaqueamento;
   const trechoLinha =
     est?.kmInicial != null && est?.kmFinal != null
@@ -142,42 +149,47 @@ function SintesePage() {
           aditivo/reajuste/equipe). Campos <span className="sin-cad-inline">em amarelo</span> = a
           cadastrar/editar.
         </p>
-        <div className="sin-facts">
-          <Fact l="Contrato" v={il("Nº do Contrato")} />
-          <Fact l="Contratante" v={il("Contratante") ?? id?.contratante} />
-          <Fact l="Contratada" v={il("Contratada")} />
-          <Fact l="Trecho" v={il("Trecho / Localização") ?? trechoLinha} />
-        </div>
       </header>
 
       {/* ── KPI bar ── */}
       <div className="sin-kpibar">
         <FarolCard
-          label="VALOR DO CONTRATO (PV)"
+          label="VALOR INICIAL (PV)"
           icon="wallet"
-          value={fmtMi(pv)}
-          info="inicial = atualizado"
+          value={fmtBRLcheio(fin?.pvInicialRs ?? pv)}
+          info="preço global de venda"
+          accent="neutral"
+        />
+        <FarolCard
+          label="VALOR ATUALIZADO"
+          icon="trending"
+          value={fmtBRLcheio(fin?.valorAtualizadoRs)}
+          info={reajusteResumo ?? "reajuste aplicado"}
+          accent="neutral"
+        />
+        <FarolCard
+          label="ORÇAMENTO INTERNO (CUSTO)"
+          icon="tag"
+          value={fmtBRLcheio(fin?.orcamentoInternoRs)}
+          info={
+            fin?.margemPct != null
+              ? `margem ${fmtPct(fin.margemPct, 2)} s/ valor atual`
+              : "custo total"
+          }
           accent="neutral"
         />
         <FarolCard
           label="BDI"
           icon="trending"
-          value={fmtPct(bdiPct)}
-          info="sobre custo direto"
+          value={fmtPct(fin?.bdiPct ?? bdiPct)}
+          info={fin?.ciRs != null ? `CI ${fmtMi(fin.ciRs)}` : "sobre custo direto"}
           accent="neutral"
         />
         <FarolCard
-          label="CUSTO DIRETO"
-          icon="tag"
-          value={fmtMi(custoDireto)}
-          info={pctDiretoPV != null ? `${fmtPct(pctDiretoPV, 1)} do PV` : "— do PV"}
-          accent="neutral"
-        />
-        <FarolCard
-          label="CUSTO INDIRETO (BDI)"
-          icon="tag"
-          value={fmtMi(custoIndireto)}
-          info={pctIndiretoPV != null ? `${fmtPct(pctIndiretoPV, 1)} do PV` : "— do PV"}
+          label="FATURAM. MÉDIO/MÊS"
+          icon="wallet"
+          value={fmtBRLcheio(fatMedioMensal)}
+          info={prazoMeses != null ? `estimado em ${prazoMeses} meses` : "estimado"}
           accent="neutral"
         />
         <FarolCard
@@ -233,11 +245,20 @@ function SintesePage() {
         <div className="sin-econ">
           <KV k="Valor total atualizado" v={fmtBRLcheio(pv)} />
           <KV k="Data-base do orçamento" v={fmtDataBR(sintese.dataBaseOrcamento)} />
-          <KV k="Aniversário de reajuste" v={pz("Aniversário de Reajuste")} />
-          <KV k="Índices de reajuste" v={pz("Índices de Reajuste")} />
-          <KV k="Reajustes aplicados" v={<span className="sin-muted">Ainda não há</span>} />
-          <KV k="Reequilíbrios aplicados" v={<span className="sin-muted">Ainda não há</span>} />
-          <KV k="Aditivos" v={<span className="sin-muted">Ainda não há</span>} />
+          <KV
+            k="Aniversário de reajuste"
+            v={fin?.aniversarioReajuste ?? pz("Aniversário de Reajuste")}
+          />
+          <KV k="Índices de reajuste" v={fin?.indicesReajuste ?? pz("Índices de Reajuste")} />
+          <KV
+            k="Reajustes aplicados"
+            v={fin?.reajustesAplicados ?? <span className="sin-muted">Ainda não há</span>}
+          />
+          <KV
+            k="Reequilíbrios aplicados"
+            v={fin?.reequilibriosAplicados ?? <span className="sin-muted">Ainda não há</span>}
+          />
+          <KV k="Aditivos" v={fin?.aditivos ?? <span className="sin-muted">Ainda não há</span>} />
           <KV k="Faturamento médio mensal" v={fmtBRLcheio(fatMedioMensal)} />
         </div>
       </Card>
@@ -308,7 +329,7 @@ function SintesePage() {
 
       {/* ── Trechos × valor ── */}
       <Section
-        titulo="Trechos × valor"
+        titulo="Segmentação física por edificação (preço de venda)"
         sub={
           est
             ? `km ${est.kmInicial?.toLocaleString("pt-BR", { maximumFractionDigits: 3 })} a ${est.kmFinal?.toLocaleString("pt-BR", { maximumFractionDigits: 3 })} · extensão ${est.extensaoKm?.toLocaleString("pt-BR", { maximumFractionDigits: 1 })} km · ${est.nSegmentos} segmentos`
@@ -317,7 +338,7 @@ function SintesePage() {
       >
         <div className="sin-tabela sin-tabela-tr" role="table">
           <div className="sin-th" role="row">
-            <span role="columnheader">Trecho</span>
+            <span role="columnheader">Edificação / frente</span>
             <span role="columnheader">km</span>
             <span className="r" role="columnheader">
               Valor
@@ -347,6 +368,55 @@ function SintesePage() {
           </div>
         </div>
       </Section>
+
+      {/* ── Orçamento interno por grupo de custo ── */}
+      {sintese.orcamentoGrupos.itens.length > 0 ? (
+        <Section
+          titulo="Orçamento interno por grupo de custo"
+          sub={`${sintese.orcamentoGrupos.itens.length} grupos · visão de custo interno (≠ preço de venda)`}
+        >
+          <div className="sin-tabela sin-tabela-prem" role="table">
+            <div className="sin-th" role="row">
+              <span role="columnheader">Grupo de custo</span>
+              <span className="r" role="columnheader">
+                Valor
+              </span>
+              <span className="r" role="columnheader">
+                % do total
+              </span>
+            </div>
+            {[...sintese.orcamentoGrupos.itens]
+              .sort((a, b) => (b.valorRs ?? 0) - (a.valorRs ?? 0))
+              .map((g) => (
+                <div className="sin-tr" role="row" key={g.grupo}>
+                  <span className="sin-forte" role="cell">
+                    {g.grupo}
+                  </span>
+                  <span className="r tabular" role="cell">
+                    {fmtBRLcheio(g.valorRs)}
+                  </span>
+                  <span className="sin-pctcell" role="cell">
+                    <span
+                      className="sin-bar"
+                      style={{ width: `${Math.min(100, (g.pct ?? 0) * 100)}%` }}
+                      aria-hidden
+                    />
+                    <span className="tabular">{fmtPct((g.pct ?? 0) * 100, 1)}</span>
+                  </span>
+                </div>
+              ))}
+            <div className="sin-tr sin-tr-total" role="row">
+              <span className="sin-forte" role="cell">
+                TOTAL
+              </span>
+              <span className="r tabular" role="cell">
+                {fmtBRLcheio(sintese.orcamentoGrupos.totalRs)}
+              </span>
+              <span role="cell" />
+            </div>
+          </div>
+        </Section>
+      ) : null}
 
       {/* ── Documentos-chave ── */}
       <Section titulo="Documentos-chave">

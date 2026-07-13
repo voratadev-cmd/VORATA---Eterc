@@ -125,6 +125,23 @@ export type SinteseContrato = {
   documentos: SinteseDocumentos | null;
   admin: SinteseAdmin | null;
   dataBaseOrcamento: string | null;
+  financeiro: {
+    pvInicialRs: number | null;
+    valorAtualizadoRs: number | null;
+    orcamentoInternoRs: number | null;
+    margemPct: number | null;
+    bdiPct: number | null;
+    ciRs: number | null;
+    reajustesAplicados: string | null;
+    reequilibriosAplicados: string | null;
+    aditivos: string | null;
+    aniversarioReajuste: string | null;
+    indicesReajuste: string | null;
+  };
+  orcamentoGrupos: {
+    itens: Array<{ grupo: string; valorRs: number | null; pct: number | null }>;
+    totalRs: number | null;
+  };
 };
 
 /** Síntese do contrato (C.1) a partir da captura genérica. null se a obra não tem seções. */
@@ -142,6 +159,9 @@ export async function getSinteseContrato(contractId: string): Promise<SinteseCon
     insumoParams,
     idLegal,
     prazosObj,
+    painel3Obj,
+    bdiResumoObj,
+    grupoRows,
   ] = await Promise.all([
     getSecaoTabela(contractId, "Resumo dos contratos"),
     getSecaoTabela(contractId, "Painel 5: Equipe e Contatos"),
@@ -161,6 +181,9 @@ export async function getSinteseContrato(contractId: string): Promise<SinteseCon
     ),
     getSecaoObj(contractId, "Painel 1: Identificação Legal"),
     getSecaoObj(contractId, "Painel 2: Prazos"),
+    getSecaoObj(contractId, "Painel 3"),
+    getSecaoObj(contractId, "BDI Detalhe — Resumo"),
+    getSecaoTabela(contractId, "Orçamento interno por grupo"),
   ]);
 
   // Sem nenhuma seção C.1 nem resumo → obra sem síntese normalizada (empty state honesto).
@@ -271,6 +294,41 @@ export async function getSinteseContrato(contractId: string): Promise<SinteseCon
 
   const dataBaseOrcamento = insumoParams ? str(pick(insumoParams, "data-base", "data base")) : null;
 
+  // ── Financeiro (cards novos) — Anexo XIV (PV preço global) + Painel 3 (atualizado/reajuste) ──
+  const p3: Row = (painel3Obj as Row | null) ?? {};
+  const bdiR: Row = (bdiResumoObj as Row | null) ?? {};
+  const gruposBrutos: Row[] = Array.isArray(grupoRows) ? (grupoRows as Row[]) : [];
+  const gruposItens = gruposBrutos
+    .map((r) => ({
+      grupo: String(pick(r, "grupo") ?? "").trim(),
+      valorRs: num(pick(r, "valor")),
+      pct: num(pick(r, "percentual", "% do total")),
+    }))
+    .filter((g) => g.grupo && !g.grupo.toLowerCase().startsWith("total") && g.valorRs != null);
+  const orcamentoInternoRs = gruposItens.length
+    ? Math.round(gruposItens.reduce((acc, g) => acc + (g.valorRs ?? 0), 0) * 100) / 100
+    : null;
+  const pvInicialRs =
+    num(pick(bdiR, "valorContratoPrecoGlobal")) ?? num(pick(p3, "valorInicialContratoPV"));
+  const valorAtualizadoRs = num(pick(p3, "valorTotalAtualizado"));
+  const financeiro = {
+    pvInicialRs,
+    valorAtualizadoRs,
+    orcamentoInternoRs,
+    margemPct:
+      valorAtualizadoRs && orcamentoInternoRs != null
+        ? ((valorAtualizadoRs - orcamentoInternoRs) / valorAtualizadoRs) * 100
+        : null,
+    bdiPct:
+      (num(pick(bdiR, "bdiAplicadoPredominanteObras")) ?? num(pick(p3, "bdi")) ?? 0) * 100 || null,
+    ciRs: num(pick(bdiR, "bdiEmValor")) ?? num(pick(p3, "custoIndiretoBDI")),
+    reajustesAplicados: str(pick(p3, "reajustesAplicados")),
+    reequilibriosAplicados: str(pick(p3, "reequilibriosAplicados")),
+    aditivos: str(pick(p3, "aditivos")),
+    aniversarioReajuste: str(pick(p3, "aniversarioReajuste")),
+    indicesReajuste: str(pick(p3, "indicesReajuste")),
+  };
+
   return {
     identidade,
     identificacaoLegal,
@@ -285,5 +343,7 @@ export async function getSinteseContrato(contractId: string): Promise<SinteseCon
     documentos,
     admin: adminMapped,
     dataBaseOrcamento,
+    financeiro,
+    orcamentoGrupos: { itens: gruposItens, totalRs: orcamentoInternoRs },
   };
 }
