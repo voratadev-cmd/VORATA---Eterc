@@ -541,3 +541,43 @@
     margin-left: 0;
   }
 }
+
+/* Natureza do avanço (spec 4.4) — lista por disciplina, direto da fonte C.5 */
+.prz-natureza {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+}
+.prz-natureza-item {
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: var(--s-3) var(--s-4);
+  background: var(--surface);
+}
+.prz-natureza-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-3);
+}
+.prz-natureza-disc {
+  font-weight: var(--fw-semibold);
+  font-size: var(--fs-13);
+  color: var(--text);
+}
+.prz-natureza-txt {
+  margin-top: var(--s-1);
+  font-size: var(--fs-13);
+  color: var(--text-2);
+}
+.prz-natureza-meta {
+  margin-top: var(--s-1);
+  display: flex;
+  gap: var(--s-4);
+  font-size: var(--fs-12);
+  color: var(--text-3);
+  font-variant-numeric: tabular-nums;
+}

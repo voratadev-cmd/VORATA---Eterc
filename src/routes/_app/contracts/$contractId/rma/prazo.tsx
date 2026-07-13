@@ -34,6 +34,9 @@ import {
 } from "@/components/ds";
 import { usePrazoBm } from "@/lib/hooks/usePrazoBm";
 import { usePrazoMarcos } from "@/lib/hooks/usePrazoMarcos";
+import { usePrazoC5 } from "@/lib/hooks/usePrazoC5";
+import { formatBRL } from "@/lib/format";
+import type { PrazoC5CurvaMes, PrazoC5Disciplina, PrazoC5Painel } from "@/lib/supabase/prazoC5";
 import { useFaturamentoDisciplinaResumo } from "@/lib/hooks/useFaturamentoDisciplinaResumo";
 import { useFaturamentoDisciplinaMes } from "@/lib/hooks/useFaturamentoDisciplinaMes";
 import { useFaturamentoBm } from "@/lib/hooks/useFaturamentoBm";
@@ -91,6 +94,14 @@ function formatBRDate(iso: string | null): string {
 // Régua configurável por contrato (CLAUDE.md) — constantes nomeadas, sem magic numbers espalhados.
 const FAROL_FISICO_PP = { observacao: -1, risco: -5, critico: -15 } as const;
 type FarolNivel = { tone: "success" | "info" | "warning" | "danger"; label: string };
+// Status declarado da fonte C.5 → farol da tela (labels canônicos do produto).
+const STATUS_C5_FAROL: Record<string, FarolNivel> = {
+  cumprido: { tone: "success", label: "Conforme" },
+  "no prazo": { tone: "info", label: "No prazo" },
+  "em risco": { tone: "warning", label: "Em risco" },
+  atrasado: { tone: "danger", label: "Atrasado" },
+};
+
 function farolDesvioFisico(desvioPp: number | null): FarolNivel | null {
   if (desvioPp == null) return null;
   if (desvioPp >= FAROL_FISICO_PP.observacao) return { tone: "success", label: "Conforme" };
@@ -285,7 +296,8 @@ function PrazoAba() {
   const mesesTotais = prazo ? Math.round(prazo.prazoContratualDias / 30.4) : null;
   const decorridoMeses = corteMesNum;
 
-  const fisico = useMemo(
+  const c5 = usePrazoC5(contractId).data ?? null;
+  const fisicoDerivado = useMemo(
     () =>
       discFat
         ? derivarFisico(
@@ -299,6 +311,34 @@ function PrazoAba() {
         : null,
     [discFat, dmes, cruz, corteMesNum, decorridoMeses, mesesTotais],
   );
+  // Físico DECLARADO da aba C.5 (painel + marcos por disciplina) vence o proxy financeiro derivado
+  // do faturamento — a spec manda exibir o que a fonte declara. Obras sem as seções → derivado.
+  const fisico = useMemo<Fisico | null>(() => {
+    if (!c5?.painel && !c5?.disciplinas.length) return fisicoDerivado;
+    const pn = c5.painel;
+    const atraso = pn?.atrasoAcumPp != null ? -pn.atrasoAcumPp : (fisicoDerivado?.atrasoPp ?? null);
+    const porDisc: DiscFisico[] = c5.disciplinas.length
+      ? c5.disciplinas.map((d) => ({
+          disciplina: d.disciplina,
+          servico: true,
+          prevPct: d.prevPct,
+          realPct: d.realPct,
+          deltaPp: d.deltaPp,
+          farol: d.status ? (STATUS_C5_FAROL[d.status.toLowerCase()] ?? null) : null,
+        }))
+      : (fisicoDerivado?.porDisciplina ?? []);
+    return {
+      realOverallPct: pn?.fisicoRealPct ?? fisicoDerivado?.realOverallPct ?? null,
+      prevOverallPct: pn?.fisicoPrevistoPct ?? fisicoDerivado?.prevOverallPct ?? null,
+      atrasoPp: atraso,
+      farol: farolDesvioFisico(atraso),
+      curva: fisicoDerivado?.curva ?? [],
+      porDisciplina: porDisc,
+      porFrente: fisicoDerivado?.porFrente ?? [],
+      ritmoNecMes: pn?.ritmoNecessarioPctMes ?? fisicoDerivado?.ritmoNecMes ?? null,
+      ritmoRecMes: pn?.ritmoRecentePctMes ?? fisicoDerivado?.ritmoRecMes ?? null,
+    };
+  }, [c5, fisicoDerivado]);
 
   if (l1 || l2) {
     // Skeleton com a FORMA real da tela (regra 4 do CLAUDE.md): header + 3 decks +
@@ -383,10 +423,22 @@ function PrazoAba() {
         </p>
       </header>
 
-      <Decks prazo={prazo} fisico={fisico} bmLabel={bmLabel} mesesTotais={mesesTotais} />
+      <Decks
+        prazo={prazo}
+        fisico={fisico}
+        bmLabel={bmLabel}
+        mesesTotais={mesesTotais}
+        painel={c5?.painel ?? null}
+      />
 
       <div className="prz-grow">
-        <CurvaCard fisico={fisico} prazo={prazo} bmLabel={bmLabel} corteMesNum={corteMesNum} />
+        <CurvaCard
+          fisico={fisico}
+          prazo={prazo}
+          bmLabel={bmLabel}
+          corteMesNum={corteMesNum}
+          curva4={c5?.curva ?? null}
+        />
         <MarcosResumo marcos={marcos ?? []} corteISO={corteDataISO} />
       </div>
 
@@ -395,7 +447,7 @@ function PrazoAba() {
       <div className="prz-grow prz-grow-atr">
         {/* FarolLegenda mora no rodapé do AtrasadosCard — junto da única tabela que usa esse farol */}
         <AtrasadosCard fisico={fisico} bmLabel={bmLabel} />
-        <CaminhoCritico />
+        <NaturezaAvanco disciplinas={c5?.disciplinas ?? []} />
       </div>
 
       {fisico && <AnaliseCard fisico={fisico} prazo={prazo} bmLabel={bmLabel} />}
@@ -406,16 +458,24 @@ function PrazoAba() {
 }
 
 // ── 3 decks ───────────────────────────────────────────────────────────────────────────────────
+function fmtDataISO(iso: string | null): string {
+  if (!iso) return "—";
+  const [y, m, d] = iso.slice(0, 10).split("-");
+  return y && m && d ? `${d}/${m}/${y}` : iso;
+}
+
 function Decks({
   prazo,
   fisico,
   bmLabel,
   mesesTotais,
+  painel,
 }: {
   prazo: PrazoBM;
   fisico: Fisico | null;
   bmLabel: string;
   mesesTotais: number | null;
+  painel: PrazoC5Painel | null;
 }) {
   // Aderência = real ÷ previsto (mesmos campos já carregados) — substitui a duplicata literal do
   // atraso que ocupava dois stats ("Atraso acum." e "Desvio" eram o MESMO número).
@@ -429,6 +489,8 @@ function Decks({
     fisico?.ritmoNecMes != null &&
     fisico?.ritmoRecMes != null &&
     fisico.ritmoRecMes < fisico.ritmoNecMes;
+  // projeção declarada só aparece com painel presente e ≥20% do prazo decorrido (regra da fonte)
+  const projecaoVisivel = painel != null && (painel.decorridoPct ?? 0) >= 20;
   // Término planejado do cronograma (tendenciaTerminoISO) — só vira stat quando DIVERGE do contratual.
   const terminoPlanejadoDivergente =
     prazo.tendenciaTerminoISO && prazo.tendenciaTerminoISO !== prazo.fimContratualISO
@@ -500,13 +562,39 @@ function Decks({
             v={fmtRitmo(fisico?.ritmoRecMes ?? null)}
             tone={ritmoAbaixo ? "neg" : undefined}
           />
-          <Stat k="Projeção término" v="—" />
-          <Stat k="Δ vs contratual" v="—" />
-          <Stat k="Prorrogação" v="—" />
+          <Stat
+            k="Projeção término"
+            v={projecaoVisivel ? fmtDataISO(painel?.terminoProjetado ?? null) : "—"}
+          />
+          <Stat
+            k="Δ vs contratual"
+            v={
+              projecaoVisivel && painel?.deltaVsContratualDias != null
+                ? `+${painel.deltaVsContratualDias.toLocaleString("pt-BR")} dias`
+                : "—"
+            }
+            tone={projecaoVisivel && (painel?.deltaVsContratualDias ?? 0) > 0 ? "neg" : undefined}
+          />
+          <Stat
+            k="Prorrogação"
+            v={
+              projecaoVisivel && painel?.prorrogacaoEstimadaMeses != null
+                ? `${painel.prorrogacaoEstimadaMeses.toLocaleString("pt-BR")} meses (${
+                    painel.impactoFinalDias != null
+                      ? `${painel.impactoFinalDias.toLocaleString("pt-BR")} dias`
+                      : "—"
+                  })`
+                : "—"
+            }
+            tone={
+              projecaoVisivel && (painel?.prorrogacaoEstimadaMeses ?? 0) > 0 ? "neg" : undefined
+            }
+          />
         </div>
         <p className="prz-deck-nota">
-          Projeção de término suprimida no início (estabiliza após ~20% do prazo; hoje{" "}
-          {fmtPct(prazo.decorridoPct, 1)}).
+          {projecaoVisivel
+            ? `Projeção pelo cenário-tendência da fonte (ritmo ${painel?.ritmoVsNecessario ?? "—"}).`
+            : `Projeção de término suprimida no início (estabiliza após ~20% do prazo; hoje ${fmtPct(prazo.decorridoPct, 1)}).`}
         </p>
       </div>
     </div>
@@ -559,25 +647,47 @@ function CurvaCard({
   prazo,
   bmLabel,
   corteMesNum,
+  curva4,
 }: {
   fisico: Fisico | null;
   prazo: PrazoBM;
   bmLabel: string;
   corteMesNum: number | null;
+  curva4: PrazoC5CurvaMes[] | null;
 }) {
-  const dados =
-    fisico?.curva.map((p) => ({
-      mes: p.mesNum,
-      mesLabel: p.mesLabel,
-      prev: p.prevPct,
-      real: p.realPct,
-    })) ?? [];
+  // Curva DECLARADA da aba C.5 (4 séries: físico + financeiro, prev × real) quando existe;
+  // senão a curva física derivada (2 séries). O físico continua o protagonista (prev/real).
+  const tem4 = (curva4?.length ?? 0) > 0;
+  const dados = tem4
+    ? curva4!.map((m, i) => ({
+        mes: i + 1,
+        mesLabel: m.mesLabel,
+        prev: m.fisPrevPct,
+        real: m.fisRealPct,
+        finPrev: m.finPrevPct,
+        finReal: m.finRealPct,
+      }))
+    : (fisico?.curva.map((p) => ({
+        mes: p.mesNum,
+        mesLabel: p.mesLabel,
+        prev: p.prevPct,
+        real: p.realPct as number | null,
+        finPrev: null as number | null,
+        finReal: null as number | null,
+      })) ?? []);
   const corteLabel = dados.find((d) => d.mes === corteMesNum)?.mesLabel ?? null;
   // Convenção única do ChartKit: Previsto = info (tracejado) · Real = navy (sólido).
-  const legenda: ChartLegendItem[] = [
-    { label: "Previsto acum.", tipo: "tracejada", cor: CHART_SERIE_COR.contratado },
-    { label: "Real acum.", tipo: "linha", cor: CHART_SERIE_COR.real },
-  ];
+  const legenda: ChartLegendItem[] = tem4
+    ? [
+        { label: "Físico previsto", tipo: "tracejada", cor: CHART_SERIE_COR.contratado },
+        { label: "Físico real", tipo: "linha", cor: CHART_SERIE_COR.real },
+        { label: "Financeiro previsto", tipo: "tracejada", cor: CHART_SERIE_COR.meta },
+        { label: "Financeiro real", tipo: "linha", cor: CHART_SERIE_COR.meta },
+      ]
+    : [
+        { label: "Previsto acum.", tipo: "tracejada", cor: CHART_SERIE_COR.contratado },
+        { label: "Real acum.", tipo: "linha", cor: CHART_SERIE_COR.real },
+      ];
   return (
     <section className="prz-section">
       <header className="prz-section-head">
@@ -619,7 +729,16 @@ function CurvaCard({
                 content={
                   <ChartTooltip
                     formatter={(v: number) => fmtPct(v)}
-                    nomes={{ prev: "Previsto acum.", real: "Real acum." }}
+                    nomes={
+                      tem4
+                        ? {
+                            prev: "Físico previsto",
+                            real: "Físico real",
+                            finPrev: "Financeiro previsto",
+                            finReal: "Financeiro real",
+                          }
+                        : { prev: "Previsto acum.", real: "Real acum." }
+                    }
                     titulo={(label, payload) => {
                       const p = payload?.[0]?.payload as { mes?: number } | undefined;
                       // nº do mês continua visível ("M3 · mai/26") — calendário não apaga o índice
@@ -659,10 +778,33 @@ function CurvaCard({
                 name="Real acum."
                 stroke={CHART_SERIE_COR.real}
                 strokeWidth={2.6}
-                dot={realDot}
+                dot={tem4 ? false : realDot}
                 connectNulls={false}
                 isAnimationActive={false}
               />
+              {tem4 ? (
+                <Line
+                  type="monotone"
+                  dataKey="finPrev"
+                  name="Financeiro previsto"
+                  stroke={CHART_SERIE_COR.meta}
+                  strokeWidth={1.6}
+                  strokeDasharray="5 4"
+                  dot={false}
+                  isAnimationActive={false}
+                />
+              ) : null}
+              {tem4 ? (
+                <Line
+                  type="monotone"
+                  dataKey="finReal"
+                  name="Financeiro real"
+                  stroke={CHART_SERIE_COR.meta}
+                  strokeWidth={2}
+                  dot={false}
+                  isAnimationActive={false}
+                />
+              ) : null}
             </LineChart>
           </ResponsiveContainer>
         </div>
@@ -1040,22 +1182,40 @@ function AtrasadosCard({ fisico, bmLabel }: { fisico: Fisico | null; bmLabel: st
   );
 }
 
-function CaminhoCritico() {
+// Windows Analysis saiu da tela por decisão do idealizador (spec 4.5): sem cronograma .mpp
+// importado não há caminho crítico documentado — o bloco volta condicionado ao dado existir.
+// No lugar, a "Natureza do avanço" (spec 4.4): o que do avanço financeiro é obra FÍSICA, por
+// disciplina — direto da fonte C.5 (coluna Natureza dos marcos por disciplina).
+function NaturezaAvanco({ disciplinas }: { disciplinas: PrazoC5Disciplina[] }) {
+  const comNatureza = disciplinas.filter((d) => d.natureza);
+  if (comNatureza.length === 0) return null;
   return (
     <section className="prz-section">
       <header className="prz-section-head">
         <div>
-          <h3 className="prz-section-title">Caminho crítico — Windows Analysis</h3>
-          <div className="prz-section-sub">base temporal do pleito de prorrogação (Módulo 3)</div>
+          <h3 className="prz-section-title">Natureza do avanço</h3>
+          <div className="prz-section-sub">o avanço financeiro reflete obra física · fonte C.5</div>
         </div>
       </header>
-      <EmptyState
-        framed
-        icon={I.clock({ size: 32 })}
-        title="Aguardando importação do cronograma (MS Project)"
-        text="Atividades com Total Float ≤ 0 ou float consumido aparecem aqui, com o atraso projetado ao término. Sem caminho crítico documentado não há nexo de prazo."
-        hint={<Badge tone="info">Aguardando .mpp R0/R1</Badge>}
-      />
+      <ul className="prz-natureza">
+        {comNatureza.map((d) => (
+          <li key={d.disciplina} className="prz-natureza-item">
+            <div className="prz-natureza-head">
+              <span className="prz-natureza-disc">{d.disciplina}</span>
+              {d.status ? (
+                <Badge tone={STATUS_C5_FAROL[d.status.toLowerCase()]?.tone ?? "info"}>
+                  {d.status}
+                </Badge>
+              ) : null}
+            </div>
+            <div className="prz-natureza-txt">{d.natureza}</div>
+            <div className="prz-natureza-meta">
+              {d.valorMedidoRs != null ? <span>medido {formatBRL(d.valorMedidoRs)}</span> : null}
+              {d.emExecucao ? <span>em execução: {d.emExecucao}</span> : null}
+            </div>
+          </li>
+        ))}
+      </ul>
     </section>
   );
 }
