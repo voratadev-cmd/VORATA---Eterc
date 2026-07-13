@@ -46,6 +46,8 @@ import { useFaturamentoDisciplinaResumo } from "@/lib/hooks/useFaturamentoDiscip
 import { useFaturamentoFrenteMacro } from "@/lib/hooks/useFaturamentoFrenteMacro";
 import { useFaturamentoSerieMes } from "@/lib/hooks/useFaturamentoSerieMes";
 import { useFaturamentoCruzamento } from "@/lib/hooks/useFaturamentoCruzamento";
+import { useFaturamentoWbs } from "@/lib/hooks/useFaturamentoWbs";
+import type { WbsLinha } from "@/lib/supabase/faturamentoWbs";
 import type { CruzItem } from "@/lib/supabase/faturamentoCruzamento";
 import "./faturamento.css";
 
@@ -984,6 +986,38 @@ function cruzToItem(c: CruzItem, key: string): DrillItem {
   };
 }
 
+// WBS SBSO (auxiliar_C.3 com Nível/Folha) → linhas do drill. real=0 vira 0 mesmo (medido zero
+// difere de pendente — a janela até-período existe e o real é dado da fonte).
+function wbsToLinhas(ls: WbsLinha[], prefixo: string): DrillLinha[] {
+  return ls.map((l, i) => ({
+    key: `${prefixo}-${i}`,
+    ordem: i,
+    nome: l.nome,
+    contratado: l.contratado,
+    acum: l.acum,
+    real: l.real,
+    realPendente: false,
+    filhos: l.filhos.map((f, fi) => ({
+      key: `${prefixo}-${i}-w${fi}`,
+      nome: f.nome,
+      contratado: f.contratado,
+      acum: f.acum,
+      real: f.real,
+      realPendente: false,
+    })),
+  }));
+}
+function wbsTotal(linhas: DrillLinha[]): DrillItem {
+  return {
+    key: "total",
+    nome: "TOTAL",
+    contratado: somaPresente(linhas.map((l) => l.contratado)),
+    acum: somaPresente(linhas.map((l) => l.acum)),
+    real: somaPresente(linhas.map((l) => l.real)),
+    realPendente: false,
+  };
+}
+
 function DrillPorDisciplina({
   contractId,
   regras,
@@ -993,7 +1027,23 @@ function DrillPorDisciplina({
 }) {
   const disc = useFaturamentoDisciplinaResumo(contractId);
   const cruz = useFaturamentoCruzamento(contractId);
-  if (disc.isLoading) return <Skeleton style={{ height: 360 }} />;
+  const wbs = useFaturamentoWbs(contractId);
+  if (disc.isLoading || wbs.isLoading) return <Skeleton style={{ height: 360 }} />;
+  // WBS da fonte (dialeto SBSO · nível 2 → nível 3) tem precedência quando existe
+  if (wbs.data?.disciplinas.length) {
+    const linhas = wbsToLinhas(wbs.data.disciplinas, "d");
+    return (
+      <DrillColecao
+        regras={regras}
+        nomeCol="Disciplina"
+        grupos={[{ macro: null, linhas }]}
+        total={wbsTotal(linhas)}
+        rotulo="disciplina"
+        rotuloPlural="disciplinas"
+        placeholder="Buscar disciplina ou atividade… (ex.: Arquitetura)"
+      />
+    );
+  }
   if (disc.isError)
     return <CardErro titulo="Faturamento por Disciplina" onRetry={() => disc.refetch()} />;
   if (!disc.data) return <div className="col-vazia">Faturamento por disciplina pendente.</div>;
@@ -1042,7 +1092,23 @@ function DrillPorFrente({
 }) {
   const frm = useFaturamentoFrenteMacro(contractId);
   const cruz = useFaturamentoCruzamento(contractId);
-  if (frm.isLoading) return <Skeleton style={{ height: 360 }} />;
+  const wbs = useFaturamentoWbs(contractId);
+  if (frm.isLoading || wbs.isLoading) return <Skeleton style={{ height: 360 }} />;
+  // WBS da fonte (dialeto SBSO · frente → folhas até 1.3.3.1) tem precedência quando existe
+  if (wbs.data?.frentes.length) {
+    const linhas = wbsToLinhas(wbs.data.frentes, "f");
+    return (
+      <DrillColecao
+        regras={regras}
+        nomeCol="Frente"
+        grupos={[{ macro: null, linhas }]}
+        total={wbsTotal(linhas)}
+        rotulo="frente"
+        rotuloPlural="frentes"
+        placeholder="Buscar frente ou atividade… (ex.: TPS)"
+      />
+    );
+  }
   if (frm.isError)
     return <CardErro titulo="Faturamento por Frente" onRetry={() => frm.refetch()} />;
   if (!frm.data) return <div className="col-vazia">Faturamento por frente pendente.</div>;
