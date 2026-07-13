@@ -387,9 +387,9 @@ function FatProjecaoDeck({
         <FarolCard
           size="sm"
           icon="repeat"
-          label="RITMO MÉDIO · 3 BM"
+          label="RITMO MÉDIO"
           value={periodo.ritmo3BmLabel}
-          info="Faturamento médio dos últimos 3 BMs"
+          info="Faturado acumulado ÷ meses decorridos"
           accent="neutral"
         />
         <FarolCard
@@ -398,11 +398,11 @@ function FatProjecaoDeck({
           icon="clock"
           label="PROJEÇÃO POR RITMO"
           value={
-            projMes != null
-              ? projComp
-                ? `~${projComp}`
-                : `mês ${projMes.toLocaleString("pt-BR")}`
-              : "— pendente"
+            (periodo.projecaoTerminoMesLabel ?? projComp)
+              ? `~${periodo.projecaoTerminoMesLabel ?? projComp}`
+              : projMes != null
+                ? `mês ${projMes.toLocaleString("pt-BR")}`
+                : "— pendente"
           }
           info={
             projMes != null

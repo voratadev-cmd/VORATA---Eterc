@@ -72,29 +72,24 @@ function buildPeriodo(calc: FaturamentoCalc): PeriodoFat | null {
   for (let i = 0; i < serie.length; i++) if (serie[i].tipo === "realizado") corteIdx = i;
   if (corteIdx < 0) return null;
 
-  // Ritmo = média dos últimos 3 meses realizados, IGNORANDO meses sem medição (projecaoRs null).
-  // Meses genuinamente ociosos (real = 0) CONTAM — são lentidão real do ritmo. (Antes `?? 0` tratava
-  // null como 0, diluindo a média e inflando a projeção/alerta em obras com mês não medido.)
-  const realizadosMeses = serie.filter((s) => s.tipo === "realizado");
-  const ult3 = realizadosMeses
-    .slice(-3)
-    .map((s) => s.projecaoRs)
-    .filter((v): v is number => v != null);
-  const ritmo = ult3.length ? ult3.reduce((a, v) => a + v, 0) / ult3.length : null;
+  // Ritmo médio = realizado acumulado ÷ meses DECORRIDOS (spec C.3: 10.219.923 ÷ 9 = 1.135.547).
+  // Meses ociosos contam — são lentidão real. (A média dos últimos 3 BMs escondia os meses parados.)
 
   // Realizado acum. = o do CALC (recortado ao corte/override). Em default == real.realAcumulado
   // (calc recebe realizadoAcumDe(real,curva) como opts.realizadoAcum), então o ES não muda sem ?bm;
   // sob override, a projeção passa a ser coerente "como naquele BM" (antes usava o realizado cheio).
   const realizadoAcum = calc.realizadoAcum;
   const bmCorrente = corteIdx + 1; // meses decorridos (posição do corte na série)
+  const ritmo = realizadoAcum != null && bmCorrente > 0 ? realizadoAcum / bmCorrente : null;
   // Prazo = horizonte do BASELINE contratado (Curva S contratada): meses com contratadoRs != null —
   // NÃO serie.length, que pode incluir cauda de projeção sem baseline. Para a BR-101 ambos = 46.
   const prazo = serie.filter((s) => s.contratadoRs != null).length;
-  // PROJEÇÃO TÉRMINO via Earned Schedule: ES = mês de cronograma "ganho" pelo realizado-acum de hoje;
-  // o trabalho restante (prazo − ES) corre ao passo planejado a partir do BM corrente. Substitui a
-  // antiga saldo÷ritmo (extrapolava 598mi ao ritmo de mobilização → mês 142). Na BR-101 dá mês 47,0.
-  const es = realizadoAcum != null ? earnedSchedule(serie, realizadoAcum) : null;
-  const projecao = es != null && prazo > 0 ? bmCorrente + (prazo - es) : null;
+  // PROJEÇÃO TÉRMINO = prazo ÷ aderência acumulada (spec C.3 · é o que o workbook declara:
+  // 18 ÷ 0,58697 = 30,67 → Δ +12,7 → mar/28). Aderência = realizado-acum ÷ contratado-acum no corte.
+  let ctAcumCorte = 0;
+  for (let i = 0; i <= corteIdx; i++) ctAcumCorte += serie[i].contratadoRs ?? 0;
+  const aderAcum = realizadoAcum != null && ctAcumCorte > 0 ? realizadoAcum / ctAcumCorte : null;
+  const projecao = aderAcum != null && aderAcum > 0 && prazo > 0 ? prazo / aderAcum : null;
   const delta = projecao != null && prazo > 0 ? projecao - prazo : null;
   // Δ exibido = arredondado a 1 casa. O alerta acende sobre o MESMO valor arredondado (não o cru),
   // para o card nunca ler "0 meses" enquanto o banner diz que ultrapassa. O "⚠" é apresentação (a UI
@@ -109,6 +104,13 @@ function buildPeriodo(calc: FaturamentoCalc): PeriodoFat | null {
     previstoMesCorte != null && previstoMesCorte > 0 && faturadoMes != null
       ? (faturadoMes / previstoMesCorte) * 100
       : null;
+  // mês-calendário do término projetado: mês #floor(projeção) contando do 1º mês da série
+  let projecaoTerminoMesLabel: string | null = null;
+  if (projecao != null && serie[0]?.ano != null && serie[0]?.mes != null) {
+    const idxMes = Math.floor(projecao) - 1;
+    const d = new Date(serie[0].ano, serie[0].mes - 1 + idxMes, 1);
+    projecaoTerminoMesLabel = `${["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"][d.getMonth()]}/${String(d.getFullYear()).slice(2)}`;
+  }
   return {
     bmCorrente,
     faturadoMesLabel: fmtMiExato(faturadoMes),
@@ -116,6 +118,7 @@ function buildPeriodo(calc: FaturamentoCalc): PeriodoFat | null {
     aderenciaPeriodoPct,
     ritmo3BmLabel: fmtMiExato(ritmo),
     projecaoTerminoMeses: projecao != null ? Math.round(projecao * 10) / 10 : null,
+    projecaoTerminoMesLabel,
     deltaProjecaoMeses: deltaRound,
     alertaProrrogacao:
       deltaRound != null && deltaRound > 0 ? "Projeção ultrapassa o prazo contratual" : null,

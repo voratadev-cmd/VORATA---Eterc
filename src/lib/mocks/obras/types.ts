@@ -2090,6 +2090,8 @@ export type PeriodoFat = {
   ritmo3BmLabel: string;
   /** Projeção de término no ritmo atual (em meses desde o início). */
   projecaoTerminoMeses: number | null;
+  /** Mês-calendário do término projetado (ex.: "mar/28") — derivado do mês 1 da série. */
+  projecaoTerminoMesLabel?: string | null;
   /** Δ entre projeção e prazo contratual (meses; >0 = ultrapassa o prazo). */
   deltaProjecaoMeses: number | null;
   /** Alerta de prorrogação, ou null se a projeção fecha no prazo. */

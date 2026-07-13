@@ -31,8 +31,23 @@ export async function fetchFaturamentoBm(
   ]);
   // PRECEDÊNCIA: medições (cadeia de BMs · Sorriso) vencem; se não há BM mas a curva traz o Real
   // DIRETO (workbook-motor), sintetiza o realizado da curva. Coexistência limpa, sem rip-out.
-  const real =
+  let real =
     realMed.nBms === 0 && curva?.realAcum != null ? faturamentoRealFromCurva(curva) : realMed;
+  // GUARD: no workbook-motor a raiz '1' do BM pode ser só a 1ª disciplina (ex.: SBSO 3,67mi) —
+  // um contratadoTotal < 50% do CFF da curva é implausível → o baseline oficial é a curva.
+  if (
+    curva?.custoTotal != null &&
+    (real.contratadoTotal == null || real.contratadoTotal < curva.custoTotal * 0.5)
+  ) {
+    const ct = curva.custoTotal;
+    real = {
+      ...real,
+      contratadoTotal: ct,
+      contratadoTotalMotivo: "raiz do BM parcial — baseline = CFF da curva",
+      pctFaturado: real.realAcumulado != null ? real.realAcumulado / ct : real.pctFaturado,
+      saldoFaturar: real.realAcumulado != null ? ct - real.realAcumulado : real.saldoFaturar,
+    };
+  }
   const regras = mesclarRegras(farolOverridesDe(obra?.farol_regras));
   const calc = calcularFaturamento(curva, {
     realizadoAcum: realizadoAcumDe(real, curva),

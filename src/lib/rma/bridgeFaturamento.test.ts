@@ -159,16 +159,17 @@ test("bridge faturamento · deck projeção (ritmo/projeção/Δ/alerta)", () =>
   expect(out?.fat.periodo).not.toBeNull();
   const p = out!.fat.periodo!;
 
-  // Ritmo = média dos 2 meses realizados (jan 18 + fev 20) ÷ 2 = 19 (2 casas em mi · auditável).
+  // Ritmo = realizado-acum (38) ÷ meses decorridos (2) = 19 (2 casas em mi · auditável).
   expect(p.ritmo3BmLabel).toBe("R$ 19,00 mi");
 
-  // Projeção via EARNED SCHEDULE (não saldo÷ritmo): ES = mês de cronograma em que o contratado-acum
-  // interpolado iguala o realizado-acum (38 mi). contratadoAcum [20,40,60,80] cruza 38 entre o mês 1
-  // (20) e o 2 (40): ES = 1 + (38−20)/(40−20) = 1,9. projeção = bmCorrente(2) + (prazo(4) − ES(1,9)) = 4,1.
-  expect(p.projecaoTerminoMeses).toBe(4.1);
-  // Δ = projeção(4,1) − prazo(4) = 0,1. Prazo = meses com contratadoRs != null = 4 (mai/26 é cauda null
-  // e NÃO conta). deltaRound 0,1 > 0 → o alerta de prorrogação ainda acende.
-  expect(p.deltaProjecaoMeses).toBe(0.1);
+  // Projeção = prazo ÷ aderência acumulada (fórmula do workbook C.3): aderência = realizado-acum
+  // (38) ÷ contratado-acum no corte (40) = 0,95 → projeção = 4 ÷ 0,95 = 4,21 → 4,2 (1 casa).
+  expect(p.projecaoTerminoMeses).toBe(4.2);
+  // Δ = projeção(4,2) − prazo(4) = 0,2. Prazo = meses com contratadoRs != null = 4 (mai/26 é cauda null
+  // e NÃO conta). deltaRound 0,2 > 0 → o alerta de prorrogação ainda acende.
+  expect(p.deltaProjecaoMeses).toBe(0.2);
+  // Mês-calendário do término projetado: mês #floor(4,2) = 4 contando de jan/26 → abr/26.
+  expect(p.projecaoTerminoMesLabel).toBe("abr/26");
   // Alerta acende sobre o Δ ARREDONDADO e sem emoji (a UI desenha o ícone).
   expect(p.alertaProrrogacao).toBe("Projeção ultrapassa o prazo contratual");
   // Período do mês de corte (fev/26): faturado (real 20 mi) × previsto (20 mi) → aderência 100%.
@@ -180,8 +181,8 @@ test("bridge faturamento · deck projeção (ritmo/projeção/Δ/alerta)", () =>
   expect(p).not.toHaveProperty("farol");
 });
 
-// Ritmo: meses 'realizado' SEM medição (projecaoRs null) são IGNORADOS; meses genuinamente ociosos
-// (real = 0) CONTAM. Antes (`?? 0`) o null virava 0 e diluía a média — viés que inflava a projeção.
+// Ritmo = realizado-acum ÷ meses DECORRIDOS (spec C.3): mês sem medição e mês ocioso CONTAM
+// igualmente — ambos são tempo de contrato consumido (10,2mi ÷ 9 meses na SBSO, não ÷ 4 BMs).
 function mesCalc(
   ano: number,
   mes: number,
@@ -237,12 +238,12 @@ function calc3(mid: number | null): FaturamentoCalc {
   };
 }
 
-test("bridge faturamento · ritmo ignora mês sem medição (null), mantém mês ocioso (0)", () => {
-  // null → ignorado: média de (10, 30) = 20.
+test("bridge faturamento · ritmo conta meses decorridos (sem medição e ocioso idem)", () => {
+  // realizado-acum 40 ÷ 3 meses decorridos = 13,33 — mês sem medição CONTA (tempo consumido)…
   const semMedicao = buildFaturamentoBm(calc3(null), MI3_REAL);
-  expect(semMedicao?.fat.periodo?.ritmo3BmLabel).toBe("R$ 20,00 mi");
+  expect(semMedicao?.fat.periodo?.ritmo3BmLabel).toBe("R$ 13,33 mi");
 
-  // 0 genuíno → conta: média de (10, 0, 30) = 13,33 (lentidão real do ritmo).
+  // …e mês genuinamente ocioso (real = 0) idem: mesma base de meses decorridos.
   const ocioso = buildFaturamentoBm(calc3(0), MI3_REAL);
   expect(ocioso?.fat.periodo?.ritmo3BmLabel).toBe("R$ 13,33 mi");
 });
