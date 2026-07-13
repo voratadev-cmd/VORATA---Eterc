@@ -89,7 +89,9 @@ try {
       where bucket_id = $1 and name like any($2)`,
     [BUCKET, prefixes],
   );
-  console.log(`\n· obra_arquivos: ${arq[0].n} row(s) · storage.objects (${BUCKET}): ${sto[0].n} objeto(s)`);
+  console.log(
+    `\n· obra_arquivos: ${arq[0].n} row(s) · storage.objects (${BUCKET}): ${sto[0].n} objeto(s)`,
+  );
 
   if (!apply) {
     console.log("\n· DRY-RUN — nada foi deletado. Re-rode com --apply pra executar.");
