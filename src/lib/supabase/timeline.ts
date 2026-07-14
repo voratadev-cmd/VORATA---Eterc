@@ -29,6 +29,12 @@ export type TimelineTarefa = {
   desvioDias: number | null;
   pctConcluido: number | null;
   ehMarco: boolean;
+  /** Barra de IMPACTO (◆ · dialeto SBSO — tabela de impacto por disciplina da aba C.5). */
+  dataInicioImpacto: string | null;
+  dataTerminoImpacto: string | null;
+  impactoDias: number | null;
+  /** "Realizado" / "Projetado (dependência)" — literal da fonte. */
+  natureza: string | null;
 };
 
 export type TimelineEvento = {
@@ -70,6 +76,10 @@ export type TimelineParams = {
   deltaImpactoFisicoPp: number | null;
   windowsObs: string | null;
   status: string;
+  /** avanço físico REAL (%) — par do previsto (dialeto SBSO · painel C.5). */
+  avancoFisicoRealPp: number | null;
+  /** caminho crítico em TEXTO (premissa declarada da obra) — vence o caminhoCriticoDias no card. */
+  caminhoCritico: string | null;
 };
 
 /** Tarefas do Gantt C.13 (ordenadas). Null se ainda não normalizado. */
@@ -97,6 +107,10 @@ export async function getTimelineTarefas(contractId: string): Promise<TimelineTa
     desvioDias: r.desvio_dias ?? null,
     pctConcluido: r.pct_concluido ?? null,
     ehMarco: !!r.eh_marco,
+    dataInicioImpacto: null,
+    dataTerminoImpacto: null,
+    impactoDias: null,
+    natureza: null,
   }));
 }
 
@@ -162,7 +176,57 @@ export async function getTimelineParams(contractId: string): Promise<TimelinePar
     deltaImpactoFisicoPp: r.delta_impacto_fisico_pp ?? null,
     windowsObs: r.windows_obs ?? null,
     status: r.status ?? "ok",
+    avancoFisicoRealPp: null,
+    caminhoCritico: null,
   };
+}
+
+/** Gantt do dialeto SBSO: SOMENTE a "TABELA DE IMPACTO POR DISCIPLINA" da aba C.5 (seção
+ *  "C.5 — Detalhe Prazos / Datas-limite (OS) por item WBS"). Regra da spec: limitar ao código
+ *  de até 3 números (1.1 e 1.1.1 — col_1 com ≤2 pontos); NUNCA cruzar com outra tabela.
+ *  null/[] se a obra não tem a seção (BR-101 segue no cronograma FF). */
+export async function getTarefasImpacto(contractId: string): Promise<TimelineTarefa[] | null> {
+  const { data, error } = await untypedTable("obra_secoes")
+    .select("dados")
+    .eq("contrato_id", contractId)
+    .ilike("titulo", "%C.5 — Detalhe Prazos%")
+    .limit(1);
+  if (error) throw error;
+  const rows = ((data ?? [])[0] as { dados?: unknown } | undefined)?.dados;
+  if (!Array.isArray(rows) || rows.length === 0) return null;
+  const str = (v: unknown): string | null => {
+    const x = v == null ? "" : String(v).trim();
+    return x ? x : null;
+  };
+  const num = (v: unknown): number | null =>
+    v == null || v === "" ? null : Number.isFinite(Number(v)) ? Number(v) : null;
+  const out: TimelineTarefa[] = [];
+  for (const raw of rows as Array<Record<string, unknown>>) {
+    const cod = str(raw["col_1"]);
+    if (!cod) continue;
+    const pontos = (cod.match(/\./g) ?? []).length;
+    if (pontos > 2) continue; // spec: até 1.1.1 — não descer a 1.1.1.1
+    out.push({
+      ordem: out.length,
+      numeroItem: cod,
+      codigo: cod,
+      nivel: pontos <= 1 ? 0 : 1, // 1.1 = disciplina (grupo) · 1.1.1 = subitem
+      nome: str(raw["Disciplina"]) ?? cod,
+      duracaoDias: num(raw["Dias"]),
+      dataInicio: str(raw["Início previsto"]),
+      dataTermino: str(raw["Término previsto"]),
+      dataInicioReal: str(raw["Início Real"]),
+      dataTerminoReal: str(raw["Termino Real"]) ?? str(raw["Término Real"]),
+      desvioDias: num(raw["Atraso"]),
+      pctConcluido: null,
+      ehMarco: false,
+      dataInicioImpacto: str(raw["Início Impacto"]),
+      dataTerminoImpacto: str(raw["Término Impacto"]),
+      impactoDias: num(raw["Impacto"]),
+      natureza: str(raw["Natureza do impacto"]),
+    });
+  }
+  return out.length ? out : null;
 }
 
 export type TimelineProjecao = {

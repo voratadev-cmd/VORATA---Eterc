@@ -436,6 +436,7 @@ function Bars({
   // do workbook (≠ início real − contratado) — exibir como está, sem reinterpretar.
   const temRealCompleto = !!t.dataInicioReal && !!t.dataTerminoReal;
   const emAndamento = !!t.dataInicioReal && !t.dataTerminoReal && !!corte;
+  const temImpacto = !!t.dataInicioImpacto && !!t.dataTerminoImpacto;
   return (
     <>
       {/* contratado */}
@@ -482,6 +483,19 @@ function Bars({
       ) : (
         <div className="tl-rplace" style={{ left: `${left}%`, width: `${width}%` }} />
       )}
+      {/* impacto (◆ · SBSO): janela de impacto declarada pela tabela da aba C.5 */}
+      {temImpacto ? (
+        <div
+          className="tl-ibar"
+          style={{
+            left: `${pct(t.dataInicioImpacto)}%`,
+            width: `${Math.max(0.4, pct(t.dataTerminoImpacto) - pct(t.dataInicioImpacto))}%`,
+          }}
+          title={`Impacto: ${fmtBR(t.dataInicioImpacto)} → ${fmtBR(t.dataTerminoImpacto)}${
+            t.impactoDias != null ? ` (+${t.impactoDias}d)` : ""
+          }${t.natureza ? ` · ${t.natureza}` : ""}`}
+        />
+      ) : null}
       {/* marco de término */}
       <span
         className="tl-mk"
@@ -631,6 +645,55 @@ function EventosTabela({ eventos }: { eventos: TimelineEvento[] }) {
   }
   const fmtJanela = (e: TimelineEvento) =>
     e.janelaInicio ? `${fmtBR(e.janelaInicio)} → ${e.janelaFim ?? "—"}` : "—";
+  // Dialeto SBSO ("Marcos & Eventos para o timeline"): a fonte só tem Data · Tipo · Marco/Evento ·
+  // Descrição — reproduzir as colunas DELA e omitir as demais (spec: nunca preencher de outra tabela).
+  const shapeSbso = eventos.every(
+    (e) => e.frenteTrecho == null && e.impacta == null && e.diasAtraso == null && e.fonte == null,
+  );
+  if (shapeSbso) {
+    const toneTipo: Record<string, "info" | "warning" | "danger" | "success"> = {
+      contratual: "info",
+      execução: "success",
+      execucao: "success",
+      medição: "info",
+      medicao: "info",
+      atraso: "danger",
+      projeção: "warning",
+      projecao: "warning",
+    };
+    return (
+      <DataTable<TimelineEvento>
+        columns={[
+          { key: "data", label: "Data", width: "96px", render: (e) => fmtBR(e.dataInicio) },
+          {
+            key: "tipo",
+            label: "Tipo",
+            width: "110px",
+            render: (e) =>
+              e.categoria ? (
+                <Badge tone={toneTipo[e.categoria.toLowerCase()] ?? "info"}>{e.categoria}</Badge>
+              ) : (
+                "—"
+              ),
+          },
+          {
+            key: "marco",
+            label: "Marco / Evento",
+            width: "1.4fr",
+            render: (e) => <span className="tl-evnm">{e.titulo}</span>,
+          },
+          {
+            key: "desc",
+            label: "Descrição / Observação",
+            width: "2fr",
+            render: (e) => <span className="tl-fonte">{e.clausulas ?? "—"}</span>,
+          },
+        ]}
+        rows={eventos}
+        getRowId={(e) => e.evId ?? String(e.ordem)}
+      />
+    );
+  }
   return (
     <DataTable<TimelineEvento>
       columns={[
@@ -698,6 +761,9 @@ function EventosTabela({ eventos }: { eventos: TimelineEvento[] }) {
   );
 }
 
+const fmtPct1 = (v: number) =>
+  `${v.toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%`;
+
 function WindowsPanel({ params, nEventos }: { params: TimelineParams; nEventos: number }) {
   const fmtPp = (v: number | null) =>
     v == null
@@ -721,15 +787,19 @@ function WindowsPanel({ params, nEventos }: { params: TimelineParams; nEventos: 
           />
           <WCard
             label="Avanço físico previsto no período"
-            value={fmtPp(params.avancoFisicoPrevistoPp)}
+            value={
+              params.avancoFisicoRealPp != null && params.avancoFisicoPrevistoPp != null
+                ? `${fmtPct1(params.avancoFisicoPrevistoPp)} (real ${fmtPct1(params.avancoFisicoRealPp)})`
+                : fmtPp(params.avancoFisicoPrevistoPp)
+            }
           />
-          <WCard
-            label="Δ impacto físico (previsto − real)"
-            value={fmtPp(params.deltaImpactoFisicoPp)}
-          />
+          <WCard label="Δ impacto físico" value={fmtPp(params.deltaImpactoFisicoPp)} />
           <WCard
             label="Caminho crítico"
-            value={params.caminhoCriticoDias != null ? `+${params.caminhoCriticoDias}d` : "—"}
+            value={
+              params.caminhoCritico ??
+              (params.caminhoCriticoDias != null ? `+${params.caminhoCriticoDias}d` : "—")
+            }
           />
           <WCard label="Eventos cadastrados" value={String(nEventos)} />
           <WCard

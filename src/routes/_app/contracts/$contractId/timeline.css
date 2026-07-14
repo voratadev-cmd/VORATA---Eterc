@@ -690,3 +690,13 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Barra de IMPACTO (◆ · dialeto SBSO) — janela declarada pela tabela de impacto da aba C.5 */
+.tl-ibar {
+  position: absolute;
+  bottom: 1px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--danger);
+  opacity: 0.75;
+}

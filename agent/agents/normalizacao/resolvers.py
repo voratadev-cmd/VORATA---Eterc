@@ -3709,9 +3709,12 @@ def capturar_secoes(secoes: list[dict]) -> list[dict]:
         if not titulo or _eh_meta(titulo):
             continue
         tipo = s.get("tipo") or ("chave_valor" if s.get("dados") else "tabela")
-        cols = [c for c in (s.get("colunas") or []) if not str(c).startswith("col_")]
+        # col_N NÃO é dropado: coluna sem CABEÇALHO ≠ coluna vazia (o filtro por-valor abaixo já
+        # remove padding). Caso real: a col_1 da "C.5 — Detalhe Prazos" é o código WBS (1.1.1) —
+        # dropá-la furava a promessa "nada dropado" e quebrava o Gantt do Timeline (SBSO).
+        cols = list(s.get("colunas") or [])
         linhas = [
-            {k: v for k, v in r.items() if not str(k).startswith("col_") and v not in (None, "")}
+            {k: v for k, v in r.items() if v not in (None, "")}
             for r in (s.get("linhas") or []) if isinstance(r, dict) and not eh_linha_rotulo(r)
         ]
         linhas = [r for r in linhas if r]  # descarta linhas vazias

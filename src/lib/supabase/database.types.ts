@@ -5057,6 +5057,7 @@ export type Database = {
           nome_interno: string;
           objeto_contratado: string | null;
           periodicidade_reajuste: string | null;
+          premissas: Json | null;
           uf: string | null;
           updated_at: string;
           valor_contratual: number | null;
@@ -5079,6 +5080,7 @@ export type Database = {
           nome_interno: string;
           objeto_contratado?: string | null;
           periodicidade_reajuste?: string | null;
+          premissas?: Json | null;
           uf?: string | null;
           updated_at?: string;
           valor_contratual?: number | null;
@@ -5101,6 +5103,7 @@ export type Database = {
           nome_interno?: string;
           objeto_contratado?: string | null;
           periodicidade_reajuste?: string | null;
+          premissas?: Json | null;
           uf?: string | null;
           updated_at?: string;
           valor_contratual?: number | null;
