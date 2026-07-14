@@ -318,3 +318,48 @@
     padding: var(--s-5) var(--s-4);
   }
 }
+
+/* ── Dialeto SBSO · tabela mensal mm e notas ── */
+.chv9-tab {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-13);
+}
+.chv9-tab th {
+  text-align: left;
+  font-size: var(--fs-12);
+  font-weight: var(--fw-semibold);
+  color: var(--text-3);
+  padding: var(--s-2) var(--s-3);
+  border-bottom: 1px solid var(--border-strong);
+}
+.chv9-tab td {
+  padding: var(--s-2) var(--s-3);
+  border-bottom: 1px solid var(--border);
+  color: var(--text-2);
+}
+.chv9-tab th.v,
+.chv9-tab td.v {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.chv9-tab .chv9-futuro td {
+  color: var(--text-4);
+}
+.chv9-up {
+  color: var(--warning);
+  font-weight: var(--fw-medium);
+}
+.chv9-down {
+  color: var(--text-3);
+}
+.chv9-notas {
+  white-space: pre-line;
+  font-size: var(--fs-13);
+  color: var(--text-2);
+  line-height: var(--lh-normal);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: var(--s-4);
+  background: var(--surface);
+}

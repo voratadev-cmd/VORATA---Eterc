@@ -34,7 +34,9 @@ import {
   Segmented,
   Skeleton,
 } from "@/components/ds";
+import { useChuvasC9 } from "@/lib/hooks/useChuvasC9";
 import { useChuvasPainel } from "@/lib/hooks/useChuvasPainel";
+import type { ChuvasC9 } from "@/lib/supabase/chuvasC9";
 import { type FarolLevel, farolLabel, farolToBadge } from "@/lib/mocks/contracts";
 import { ColPag, ColToolbar, ColVazio, useColecao } from "@/lib/rma/colecao";
 import type { ChuvaApuracaoMes, ChuvasPainel, ChuvaSerieMes } from "@/lib/supabase/chuvasPainel";
@@ -87,8 +89,11 @@ const MESES_CAL = [
 function ChuvasAba() {
   const { contractId } = Route.useParams();
   const { data, isLoading, error, refetch } = useChuvasPainel(contractId);
+  // Dialeto SBSO: análise MENSAL em mm (baseline INMET × real INMET × RDO) — quando a obra
+  // declara a seção C.9 nesse regime, ela substitui o modo rodoviário "dias >5 mm" inteiro.
+  const c9q = useChuvasC9(contractId);
 
-  if (isLoading) {
+  if (isLoading || c9q.isLoading) {
     // skeleton com a FORMA real da página (KPIs → Gráfico A → apuração → evidência → grid C+D)
     return (
       <main className="chv-main">
@@ -107,6 +112,7 @@ function ChuvasAba() {
       </main>
     );
   }
+  if (c9q.data) return <ChuvasSbso c9={c9q.data} />;
   if (error) {
     // ERRO ≠ PENDÊNCIA: falha de leitura ganha Badge danger + retry, nunca vira "aguardando".
     return (
@@ -203,6 +209,219 @@ function ChuvasAba() {
         <GraficoCalendarios dias={data.diasChuva} totais={data.calTotais} />
       </div>
       {data.leituraIA && <LeituraIA texto={data.leituraIA} />}
+    </main>
+  );
+}
+
+// ── Dialeto SBSO · chuva mensal (mm): baseline INMET 2020-2025 × real INMET × real RDO ──────────
+// A conversão p/ impacto de prazo/pleito é feita à parte — aqui é volume vs histórico, mês a mês.
+function ChuvasSbso({ c9 }: { c9: ChuvasC9 }) {
+  const medidos = c9.meses.filter((m) => m.inmetMm != null);
+  // destaque = mês medido com maior razão real/histórico (SBSO: fev/26 · 451 mm · 1,33×)
+  const destaque = medidos
+    .filter((m) => m.prevMm != null && m.prevMm > 0)
+    .reduce<{ mesAno: string; ratio: number; mm: number } | null>((acc, m) => {
+      const ratio = (m.inmetMm as number) / (m.prevMm as number);
+      return !acc || ratio > acc.ratio ? { mesAno: m.mesAno, ratio, mm: m.inmetMm as number } : acc;
+    }, null);
+  const grafico = c9.meses.map((m) => ({
+    mes: m.mesAno,
+    prev: m.prevMm,
+    inmet: m.inmetMm,
+    rdo: m.rdoMm,
+  }));
+  const fmtMm = (v: number | null) =>
+    v != null ? `${v.toLocaleString("pt-BR", { maximumFractionDigits: 1 })} mm` : "—";
+  const legenda = [
+    { label: "Baseline INMET 2020-2025", tipo: "tracejada", cor: CHART_SERIE_COR.contratado },
+    { label: "Real INMET 2026", tipo: "linha", cor: CHART_SERIE_COR.real },
+    { label: "Real RDO", tipo: "linha", cor: CHART_SERIE_COR.meta },
+  ] as const;
+  return (
+    <main className="chv-main">
+      <header className="chv-head">
+        <div>
+          <h2 className="chv-titulo">Análise de Chuvas · C.9</h2>
+          <p className="chv-sub">
+            estação INMET A904 Sorriso/MT · baseline histórico 2020-2025 × real INMET 2026 ×
+            registro RDO
+          </p>
+        </div>
+        <Badge tone={(c9.deltaAcumMm ?? 0) > 0 ? "warning" : "success"}>
+          {(c9.deltaAcumMm ?? 0) > 0 ? "Acima do histórico" : "Dentro do histórico"}
+        </Badge>
+      </header>
+
+      <div className="chv-kpis">
+        <FarolCard
+          label={`CHUVA PREVISTA ACUM. (M1–M${c9.nMedidos})`}
+          value={fmtMm(c9.prevAcumMm)}
+          info="baseline INMET 2020-2025"
+          accent="neutral"
+        />
+        <FarolCard
+          label={`REAL INMET ACUM. (M1–M${c9.nMedidos})`}
+          value={fmtMm(c9.inmetAcumMm)}
+          info="estação A904 Sorriso"
+          accent="neutral"
+        />
+        <FarolCard
+          label="Δ ACUMULADO"
+          value={
+            c9.deltaAcumMm != null
+              ? `${c9.deltaAcumMm > 0 ? "+" : ""}${fmtMm(c9.deltaAcumMm)}`
+              : "—"
+          }
+          info={
+            c9.deltaAcumPct != null
+              ? `${c9.deltaAcumPct > 0 ? "+" : ""}${c9.deltaAcumPct.toLocaleString("pt-BR", { maximumFractionDigits: 1 })}% real vs histórico`
+              : "real vs histórico"
+          }
+          farol={(c9.deltaAcumMm ?? 0) > 0 ? "risco" : "conforme"}
+        />
+        <FarolCard
+          label="MESES ACIMA DO HISTÓRICO"
+          value={`${c9.mesesAcima} de ${c9.nMedidos}`}
+          info="potencial base p/ pleito de chuva"
+          farol={c9.mesesAcima > c9.nMedidos / 2 ? "risco" : "conforme"}
+        />
+      </div>
+
+      <section className="chv-section">
+        <header className="chv-section-head">
+          <div>
+            <h3 className="chv-section-title">
+              Chuva mensal — previsto (baseline INMET) × real INMET × real RDO · mm
+            </h3>
+            {destaque && destaque.ratio > 1.2 ? (
+              <div className="chv-section-sub">
+                destaque {destaque.mesAno}: {fmtMm(destaque.mm)} ={" "}
+                {destaque.ratio.toLocaleString("pt-BR", { maximumFractionDigits: 2 })}× o histórico
+              </div>
+            ) : null}
+          </div>
+          <ChartLegend items={[...legenda]} />
+        </header>
+        <div className="chv-chart">
+          <ResponsiveContainer width="100%" height={300}>
+            <ComposedChart data={grafico} margin={{ top: 12, right: 14, left: 0, bottom: 0 }}>
+              <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" vertical={false} />
+              <XAxis
+                dataKey="mes"
+                tick={{ fontSize: 11, fill: "var(--text-3)" }}
+                tickLine={false}
+                axisLine={{ stroke: "var(--border)" }}
+                interval="preserveStartEnd"
+                minTickGap={20}
+              />
+              <YAxis
+                tick={{ fontSize: 11, fill: "var(--text-3)" }}
+                tickLine={false}
+                axisLine={false}
+                tickFormatter={(v) => `${v}`}
+              />
+              <Tooltip
+                content={
+                  <ChartTooltip
+                    formatter={(v: number) => fmtMm(v)}
+                    nomes={{ prev: "Baseline 2020-2025", inmet: "Real INMET", rdo: "Real RDO" }}
+                  />
+                }
+              />
+              <Bar
+                dataKey="inmet"
+                name="Real INMET"
+                fill={CHART_SERIE_COR.real}
+                radius={[3, 3, 0, 0]}
+              />
+              <Bar
+                dataKey="rdo"
+                name="Real RDO"
+                fill={CHART_SERIE_COR.meta}
+                radius={[3, 3, 0, 0]}
+              />
+              <Line
+                type="monotone"
+                dataKey="prev"
+                name="Baseline"
+                stroke={CHART_SERIE_COR.contratado}
+                strokeWidth={2}
+                strokeDasharray="5 4"
+                dot={false}
+                isAnimationActive={false}
+              />
+            </ComposedChart>
+          </ResponsiveContainer>
+        </div>
+      </section>
+
+      <section className="chv-section">
+        <header className="chv-section-head">
+          <div>
+            <h3 className="chv-section-title">Mês a mês — baseline × INMET × RDO</h3>
+            <div className="chv-section-sub">
+              {c9.nMedidos} meses medidos · M{c9.nMedidos + 1}+ apenas baseline (futuro)
+            </div>
+          </div>
+        </header>
+        <table className="chv9-tab">
+          <thead>
+            <tr>
+              <th>Mês obra</th>
+              <th>Mês/Ano</th>
+              <th className="v">Prev. (baseline)</th>
+              <th className="v">Real INMET (mm)</th>
+              <th className="v">Real RDO (mm)</th>
+              <th className="v">Δ INMET−Prev</th>
+              <th>Análise</th>
+            </tr>
+          </thead>
+          <tbody>
+            {c9.meses.map((m) => {
+              const futuro = m.inmetMm == null;
+              const acima = (m.deltaMm ?? 0) > 0;
+              return (
+                <tr key={m.mesObra || m.mesAno} className={futuro ? "chv9-futuro" : ""}>
+                  <td>{m.mesObra || "—"}</td>
+                  <td>{m.mesAno}</td>
+                  <td className="v">
+                    {m.prevMm != null
+                      ? m.prevMm.toLocaleString("pt-BR", { maximumFractionDigits: 1 })
+                      : "—"}
+                  </td>
+                  <td className="v">
+                    {m.inmetMm != null ? m.inmetMm.toLocaleString("pt-BR") : "—"}
+                  </td>
+                  <td className="v">{m.rdoMm != null ? m.rdoMm.toLocaleString("pt-BR") : "—"}</td>
+                  <td className={`v ${!futuro && acima ? "chv9-up" : ""}`}>
+                    {m.deltaMm != null
+                      ? `${m.deltaMm > 0 ? "+" : ""}${m.deltaMm.toLocaleString("pt-BR", { maximumFractionDigits: 0 })}`
+                      : "—"}
+                  </td>
+                  <td className={futuro ? "" : acima ? "chv9-up" : "chv9-down"}>
+                    {futuro ? "futuro" : (m.analise ?? "—")}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </section>
+
+      {c9.notas ? (
+        <section className="chv-section">
+          <header className="chv-section-head">
+            <div>
+              <h3 className="chv-section-title">Notas sobre o registro RDO</h3>
+              <div className="chv-section-sub">
+                num pleito, a prova é o RDO (registro contemporâneo) — priorizar a extração dos dias
+                marcados nos DDOs de out/25 a mar/26
+              </div>
+            </div>
+          </header>
+          <div className="chv9-notas">{c9.notas}</div>
+        </section>
+      ) : null}
     </main>
   );
 }
