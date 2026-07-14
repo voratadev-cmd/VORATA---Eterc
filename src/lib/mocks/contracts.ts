@@ -73,7 +73,9 @@ export function formatBRLAbbreviated(value: number, withSymbol = true): string {
   } else if (abs >= 1_000) {
     formatted = `${(abs / 1_000).toFixed(0)} k`;
   } else {
-    formatted = String(abs);
+    // Arredonda SEMPRE (regra global v3: R$ sem casas decimais) — `String(abs)` cru vazava o
+    // float da fonte pra tela ("R$ 682.00674" na linha do motorista-basculante · spec §C.4.2).
+    formatted = abs.toLocaleString("pt-BR", { maximumFractionDigits: 0 });
   }
   return `${sign}${withSymbol ? "R$ " : ""}${formatted}`;
 }

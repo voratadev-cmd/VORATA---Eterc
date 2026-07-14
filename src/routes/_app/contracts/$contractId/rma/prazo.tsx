@@ -35,8 +35,14 @@ import {
 import { usePrazoBm } from "@/lib/hooks/usePrazoBm";
 import { usePrazoMarcos } from "@/lib/hooks/usePrazoMarcos";
 import { usePrazoC5 } from "@/lib/hooks/usePrazoC5";
+import { useObra } from "@/lib/hooks/useObra";
 import { formatBRL } from "@/lib/format";
-import type { PrazoC5CurvaMes, PrazoC5Disciplina, PrazoC5Painel } from "@/lib/supabase/prazoC5";
+import type {
+  PrazoC5CurvaMes,
+  PrazoC5Disciplina,
+  PrazoC5Natureza,
+  PrazoC5Painel,
+} from "@/lib/supabase/prazoC5";
 import { useFaturamentoDisciplinaResumo } from "@/lib/hooks/useFaturamentoDisciplinaResumo";
 import { useFaturamentoDisciplinaMes } from "@/lib/hooks/useFaturamentoDisciplinaMes";
 import { useFaturamentoBm } from "@/lib/hooks/useFaturamentoBm";
@@ -311,6 +317,46 @@ function PrazoAba() {
         : null,
     [discFat, dmes, cruz, corteMesNum, decorridoMeses, mesesTotais],
   );
+  // Calendário OFICIAL de nível contrato (spec ajustes-REVISADO-v3 §C.5.3): decorrido/restantes
+  // são CALCULADOS (corte − OS · término − corte · % sobre o prazo), nunca chumbados. Precedência
+  // das âncoras: premissas declaradas (obras.premissas.datas_oficiais, sobrevive re-normalização)
+  // → obras row → painel C.5 da fonte. Sem as âncoras → cards seguem no bridge (BR-101 intocada).
+  const { data: obra } = useObra(contractId);
+  const calOficial = useMemo<CalendarioOficial | null>(() => {
+    const painel = c5?.painel ?? null;
+    const premissas = (
+      obra as {
+        premissas?: { datas_oficiais?: { termino_execucao?: string; prazo_dias?: number } };
+      } | null
+    )?.premissas;
+    const inicio = obra?.data_inicio ?? painel?.inicioOsISO ?? null;
+    const termino =
+      premissas?.datas_oficiais?.termino_execucao ??
+      obra?.data_termino ??
+      painel?.terminoContratual?.slice(0, 10) ??
+      null;
+    const corteISO = painel?.dataCorteISO ?? (corte ? corteMesParaISO(corte.ano, corte.mes) : null);
+    if (!inicio || !termino || !corteISO) return null;
+    const diasEntre = (a: string, b: string): number => {
+      const [ay, am, ad] = a.split("-").map(Number);
+      const [by, bm, bd] = b.split("-").map(Number);
+      return Math.round((Date.UTC(by, bm - 1, bd) - Date.UTC(ay, am - 1, ad)) / 86_400_000);
+    };
+    // prazo em dias: o DECLARADO no contrato quando cadastrado (540); senão a diferença de datas.
+    const prazoDias = premissas?.datas_oficiais?.prazo_dias ?? diasEntre(inicio, termino);
+    if (!(prazoDias > 0)) return null;
+    const decorridoDias = diasEntre(inicio, corteISO);
+    if (decorridoDias < 0) return null;
+    return {
+      inicioISO: inicio,
+      terminoISO: termino,
+      prazoDias,
+      decorridoDias,
+      restantesDias: diasEntre(corteISO, termino),
+      decorridoPct: (decorridoDias / prazoDias) * 100,
+    };
+  }, [obra, c5, corte]);
+
   // Físico DECLARADO da aba C.5 (painel + marcos por disciplina) vence o proxy financeiro derivado
   // do faturamento — a spec manda exibir o que a fonte declara. Obras sem as seções → derivado.
   const fisico = useMemo<Fisico | null>(() => {
@@ -429,6 +475,7 @@ function PrazoAba() {
         bmLabel={bmLabel}
         mesesTotais={mesesTotais}
         painel={c5?.painel ?? null}
+        cal={calOficial}
       />
 
       <div className="prz-grow">
@@ -442,12 +489,16 @@ function PrazoAba() {
         <MarcosResumo marcos={marcos ?? []} corteISO={corteDataISO} />
       </div>
 
-      <MarcosDetalhe marcos={marcos ?? []} corteISO={corteDataISO} />
+      <MarcosDetalhe marcos={marcos ?? []} corteISO={corteDataISO} c5Disc={c5?.disciplinas ?? []} />
 
       <div className="prz-grow prz-grow-atr">
         {/* FarolLegenda mora no rodapé do AtrasadosCard — junto da única tabela que usa esse farol */}
         <AtrasadosCard fisico={fisico} bmLabel={bmLabel} />
-        <NaturezaAvanco disciplinas={c5?.disciplinas ?? []} />
+        <NaturezaAvanco
+          naturezas={c5?.naturezas ?? []}
+          totalRs={c5?.naturezaTotalRs ?? null}
+          achado={c5?.naturezaAchado ?? null}
+        />
       </div>
 
       {fisico && <AnaliseCard fisico={fisico} prazo={prazo} bmLabel={bmLabel} />}
@@ -464,18 +515,30 @@ function fmtDataISO(iso: string | null): string {
   return y && m && d ? `${d}/${m}/${y}` : iso;
 }
 
+/** Calendário de nível CONTRATO calculado das âncoras oficiais (OS · término · prazo declarado). */
+type CalendarioOficial = {
+  inicioISO: string;
+  terminoISO: string;
+  prazoDias: number;
+  decorridoDias: number;
+  restantesDias: number;
+  decorridoPct: number;
+};
+
 function Decks({
   prazo,
   fisico,
   bmLabel,
   mesesTotais,
   painel,
+  cal,
 }: {
   prazo: PrazoBM;
   fisico: Fisico | null;
   bmLabel: string;
   mesesTotais: number | null;
   painel: PrazoC5Painel | null;
+  cal: CalendarioOficial | null;
 }) {
   // Aderência = real ÷ previsto (mesmos campos já carregados) — substitui a duplicata literal do
   // atraso que ocupava dois stats ("Atraso acum." e "Desvio" eram o MESMO número).
@@ -492,8 +555,9 @@ function Decks({
   // projeção declarada só aparece com painel presente e ≥20% do prazo decorrido (regra da fonte)
   const projecaoVisivel = painel != null && (painel.decorridoPct ?? 0) >= 20;
   // Término planejado do cronograma (tendenciaTerminoISO) — só vira stat quando DIVERGE do contratual.
+  const terminoContratualExib = cal?.terminoISO ?? prazo.fimContratualISO;
   const terminoPlanejadoDivergente =
-    prazo.tendenciaTerminoISO && prazo.tendenciaTerminoISO !== prazo.fimContratualISO
+    prazo.tendenciaTerminoISO && prazo.tendenciaTerminoISO !== terminoContratualExib
       ? prazo.tendenciaTerminoISO
       : null;
   return (
@@ -502,20 +566,25 @@ function Decks({
         <div className="prz-deck-head">
           {I.clock({ size: 15 })} <span className="prz-deck-titulo">Decorrido</span>
         </div>
-        <div className="prz-deck-big">{fmtPct(prazo.decorridoPct, 1)}</div>
+        {/* Base OFICIAL de contrato quando as âncoras existem (OS/término/prazo) — os valores são
+            fórmula (corte − OS · ÷ prazo · término − corte), nunca copiados da aba (spec v3). */}
+        <div className="prz-deck-big">{fmtPct(cal?.decorridoPct ?? prazo.decorridoPct, 1)}</div>
         <ProgressBar
           size="sm"
-          value={Math.max(0, Math.min(100, prazo.decorridoPct))}
+          value={Math.max(0, Math.min(100, cal?.decorridoPct ?? prazo.decorridoPct))}
           aria-label="Prazo contratual decorrido"
         />
         <div className="prz-deck-sub">do prazo contratual</div>
         <div className="prz-deck-stats">
-          <Stat k="Prazo" v={`${mesesTotais ?? "—"} meses`} />
-          <Stat k="= dias" v={`${fmtNum(prazo.prazoContratualDias)} d`} />
-          <Stat k="Início (OS)" v={formatBRDate(prazo.inicioISO)} />
-          <Stat k="Término" v={formatBRDate(prazo.fimContratualISO)} />
-          <Stat k="Decorrido" v={`${prazo.decorridoDias} dias`} />
-          <Stat k="Restantes" v={`${fmtNum(prazo.restantesDias)} dias`} />
+          <Stat
+            k="Prazo"
+            v={`${cal ? Math.round(cal.prazoDias / 30.4) : (mesesTotais ?? "—")} meses`}
+          />
+          <Stat k="= dias" v={`${fmtNum(cal?.prazoDias ?? prazo.prazoContratualDias)} d`} />
+          <Stat k="Início (OS)" v={formatBRDate(cal?.inicioISO ?? prazo.inicioISO)} />
+          <Stat k="Término" v={formatBRDate(cal?.terminoISO ?? prazo.fimContratualISO)} />
+          <Stat k="Decorrido" v={`${cal?.decorridoDias ?? prazo.decorridoDias} dias`} />
+          <Stat k="Restantes" v={`${fmtNum(cal?.restantesDias ?? prazo.restantesDias)} dias`} />
           {terminoPlanejadoDivergente ? (
             <Stat
               k="Término planejado (cronograma)"
@@ -929,7 +998,23 @@ function DonutStatus({
 }
 
 // ── Marcos · detalhe (busca + filtro + paginação) ───────────────────────────────────────────────
-function MarcosDetalhe({ marcos, corteISO }: { marcos: PrazoMarco[]; corteISO: string | null }) {
+// A coluna "Trecho / Obra" foi REMOVIDA (spec v3 §C.5.1): a tabela de marcos por disciplina da
+// fonte não tem essa coluna — o campo `trecho` do banco veio contaminado com os textos da tabela
+// vizinha "Natureza do avanço" (fundidas na captura). No lugar, "Em execução (RDO)", que EXISTE
+// na fonte (lida da seção C.5 via prazoC5, casada por nome de disciplina).
+function MarcosDetalhe({
+  marcos,
+  corteISO,
+  c5Disc,
+}: {
+  marcos: PrazoMarco[];
+  corteISO: string | null;
+  c5Disc: PrazoC5Disciplina[];
+}) {
+  const emExecPorDisc = useMemo(
+    () => new Map(c5Disc.map((d) => [normTxt(d.disciplina), d.emExecucao])),
+    [c5Disc],
+  );
   const categorias = useMemo(
     () => ["TODAS", ...Array.from(new Set(marcos.map((m) => m.categoria ?? "—")))],
     [marcos],
@@ -946,7 +1031,8 @@ function MarcosDetalhe({ marcos, corteISO }: { marcos: PrazoMarco[]; corteISO: s
   }, [marcos]);
   const [cat, setCat] = useState("TODAS");
   const col = useColecao(marcos, {
-    busca: (m) => `${m.categoria ?? ""} ${m.trecho ?? ""} ${m.dataLimite ?? ""}`,
+    busca: (m) =>
+      `${m.categoria ?? ""} ${emExecPorDisc.get(normTxt(m.categoria ?? "")) ?? ""} ${m.dataLimite ?? ""}`,
     filtro: (m) => cat === "TODAS" || (m.categoria ?? "—") === cat,
     ordenacoes: [
       {
@@ -1004,11 +1090,11 @@ function MarcosDetalhe({ marcos, corteISO }: { marcos: PrazoMarco[]; corteISO: s
           </button>
         ))}
       </div>
-      {col.showToolbar ? <ColToolbar col={col} placeholder="Buscar marco / trecho…" /> : null}
+      {col.showToolbar ? <ColToolbar col={col} placeholder="Buscar marco / disciplina…" /> : null}
       <div className="prz-tabela prz-tabela-marcos" role="table">
         <div className="prz-tabela-head" role="row">
           <span role="columnheader">Categoria</span>
-          <span role="columnheader">Trecho / Obra</span>
+          <span role="columnheader">Em execução (RDO)</span>
           <span role="columnheader">Data-limite</span>
           <span className="r" role="columnheader">
             % concl.
@@ -1029,7 +1115,7 @@ function MarcosDetalhe({ marcos, corteISO }: { marcos: PrazoMarco[]; corteISO: s
                 <span className="prz-cell-forte" role="cell">
                   {m.categoria ?? "—"}
                 </span>
-                <span role="cell">{m.trecho ?? "—"}</span>
+                <span role="cell">{emExecPorDisc.get(normTxt(m.categoria ?? "")) ?? "—"}</span>
                 <span className="tabular" role="cell">
                   {formatBRDate(m.dataLimite)}
                 </span>
@@ -1184,38 +1270,75 @@ function AtrasadosCard({ fisico, bmLabel }: { fisico: Fisico | null; bmLabel: st
 
 // Windows Analysis saiu da tela por decisão do idealizador (spec 4.5): sem cronograma .mpp
 // importado não há caminho crítico documentado — o bloco volta condicionado ao dado existir.
-// No lugar, a "Natureza do avanço" (spec 4.4): o que do avanço financeiro é obra FÍSICA, por
-// disciplina — direto da fonte C.5 (coluna Natureza dos marcos por disciplina).
-function NaturezaAvanco({ disciplinas }: { disciplinas: PrazoC5Disciplina[] }) {
-  const comNatureza = disciplinas.filter((d) => d.natureza);
-  if (comNatureza.length === 0) return null;
+// "Natureza do avanço" (spec v3 §C.5.2) é a COMPOSIÇÃO do avanço medido (4 fatias + TOTAL) — a
+// tabela da fonte NÃO é por disciplina (a versão anterior colava natureza×disciplina porque a
+// captura fundiu as duas tabelas vizinhas). O "Achado" é texto de leitura, fora da tabela.
+function NaturezaAvanco({
+  naturezas,
+  totalRs,
+  achado,
+}: {
+  naturezas: PrazoC5Natureza[];
+  totalRs: number | null;
+  achado: string | null;
+}) {
+  if (naturezas.length === 0) return null;
+  const fmtPctMedido = (v: number | null) =>
+    v != null
+      ? `${v.toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%`
+      : "—";
   return (
     <section className="prz-section">
       <header className="prz-section-head">
         <div>
           <h3 className="prz-section-title">Natureza do avanço</h3>
-          <div className="prz-section-sub">o avanço financeiro reflete obra física · fonte C.5</div>
+          <div className="prz-section-sub">
+            composição do avanço medido · {naturezas.length} naturezas · fonte C.5
+          </div>
         </div>
       </header>
-      <ul className="prz-natureza">
-        {comNatureza.map((d) => (
-          <li key={d.disciplina} className="prz-natureza-item">
-            <div className="prz-natureza-head">
-              <span className="prz-natureza-disc">{d.disciplina}</span>
-              {d.status ? (
-                <Badge tone={STATUS_C5_FAROL[d.status.toLowerCase()]?.tone ?? "info"}>
-                  {d.status}
-                </Badge>
-              ) : null}
-            </div>
-            <div className="prz-natureza-txt">{d.natureza}</div>
-            <div className="prz-natureza-meta">
-              {d.valorMedidoRs != null ? <span>medido {formatBRL(d.valorMedidoRs)}</span> : null}
-              {d.emExecucao ? <span>em execução: {d.emExecucao}</span> : null}
-            </div>
-          </li>
+      <div className="prz-tabela prz-tabela-nat" role="table">
+        <div className="prz-tabela-head" role="row">
+          <span role="columnheader">Natureza</span>
+          <span className="r" role="columnheader">
+            Valor medido (R$)
+          </span>
+          <span className="r" role="columnheader">
+            % do medido
+          </span>
+        </div>
+        {naturezas.map((f) => (
+          <div className="prz-tabela-row" role="row" key={f.natureza}>
+            <span className="prz-cell-forte" role="cell">
+              {f.natureza}
+            </span>
+            <span className="r tabular" role="cell">
+              {formatBRL(f.valorRs)}
+            </span>
+            <span className="r tabular" role="cell">
+              {fmtPctMedido(f.pctDoMedido)}
+            </span>
+          </div>
         ))}
-      </ul>
+        {totalRs != null ? (
+          <div className="prz-tabela-row prz-nat-total" role="row">
+            <span className="prz-cell-forte" role="cell">
+              TOTAL medido
+            </span>
+            <span className="r tabular" role="cell">
+              {formatBRL(totalRs)}
+            </span>
+            <span className="r tabular" role="cell">
+              100,0%
+            </span>
+          </div>
+        ) : null}
+      </div>
+      {achado ? (
+        <p className="prz-obs">
+          <strong>Leitura:</strong> {achado}
+        </p>
+      ) : null}
     </section>
   );
 }

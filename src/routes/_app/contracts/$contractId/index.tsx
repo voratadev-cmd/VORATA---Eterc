@@ -10,6 +10,7 @@ import { useSinteseContrato } from "@/lib/hooks/useSinteseContrato";
 import { useFaturamentoCurva } from "@/lib/hooks/useFaturamentoCurva";
 import { useIndiretos } from "@/lib/hooks/useIndiretos";
 import { usePrazoBm } from "@/lib/hooks/usePrazoBm";
+import { useObra } from "@/lib/hooks/useObra";
 import "./sintese.css";
 
 export const Route = createFileRoute("/_app/contracts/$contractId/")({
@@ -59,6 +60,7 @@ function SintesePage() {
   const { data: curva } = useFaturamentoCurva(contractId);
   const { data: indiretos } = useIndiretos(contractId);
   const { data: prazoBridge } = usePrazoBm(contractId);
+  const { data: obra } = useObra(contractId);
 
   if (l1) {
     return (
@@ -104,23 +106,50 @@ function SintesePage() {
   // ausente ou "(a cadastrar)" → KV/Fact pintam o amarelo "a cadastrar".
   const idl = sintese.identificacaoLegal;
   const prz = sintese.prazosContratuais;
-  const il = (k: string) => idl?.[k] ?? null;
-  const pz = (k: string) => prz?.[k] ?? null;
+  // Busca por rótulo: exata primeiro, depois normalizada por inclusão (a captura pode grafar o
+  // rótulo com pequenas variações entre obras — "OS Original" × "Data da Ordem de Serviço").
+  const kvPick = (m: Record<string, string | null> | null, ...keys: string[]): string | null => {
+    if (!m) return null;
+    for (const k of keys) if (m[k] != null) return m[k];
+    const norm = (s: string) => s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+    const entries = Object.entries(m);
+    for (const k of keys) {
+      const hit = entries.find(([kk, vv]) => vv != null && norm(kk).includes(norm(k)));
+      if (hit) return hit[1];
+    }
+    return null;
+  };
+  const il = (...k: string[]) => kvPick(idl, ...k);
+  const pz = (...k: string[]) => kvPick(prz, ...k);
   const prazo = prazoBridge?.prazo ?? null;
   const pv = curva?.custoTotal ?? id?.valor ?? null;
   const custoDireto = indiretos?.custoDireto ?? null;
   const custoIndireto = pv != null && custoDireto != null ? pv - custoDireto : null;
+  // BDI derivado é FALLBACK — o oficial vem do Painel 3 (fin.bdiPct). Derivar do pv da CURVA
+  // (total do CFF, +R$ 10.000) dava 22,43% onde o contrato declara 22,40% (spec v3 A.3).
   const bdiPct =
     custoDireto && custoDireto > 0 && custoIndireto != null
       ? (custoIndireto / custoDireto) * 100
       : null;
-  const pctDiretoPV = pv && custoDireto != null ? (custoDireto / pv) * 100 : null;
-  const pctIndiretoPV = pv && custoIndireto != null ? (custoIndireto / pv) * 100 : null;
   const prazoMeses = prazo
     ? Math.round(prazo.prazoContratualDias / 30.4)
     : (id?.prazoMeses ?? null);
-  const inicio = fmtMesAno(prazo?.inicioISO);
-  const fim = fmtMesAno(prazo?.fimContratualISO);
+  // Datas de nível CONTRATO por precedência (spec v3 A.2): premissas oficiais declaradas
+  // (obras.premissas.datas_oficiais) → obras row → cronograma (bridge). O cronograma é a curva
+  // planejada (CFF) — mostrava 01/10→31/03 onde o contrato diz OS 22/09.
+  const premissasObra = (
+    obra as {
+      premissas?: { datas_oficiais?: { termino_execucao?: string; tap?: string; tad?: string } };
+    } | null
+  )?.premissas;
+  const inicioISO = obra?.data_inicio ?? prazo?.inicioISO ?? null;
+  const terminoISO =
+    premissasObra?.datas_oficiais?.termino_execucao ??
+    obra?.data_termino ??
+    prazo?.fimContratualISO ??
+    null;
+  const inicio = fmtMesAno(inicioISO);
+  const fim = fmtMesAno(terminoISO);
   const fin = sintese.financeiro;
   // faturamento médio = PV inicial ÷ prazo (spec C.1 · 39.766.038/18 = 2.209.224)
   const fatMedioMensal =
@@ -129,10 +158,29 @@ function SintesePage() {
   const reajusteResumo = fin?.reajustesAplicados
     ? `reajuste ${fin.reajustesAplicados.split(" ")[0]}`
     : null;
+  // Bases da leitura IA (spec v3 A.3): % sobre o PV OFICIAL; CI do Painel 3 (não pv−CD, que herda
+  // o +10k do CFF); atualizado com a ressalva de revalidação contra a PSP reajustada.
+  const pvOficial = fin?.pvInicialRs ?? pv;
+  const custoIndiretoIa = fin?.ciRs ?? custoIndireto;
+  const pctDiretoPV = pvOficial && custoDireto != null ? (custoDireto / pvOficial) * 100 : null;
+  const pctIndiretoPV =
+    pvOficial && custoIndiretoIa != null ? (custoIndiretoIa / pvOficial) * 100 : null;
+  const reajusteToken = fin?.reajustesAplicados
+    ? `${fin.reajustesAplicados.split(" ")[0]} — revalidar contra a PSP reajustada`
+    : null;
   const est = sintese.estaqueamento;
   const trechoLinha =
     est?.kmInicial != null && est?.kmFinal != null
       ? `BR-101/RJ · km ${est.kmInicial.toLocaleString("pt-BR")} a ${est.kmFinal.toLocaleString("pt-BR")} · Macaé/RJ`
+      : null;
+  // Segmentação: % da fonte quando existe; delta vs PSQ só quando a quebra vem do CFF e diverge
+  // do PV (spec v3 A.1/G.1: exibir o total do CFF SEMPRE com a nota da divergência +R$ 10.000).
+  const temPctSeg = sintese.trechos.some((t) => t.pct != null);
+  const deltaCffPsq =
+    fin?.pvInicialRs != null &&
+    sintese.trechosTotal > 0 &&
+    Math.abs(sintese.trechosTotal - fin.pvInicialRs) > 0.5
+      ? sintese.trechosTotal - fin.pvInicialRs
       : null;
 
   return (
@@ -221,20 +269,33 @@ function SintesePage() {
 
         <Card className="sin-panel">
           <h3 className="sin-panel-t">{I.calendar({ size: 15 })} Prazos e marcos</h3>
-          <KV k="OS original" v={pz("OS Original")} />
-          <KV k="OS real" v={pz("OS Real")} />
+          {/* Nível CONTRATO: OS/término/TAP/TAD por precedência oficial (spec v3 A.2/Parte C) —
+              premissas declaradas → obras row → Painel 2 da fonte → cronograma. */}
+          <KV
+            k="OS original / Início autorizado"
+            v={pz("OS Original", "Data da Ordem de Serviço") ?? fmtDataBR(obra?.data_inicio)}
+          />
           <KV
             k="Prazo de execução"
-            v={prazoMeses != null ? `${prazoMeses} meses` : pz("Prazo de Execução")}
+            v={pz("Prazo de Execução") ?? (prazoMeses != null ? `${prazoMeses} meses` : null)}
           />
           <KV k="Início" v={inicio ?? pz("Início da Execução")} />
-          <KV k="Término previsto" v={fim ?? pz("Término Previsto")} />
+          <KV k="Término previsto (execução)" v={fmtDataBR(terminoISO) ?? pz("Término Previsto")} />
+          <KV k="Término contratual" v={fmtDataBR(terminoISO) ?? pz("Término Contratual")} />
           <KV
-            k="Término contratual"
-            v={pz("Término Contratual") ?? fmtDataBR(prazo?.fimContratualISO)}
+            k="Aceitação provisória (TAP)"
+            v={
+              fmtDataBR(premissasObra?.datas_oficiais?.tap) ??
+              pz("Aceitação Provisória (TAP)", "Recebimento Provisório")
+            }
           />
-          <KV k="Aceitação provisória (TAP)" v={pz("Aceitação Provisória (TAP)")} />
-          <KV k="Aceitação definitiva (TAD)" v={pz("Aceitação Definitiva (TAD)")} />
+          <KV
+            k="Aceitação definitiva (TAD)"
+            v={
+              fmtDataBR(premissasObra?.datas_oficiais?.tad) ??
+              pz("Aceitação Definitiva (TAD)", "Recebimento Definitivo")
+            }
+          />
           <KV k="Período chuvoso (baseline)" v={pz("Período Chuvoso (baseline)")} />
         </Card>
       </div>
@@ -243,7 +304,9 @@ function SintesePage() {
       <Card className="sin-panel">
         <h3 className="sin-panel-t">{I.wallet({ size: 15 })} Econômico-financeiro</h3>
         <div className="sin-econ">
-          <KV k="Valor total atualizado" v={fmtBRLcheio(pv)} />
+          {/* PV oficial (PSQ), não o total do CFF — e o rótulo deixou de ecoar o card "VALOR
+              ATUALIZADO" do topo (spec v3 A.1: são conceitos diferentes na mesma casa). */}
+          <KV k="Valor total do contrato (PV)" v={fmtBRLcheio(fin?.pvInicialRs ?? pv)} />
           <KV k="Data-base do orçamento" v={fmtDataBR(sintese.dataBaseOrcamento)} />
           <KV
             k="Aniversário de reajuste"
@@ -308,6 +371,8 @@ function SintesePage() {
       </Section>
 
       {/* ── Equipe e contatos ── */}
+      {/* SBSO não tem o "Painel 5" tabular — a equipe vem do KV "Painel Administração Contratual"
+          (spec v3 Parte F); obras com o Painel 5 seguem na tabela de 3 colunas. */}
       <Section titulo="Equipe e contatos">
         <div className="sin-tabela sin-tabela-eq" role="table">
           <div className="sin-th" role="row">
@@ -315,15 +380,34 @@ function SintesePage() {
             <span role="columnheader">Nome</span>
             <span role="columnheader">Documento / contato</span>
           </div>
-          {sintese.equipe.map((m, i) => (
-            <div className="sin-tr" role="row" key={`${m.nome}-${i}`}>
-              <span role="cell">{m.funcao}</span>
-              <span className="sin-forte" role="cell">
-                {m.nome}
+          {sintese.equipe.length > 0
+            ? sintese.equipe.map((m, i) => (
+                <div className="sin-tr" role="row" key={`${m.nome}-${i}`}>
+                  <span role="cell">{m.funcao}</span>
+                  <span className="sin-forte" role="cell">
+                    {m.nome}
+                  </span>
+                  <span role="cell">{m.documento ?? m.designacao ?? "—"}</span>
+                </div>
+              ))
+            : sintese.equipeContatos.map((m) => (
+                <div className="sin-tr" role="row" key={m.funcao}>
+                  <span role="cell">{m.funcao}</span>
+                  <span className="sin-forte" role="cell">
+                    {m.nome}
+                  </span>
+                  <span role="cell">—</span>
+                </div>
+              ))}
+          {sintese.equipe.length === 0 && sintese.equipeContatos.length === 0 ? (
+            <div className="sin-tr" role="row">
+              <span role="cell">
+                <Cad />
               </span>
-              <span role="cell">{m.documento ?? m.designacao ?? "—"}</span>
+              <span role="cell" />
+              <span role="cell" />
             </div>
-          ))}
+          ) : null}
         </div>
       </Section>
 
@@ -339,7 +423,11 @@ function SintesePage() {
         <div className="sin-tabela sin-tabela-tr" role="table">
           <div className="sin-th" role="row">
             <span role="columnheader">Edificação / frente</span>
-            <span role="columnheader">km</span>
+            {/* Coluna do meio: km nas obras lineares (BR-101) · % da quebra nas de edificação
+                (SBSO tem a coluna na fonte — spec v3 Parte G.1). */}
+            <span className={temPctSeg ? "r" : ""} role="columnheader">
+              {temPctSeg ? "% do total" : "km"}
+            </span>
             <span className="r" role="columnheader">
               Valor
             </span>
@@ -349,8 +437,8 @@ function SintesePage() {
               <span className="sin-forte" role="cell">
                 {t.trecho}
               </span>
-              <span className="tabular" role="cell">
-                {t.km ?? "—"}
+              <span className={`tabular${temPctSeg ? " r" : ""}`} role="cell">
+                {temPctSeg ? fmtPct(t.pct, 2) : (t.km ?? "—")}
               </span>
               <span className="r tabular" role="cell">
                 {fmtBRLcheio(t.valor)}
@@ -361,12 +449,22 @@ function SintesePage() {
             <span className="sin-forte" role="cell">
               TOTAL
             </span>
-            <span role="cell" />
+            <span className={temPctSeg ? "r tabular" : ""} role="cell">
+              {temPctSeg ? "100,00%" : ""}
+            </span>
             <span className="r tabular" role="cell">
               {fmtBRLcheio(sintese.trechosTotal)}
             </span>
           </div>
         </div>
+        {deltaCffPsq != null ? (
+          <p className="sin-nota">
+            Total desta quebra = <strong>{fmtBRLcheio(sintese.trechosTotal)}</strong> — baseline do
+            CFF aprovado ({deltaCffPsq > 0 ? "+" : "−"}
+            {fmtBRLcheio(Math.abs(deltaCffPsq))} vs a PSQ contratual de{" "}
+            {fmtBRLcheio(fin?.pvInicialRs ?? null)}, divergência documental em reconciliação).
+          </p>
+        ) : null}
       </Section>
 
       {/* ── Orçamento interno por grupo de custo ── */}
@@ -418,26 +516,55 @@ function SintesePage() {
         </Section>
       ) : null}
 
+      {/* ── Área / escopo físico (existe na fonte SBSO — spec v3 Parte G.3) ── */}
+      {sintese.areaEscopo ? (
+        <Card className="sin-panel">
+          <h3 className="sin-panel-t">{I.map({ size: 15 })} Área / escopo físico</h3>
+          <KV k="Área construída — TPS" v={sintese.areaEscopo.area} />
+          <KV k="Edificações do escopo" v={sintese.areaEscopo.edificacoes} />
+          <KV k="Natureza do escopo" v={sintese.areaEscopo.natureza} />
+        </Card>
+      ) : null}
+
       {/* ── Documentos-chave ── */}
+      {/* Fonte em LISTA (SBSO · 10 documentos da aba) tem precedência; formato KV (Painel 6) segue
+          nos chips de link (spec v3 Parte G.2). */}
       <Section titulo="Documentos-chave">
-        <div className="sin-docs">
-          <DocChip ok label={sintese.documentos?.contratoInterno ?? "Contrato"} />
-          <DocChip label="Anexos do contrato" valor={sintese.documentos?.anexos} />
-          <DocChip label="Proposta" valor={sintese.documentos?.proposta} />
-        </div>
+        {sintese.documentosLista.length > 0 ? (
+          <div className="sin-docs">
+            {sintese.documentosLista.map((d) => (
+              <DocChip key={d} ok label={d} />
+            ))}
+          </div>
+        ) : (
+          <div className="sin-docs">
+            <DocChip ok label={sintese.documentos?.contratoInterno ?? "Contrato"} />
+            <DocChip label="Anexos do contrato" valor={sintese.documentos?.anexos} />
+            <DocChip label="Proposta" valor={sintese.documentos?.proposta} />
+          </div>
+        )}
       </Section>
 
       {/* ── Leitura da Síntese (IA) ── */}
+      {/* Template da spec v3 A.3: PV oficial (não o CFF), BDI do Painel 3 (22,40% — derivar do
+          CFF dava o 22,43% errado), CD/CI com % sobre o PV. Sem literais de outra obra. */}
       <Card className="sin-ia">
         <div className="sin-ia-tag">
           {I.star({ size: 12 })} IA · Adm Contratual · Leitura da Síntese
         </div>
         <p className="sin-ia-text">
-          Contrato de <strong>{fmtMi(pv)}</strong> (BDI <strong>{fmtPct(bdiPct)}</strong>),{" "}
+          Contrato <strong>{fmtMi(pvOficial)}</strong> (PV)
+          {fin?.valorAtualizadoRs != null ? (
+            <>
+              , atualizado <strong>{fmtMi(fin.valorAtualizadoRs)}</strong>
+              {reajusteToken ? ` (${reajusteToken})` : ""}
+            </>
+          ) : null}
+          . BDI <strong>{fmtPct(fin?.bdiPct ?? bdiPct)}</strong>. Custo direto{" "}
+          <strong>{fmtMi(custoDireto)}</strong> ({fmtPct(pctDiretoPV, 1)} do PV), custo indireto/BDI{" "}
+          <strong>{fmtMi(custoIndiretoIa)}</strong> ({fmtPct(pctIndiretoPV, 1)} do PV).{" "}
           {prazoMeses != null ? `${prazoMeses} meses` : "—"}
-          {inicio && fim ? ` (${inicio} → ${fim})` : ""}. Custo direto{" "}
-          <strong>{fmtMi(custoDireto)}</strong> ({fmtPct(pctDiretoPV, 1)} do PV) e custo
-          indireto/BDI <strong>{fmtMi(custoIndireto)}</strong> ({fmtPct(pctIndiretoPV, 1)} do PV).
+          {inicio && fim ? ` (${inicio} → ${fim})` : ""}.
         </p>
         {sintese.premissas.length > 0 ? (
           <p className="sin-ia-text">
@@ -447,9 +574,7 @@ function SintesePage() {
               .slice(0, 3)
               .map((p) => `${p.frente} (${fmtPct(p.pctPV, 1)})`)
               .join(", ")}
-            . O instrumento contratual está cadastrado (CNPJs, regime, foro CAM-CCBC, OS{" "}
-            {pz("OS Real") ? "real 09/03/26 com +66 dias" : "real"}, término contratual 05/01/30);
-            pendem apenas a administração contratual e os links dos documentos.
+            .
           </p>
         ) : null}
       </Card>

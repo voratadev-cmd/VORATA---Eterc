@@ -67,6 +67,10 @@ export type PrazoC5Painel = {
   /** rótulo pronto da fonte — "7,2% vs 9,0%/mês". */
   ritmoVsNecessario: string | null;
   terminoContratual: string | null;
+  /** OS real declarada pela fonte (ISO) — 2025-09-22 na SBSO. */
+  inicioOsISO: string | null;
+  /** data de corte (fim do BM) declarada pela fonte (ISO) — 2026-06-30. */
+  dataCorteISO: string | null;
   terminoProjetado: string | null;
   deltaVsContratualDias: number | null;
   prorrogacaoEstimadaMeses: number | null;
@@ -97,10 +101,26 @@ export type PrazoC5Disciplina = {
   emExecucao: string | null;
 };
 
+/** Fatia da COMPOSIÇÃO do avanço medido (tabela "Natureza do avanço real" — 4 fatias + TOTAL). */
+export type PrazoC5Natureza = {
+  natureza: string;
+  valorRs: number;
+  /** % do medido — calculado (valor ÷ total); o header da coluna na fonte veio envenenado
+   *  como data ("2027-03-09"), então NUNCA lido pela chave. */
+  pctDoMedido: number | null;
+};
+
 export type PrazoC5 = {
   painel: PrazoC5Painel | null;
   curva: PrazoC5CurvaMes[];
   disciplinas: PrazoC5Disciplina[];
+  /** Composição do avanço medido (4 fatias). Na planilha essa tabela mora AO LADO da de marcos
+   *  (colunas L–N, mesmas linhas) — a captura funde as duas; aqui ela é separada de volta.
+   *  As fatias NÃO têm vínculo com a disciplina da mesma linha (spec ajustes-REVISADO-v3 §C.5.2). */
+  naturezas: PrazoC5Natureza[];
+  naturezaTotalRs: number | null;
+  /** Texto de leitura ("Achado: …") — linhas da tabela-fonte sem valor; exibir como prosa. */
+  naturezaAchado: string | null;
 };
 
 /** Painel/curva/disciplinas do físico declarado (aba C.5). null se a obra não tem as seções. */
@@ -134,6 +154,8 @@ export async function getPrazoC5(contractId: string): Promise<PrazoC5 | null> {
       deltaVsContratualDias: num(pick(p, "deltaVsContratual_dias")),
       prorrogacaoEstimadaMeses: num(pick(p, "prorrogacaoEstimada_meses")),
       impactoFinalDias: num(pick(p, "impactoFinal_diasProrrogacao")),
+      inicioOsISO: str(pick(p, "inicioOSreal"))?.slice(0, 10) ?? null,
+      dataCorteISO: str(pick(p, "dataCorteFimBM"))?.slice(0, 10) ?? null,
       riscoDePrazo: str(pick(p, "riscoDePrazo")),
       prazoContratualMeses: num(pick(p, "prazoContratualMeses")),
       bmCorrente: num(pick(p, "bmCorrente")),
@@ -180,5 +202,26 @@ export async function getPrazoC5(contractId: string): Promise<PrazoC5 | null> {
         .filter((d) => d.disciplina && !/^total/i.test(d.disciplina))
     : [];
 
-  return { painel, curva, disciplinas };
+  // Composição do avanço medido: nas linhas fundidas, fatia = Natureza COM valor; a linha
+  // "TOTAL" fecha a conservação (Σ fatias == total == medido do BM); Natureza SEM valor são os
+  // fragmentos do "Achado" (texto de leitura, quebrado em linhas pela fonte).
+  const naturezas: PrazoC5Natureza[] = [];
+  let naturezaTotalRs: number | null = null;
+  const achadoFrag: string[] = [];
+  if (Array.isArray(discRaw)) {
+    for (const r of discRaw as Row[]) {
+      const nat = str(pick(r, "natureza"));
+      if (!nat) continue;
+      const valor = num(pick(r, "valor medido (r$)", "valor medido"));
+      if (/^total/i.test(nat)) naturezaTotalRs = valor;
+      else if (valor != null) naturezas.push({ natureza: nat, valorRs: valor, pctDoMedido: null });
+      else achadoFrag.push(nat);
+    }
+    const total = naturezaTotalRs ?? naturezas.reduce((s, f) => s + f.valorRs, 0);
+    if (total > 0) for (const f of naturezas) f.pctDoMedido = (f.valorRs / total) * 100;
+    if (naturezaTotalRs == null && naturezas.length) naturezaTotalRs = total;
+  }
+  const naturezaAchado = achadoFrag.length ? achadoFrag.join(" ") : null;
+
+  return { painel, curva, disciplinas, naturezas, naturezaTotalRs, naturezaAchado };
 }

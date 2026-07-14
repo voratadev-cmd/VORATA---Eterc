@@ -254,6 +254,14 @@
   z-index: 1;
 }
 
+/* Nota de reconciliação (segmentação = baseline do CFF ≠ PSQ · spec v3 A.1) */
+.sin-nota {
+  margin: var(--s-2) 0 0;
+  font-size: var(--fs-12);
+  color: var(--text-3);
+  font-variant-numeric: tabular-nums;
+}
+
 /* ── Documentos-chave ───────────────────────────────────────────────────── */
 .sin-docs {
   display: flex;

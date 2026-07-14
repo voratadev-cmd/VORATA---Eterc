@@ -73,7 +73,13 @@ export type SinteseEquipe = {
   documento: string | null;
   designacao: string | null;
 };
-export type SinteseTrecho = { trecho: string; km: string | null; valor: number | null };
+export type SinteseTrecho = {
+  trecho: string;
+  km: string | null;
+  valor: number | null;
+  /** % do total da quebra (fonte SBSO traz a coluna; ×100 já aplicado). */
+  pct: number | null;
+};
 export type SintesePremissa = { frente: string; valor: number | null; pctPV: number | null };
 export type SinteseBdiRubrica = {
   descricao: string;
@@ -119,10 +125,16 @@ export type SinteseContrato = {
   premissas: SintesePremissa[];
   premissasTotal: number;
   equipe: SinteseEquipe[];
+  /** Equipe no formato KV do "Painel Administração Contratual" (SBSO) — função → nome. */
+  equipeContatos: Array<{ funcao: string; nome: string }>;
   trechos: SinteseTrecho[];
   trechosTotal: number;
   bdiRubricas: SinteseBdiRubrica[];
   documentos: SinteseDocumentos | null;
+  /** Lista de documentos-chave da fonte (seção-texto SBSO, um item por linha "• …"). */
+  documentosLista: string[];
+  /** Área / escopo físico (KV da C.1 — spec v3 Parte G.3). */
+  areaEscopo: { area: string | null; edificacoes: string | null; natureza: string | null } | null;
   admin: SinteseAdmin | null;
   dataBaseOrcamento: string | null;
   financeiro: {
@@ -162,6 +174,7 @@ export async function getSinteseContrato(contractId: string): Promise<SinteseCon
     painel3Obj,
     bdiResumoObj,
     grupoRows,
+    areaEscopoObj,
   ] = await Promise.all([
     getSecaoTabela(contractId, "Resumo dos contratos"),
     getSecaoTabela(contractId, "Painel 5: Equipe e Contatos"),
@@ -169,7 +182,11 @@ export async function getSinteseContrato(contractId: string): Promise<SinteseCon
       (v) => v ?? getSecaoTabela(contractId, "Segmentação física por edificação"),
     ),
     getSegmentos(contractId),
-    getSecaoTabela(contractId, "Painel 4: Premissas de Orçamento"),
+    // Parte E (spec v3): a SBSO não tem "Painel 4" — as premissas por frente são o
+    // "Resumo por Disciplina (contratado)" da própria C.1 (PSQ · Σ = 39.766.000 = PV exato).
+    getSecaoTabela(contractId, "Painel 4: Premissas de Orçamento").then(
+      (v) => v ?? getSecaoTabela(contractId, "C.1 Síntese — Resumo por Disciplina"),
+    ),
     getSecaoTabela(contractId, "BDI Detalhe — Rubricas"),
     getSecaoObj(contractId, "Estaqueamento / Extensão"),
     getSecaoObj(contractId, "Painel 6: Documentos-chave").then(
@@ -184,6 +201,7 @@ export async function getSinteseContrato(contractId: string): Promise<SinteseCon
     getSecaoObj(contractId, "Painel 3"),
     getSecaoObj(contractId, "BDI Detalhe — Resumo"),
     getSecaoTabela(contractId, "Orçamento interno por grupo"),
+    getSecaoObj(contractId, "Área / Escopo Físico"),
   ]);
 
   // Sem nenhuma seção C.1 nem resumo → obra sem síntese normalizada (empty state honesto).
@@ -224,11 +242,15 @@ export async function getSinteseContrato(contractId: string): Promise<SinteseCon
     v == null ? null : v.toLocaleString("pt-BR", { maximumFractionDigits: 2 });
   const trechos: SinteseTrecho[] = trechoSecao
     ? trechoSecao
-        .map((r) => ({
-          trecho: String(pick(r, "trecho", "item", "edifica", "frente") ?? "").trim(),
-          km: str(pick(r, "km")),
-          valor: num(pick(r, "valor")),
-        }))
+        .map((r) => {
+          const frac = num(pick(r, "percentual", "% do pv"));
+          return {
+            trecho: String(pick(r, "trecho", "item", "edifica", "frente") ?? "").trim(),
+            km: str(pick(r, "km")),
+            valor: num(pick(r, "valor")),
+            pct: frac != null ? frac * 100 : null,
+          };
+        })
         .filter((t) => t.trecho.toLowerCase() !== "total")
     : (segRows ?? []).map((r) => {
         const ki = fmtKm(num(pick(r, "km_inicio")));
@@ -237,18 +259,23 @@ export async function getSinteseContrato(contractId: string): Promise<SinteseCon
           trecho: String(pick(r, "item_nome", "item") ?? "").trim(),
           km: ki && kf ? `${ki}–${kf}` : (ki ?? kf),
           valor: num(pick(r, "valor_contrato_rs", "valor")),
+          pct: null,
         };
       });
   const trechosTotal = trechos.reduce((a, t) => a + (t.valor ?? 0), 0);
 
-  const premissas: SintesePremissa[] = (premissaRows ?? []).map((r) => {
-    const frac = num(pick(r, "% do pv", "% do PV", "pv"));
-    return {
-      frente: String(pick(r, "frente", "disciplina") ?? "").trim(),
-      valor: num(pick(r, "valor contratado", "valor")),
-      pctPV: frac != null ? frac * 100 : null, // fonte = fração → %
-    };
-  });
+  // Linha TOTAL da fonte FICA FORA da lista (a tela imprime o próprio TOTAL; incluí-la dobraria a
+  // soma — mesma classe do bug "TOTAL — ORÇAMENTO INTERNO" dos grupos).
+  const premissas: SintesePremissa[] = (premissaRows ?? [])
+    .map((r) => {
+      const frac = num(pick(r, "% do pv", "percentual", "pv"));
+      return {
+        frente: String(pick(r, "frente", "disciplina") ?? "").trim(),
+        valor: num(pick(r, "valor contratado", "contratado", "valor")),
+        pctPV: frac != null ? frac * 100 : null, // fonte = fração → %
+      };
+    })
+    .filter((p) => p.frente && !p.frente.toLowerCase().startsWith("total"));
   const premissasTotal = premissas.reduce((a, p) => a + (p.valor ?? 0), 0);
 
   const bdiRubricas: SinteseBdiRubrica[] = (bdiRows ?? []).map((r) => {
@@ -280,6 +307,24 @@ export async function getSinteseContrato(contractId: string): Promise<SinteseCon
       }
     : null;
 
+  // Documentos-chave em LISTA (SBSO): a seção é texto ("DOCUMENTOS-CHAVE:\n• Contrato …") — um
+  // item por bullet. Obras no formato KV (Painel 6) seguem nos chips.
+  const docsConteudo = docs ? str(pick(docs, "conteudo")) : null;
+  const documentosLista = docsConteudo
+    ? docsConteudo
+        .split("\n")
+        .map((l) => l.replace(/^[•\-•\s]+/, "").trim())
+        .filter((l) => l && !/^documentos-chave/i.test(l))
+    : [];
+
+  const areaEscopo = areaEscopoObj
+    ? {
+        area: str(pick(areaEscopoObj, "areaconstruida", "area")),
+        edificacoes: str(pick(areaEscopoObj, "edificacoes", "edificações")),
+        natureza: str(pick(areaEscopoObj, "natureza")),
+      }
+    : null;
+
   const adminObj = admin ?? null;
   const adminMapped: SinteseAdmin | null = adminObj
     ? {
@@ -292,10 +337,30 @@ export async function getSinteseContrato(contractId: string): Promise<SinteseCon
       }
     : null;
 
-  const dataBaseOrcamento = insumoParams ? str(pick(insumoParams, "data-base", "data base")) : null;
+  // Equipe e contatos no formato KV do "Painel Administração Contratual" (SBSO · spec v3 Parte F):
+  // chaves camelCase da captura → rótulos canônicos da aba. Chave desconhecida fica de fora
+  // (rótulo inventado é pior que ausência).
+  const EQUIPE_LABELS: Array<[string, string]> = [
+    ["gestorcontrato", "Gestor do contrato (INFRAERO)"],
+    ["comissaofiscalizacao", "Comissão de fiscalização"],
+    ["fiscalizacaoinfraero", "Fiscalização (INFRAERO)"],
+    ["responsaveltecnico", "Responsável técnico (ETERC)"],
+    ["representantelegal", "Representante legal (ETERC)"],
+    ["preposto", "Preposto da contratada"],
+  ];
+  const equipeContatos: Array<{ funcao: string; nome: string }> = [];
+  if (adminObj) {
+    for (const [frag, label] of EQUIPE_LABELS) {
+      const nome = strCad(pick(adminObj, frag));
+      if (nome) equipeContatos.push({ funcao: label, nome });
+    }
+  }
 
   // ── Financeiro (cards novos) — Anexo XIV (PV preço global) + Painel 3 (atualizado/reajuste) ──
   const p3: Row = (painel3Obj as Row | null) ?? {};
+  const dataBaseOrcamento =
+    (insumoParams ? str(pick(insumoParams, "data-base", "data base")) : null) ??
+    str(pick(p3, "dataBaseOrcamento"));
   const bdiR: Row = (bdiResumoObj as Row | null) ?? {};
   const gruposBrutos: Row[] = Array.isArray(grupoRows) ? (grupoRows as Row[]) : [];
   const gruposItens = gruposBrutos
@@ -308,8 +373,11 @@ export async function getSinteseContrato(contractId: string): Promise<SinteseCon
   const orcamentoInternoRs = gruposItens.length
     ? Math.round(gruposItens.reduce((acc, g) => acc + (g.valorRs ?? 0), 0) * 100) / 100
     : null;
+  // PV oficial = a célula "Valor inicial do Contrato (PV)" da C.1 (fórmula → FONTE-PSQ; SBSO
+  // 39.766.000 exato). O "preço global" do Anexo XIV (39.766.038) é FALLBACK — a spec v3 A.1
+  // inverteu a precedência da v1 depois da auditoria da pasta-fonte.
   const pvInicialRs =
-    num(pick(bdiR, "valorContratoPrecoGlobal")) ?? num(pick(p3, "valorInicialContratoPV"));
+    num(pick(p3, "valorInicialContratoPV")) ?? num(pick(bdiR, "valorContratoPrecoGlobal"));
   const valorAtualizadoRs = num(pick(p3, "valorTotalAtualizado"));
   const financeiro = {
     pvInicialRs,
@@ -337,10 +405,13 @@ export async function getSinteseContrato(contractId: string): Promise<SinteseCon
     premissas,
     premissasTotal,
     equipe,
+    equipeContatos,
     trechos,
     trechosTotal,
     bdiRubricas,
     documentos,
+    documentosLista,
+    areaEscopo,
     admin: adminMapped,
     dataBaseOrcamento,
     financeiro,

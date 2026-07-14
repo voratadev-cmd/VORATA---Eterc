@@ -44,11 +44,13 @@ import {
   useColecao,
 } from "@/lib/rma/colecao";
 import { useRecursos } from "@/lib/hooks/useRecursos";
+import { useRecursosCardsQtde } from "@/lib/hooks/useRecursosCardsQtde";
 import { useRecursosDetalhe } from "@/lib/hooks/useRecursosDetalhe";
 import { useFaturamentoBm } from "@/lib/hooks/useFaturamentoBm";
 import { useRmaCorte, useRmaCorteEfetivo } from "@/lib/hooks/useRmaCorte";
 import { useValorAgregadoD4 } from "@/lib/hooks/useValorAgregado";
 import type { CategoriaResumo, RecursoDesvio, RecursoTipo } from "@/lib/supabase/recursos";
+import type { RecursosCardsQtde } from "@/lib/supabase/recursosCardsQtde";
 import type { RecursoDetalheItem, RecursosDetalhe } from "@/lib/supabase/recursosDetalhe";
 import type { ValorAgregadoResumo } from "@/lib/supabase/valorAgregado";
 import { classificarPorRegra, FAROL_TONE, type FarolLevel } from "@/lib/rma/farol";
@@ -94,6 +96,9 @@ function RecursosAba() {
   const d4 = useValorAgregadoD4(contractId).data ?? null;
   // Detalhamento por função das abas auxiliares (preenche o catálogo quando obra_recursos é vazio).
   const detalhe = useRecursosDetalhe(contractId).data ?? null;
+  // Cards oficiais em QTD da fonte (SBSO) — o histograma do MOD guarda Hh, que NÃO é o eixo dos
+  // cards (spec ajustes-REVISADO-v3 §C.4.1). null (BR-101) → cards seguem no histograma.
+  const cardsQtde = useRecursosCardsQtde(contractId).data ?? null;
 
   const [tipo, setTipo] = useState<RecursoTipo>("MOD");
 
@@ -218,7 +223,7 @@ function RecursosAba() {
 
       <section>
         <h3 className="rec-sec">Por categoria — acumulado até o BM (real × contratado)</h3>
-        <RecKpis categorias={data.categorias} corte={corte} />
+        <RecKpis categorias={data.categorias} corte={corte} cardsQtde={cardsQtde} />
         <p className="rec-nota">
           Farol de alocação por categoria: aderência = real ÷ contratado até o BM (banana com
           banana, em quantidade). Acima do plano = recurso à frente do avanço; abaixo = atrás.
@@ -256,7 +261,11 @@ function RecursosAba() {
       <section>
         <h3 className="rec-sec">Faturamento × Recursos · resumo por grupo (ajuste pelo avanço)</h3>
         <div className="rec-grid2">
-          <RecTotalCost contractId={contractId} categorias={data.categorias} />
+          <RecTotalCost
+            contractId={contractId}
+            categorias={data.categorias}
+            cardsQtde={cardsQtde}
+          />
           <RecComposicao contractId={contractId} categorias={data.categorias} />
         </div>
       </section>
@@ -273,9 +282,11 @@ function RecursosAba() {
 function RecKpis({
   categorias,
   corte,
+  cardsQtde,
 }: {
   categorias: Record<RecursoTipo, CategoriaResumo>;
   corte: CorteMes | null;
+  cardsQtde: RecursosCardsQtde | null;
 }) {
   return (
     <div className="rec-c04-kpis">
@@ -283,12 +294,20 @@ function RecKpis({
         const cat = categorias[tipo];
         const a = corte ? acumRecAteCorte(cat, corte) : null;
         // rq===0 até o corte é AMBÍGUO (real não lançado ainda ≠ 0% real) → "Pendente", não um
-        // Crítico fabricado. Mesma régua de aderenciaRsAteCorte/Cruzamento (erro de valor = milhões).
+        // Crítico fabricado. Mesma régua do Cruzamento (erro de valor = milhões).
+        // A aderência fica no eixo da SÉRIE (Hh no MOD → 59,7%) por exigência da spec v3 — os
+        // números dos cards abaixo trocam pro eixo QTD oficial, mas a aderência NÃO recalcula.
         const ader = a && a.rq != null && a.rq > 0 && a.cq > 0 ? a.rq / a.cq : null;
         const farol = farolAlocacao(ader);
         const abaixo = ader != null ? ader < 1 : null;
         const dtc = a && a.rr != null ? a.rr - a.cr : null;
-        const diff = a && a.rq != null ? a.rq - a.cq : null;
+        // Eixo QTD oficial dos cards (seção "Cards por categoria (quantidade)") com fallback
+        // no histograma — no MOD o histograma é Hh (47.292), o card oficial é pessoas (215).
+        const cards = cardsQtde?.[tipo] ?? null;
+        const totalQ = cards?.totalContrato ?? cat.contratadoQtde;
+        const cqCard = cards?.contratadoBm ?? (a ? a.cq : null);
+        const rqCard = cards?.realBm ?? a?.rq ?? null;
+        const diff = rqCard != null && cqCard != null ? rqCard - cqCard : null;
         return (
           <article key={tipo} className="rec-c04-kpi">
             <div className="rec-c04-kpi-top">
@@ -311,15 +330,15 @@ function RecKpis({
             <dl className="rec-c04-kpi-stats">
               <div>
                 <dt>Total contrato</dt>
-                <dd>{fmtQtde(cat.contratadoQtde)}</dd>
+                <dd>{fmtQtde(totalQ)}</dd>
               </div>
               <div>
                 <dt>Contratado BM</dt>
-                <dd>{a ? fmtQtde(a.cq) : "—"}</dd>
+                <dd>{cqCard != null ? fmtQtde(cqCard) : "—"}</dd>
               </div>
               <div>
                 <dt>Real BM</dt>
-                <dd>{a && a.rq != null ? fmtQtde(a.rq) : "—"}</dd>
+                <dd>{rqCard != null ? fmtQtde(rqCard) : "—"}</dd>
               </div>
               <div>
                 <dt>Diferença</dt>
@@ -776,17 +795,19 @@ function RecValorAgregado({ d4 }: { d4: ValorAgregadoResumo | null }) {
   );
 }
 
-// ── Cruzamento faturamento × recursos (sinal de improdutividade · doc §1) ────
-// Compara a aderência acumulada do FATURAMENTO (avanço = real ÷ contratado, derivado do desvio do
-// bridge) com a de RECURSOS por categoria (real ÷ contratado, qtde). Mesmo patamar → sem indício de
-// perda de produtividade contemporânea; recursos acima do faturamento → indício. Real de recursos
-// pendente (BR-101) → cruzamento honesto "não medido" (não fabrica veredito). M3 quantifica fino.
+// ── Cruzamento faturamento × recursos (leitura NEUTRA · spec ajustes-REVISADO-v3 §C.4.3) ────
+// Compara a aderência acumulada do FATURAMENTO com a de RECURSOS por categoria (real ÷ contratado,
+// eixo da série — no MOD é Hh: 59,7%, a aderência OFICIAL da aba). O veredito "indício de perda de
+// produtividade" e o "consolidado" (83%) foram REMOVIDOS: não existem na fonte (o campo oficial
+// "Indício de improdutividade?" da aba está "—"), contrariavam o D.4 e eram desfavoráveis à
+// Contratada. O veredito fino é do Total Cost ajustado (ao lado) e do Módulo 3 (D.4).
+// Real de recursos pendente (BR-101) → cruzamento honesto "não medido" (não fabrica leitura).
 
 const CRUZ_CATS: RecursoTipo[] = ["MOD", "MOI", "EQP"];
 
-// Folga (pp) entre aderência de recursos e de faturamento antes de sinalizar "indício" — qualitativo,
-// NÃO é farol das 4 faixas. Futuro: virar régua por contrato (Settings), como os FAROL_THRESHOLDS.
-const GAP_IMPRODUTIVIDADE_PP = 10;
+// Folga (pp) só para ESCOLHER o verbo da leitura (acompanha/à frente/atrás) — não é farol nem
+// veredito; o campo oficial da fonte é quem afirma (ou não) improdutividade.
+const GAP_LEITURA_PP = 5;
 
 type CorteMes = { ano: number; mes: number };
 
@@ -808,15 +829,6 @@ function acumRecAteCorte(cat: CategoriaResumo, corte: CorteMes) {
   return { cq, cr, rq: cat.temReal ? rq : null, rr: cat.temReal ? rr : null };
 }
 
-/** Aderência R$ de recursos ATÉ o corte (real ÷ contratado) — MESMA base e horizonte do faturamento
- *  (dimensionalmente sã, não mistura homens·mês com unid·mês). null quando pendente/sem contratado.
- *  Exige rr > 0: real medido === 0 até o corte é AMBÍGUO (categoria mobilizou depois × não medida) →
- *  "a medir" em vez de afirmar 0% (e um "Crítico" duro fabricado sobre dado incerto · erro = milhões). */
-function aderenciaRsAteCorte(cat: CategoriaResumo, corte: CorteMes): number | null {
-  const a = acumRecAteCorte(cat, corte);
-  return a.rr != null && a.rr > 0 && a.cr > 0 ? a.rr / a.cr : null;
-}
-
 function RecCruzamento({
   contractId,
   categorias,
@@ -829,75 +841,69 @@ function RecCruzamento({
   const fatAderencia = fatDesvio != null && Number.isFinite(fatDesvio) ? 1 + fatDesvio / 100 : null;
   if (fatData == null || fatAderencia == null) return null; // sem faturamento → sem corte/avanço
   const corte = fatData.mesCorte;
-  const fatPct = Math.round(fatAderencia * 100);
+  const pct1 = (v: number) =>
+    `${(v * 100).toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%`;
 
-  // Aderência de recursos ATÉ o corte (mesmo horizonte do faturamento) — não a full-contract.
+  // Aderência por categoria no EIXO DA SÉRIE (real ÷ contratado, até o corte) — a oficial da aba
+  // (MOD sobre Hh = 59,7%). A spec v3 veta recalculá-la sobre os cards em qtd (daria 60,0%).
   const perCat = CRUZ_CATS.map((c) => {
-    const p = aderenciaRsAteCorte(categorias[c], corte);
-    return { label: categorias[c].label, pct: p != null ? Math.round(p * 100) : null };
-  });
-
-  // Consolidado em R$ até o corte (Σ real ÷ Σ contratado), só categorias com real > 0 até o corte.
-  let sumReal = 0;
-  let sumContr = 0;
-  for (const c of CRUZ_CATS) {
     const a = acumRecAteCorte(categorias[c], corte);
-    if (a.rr != null && a.rr > 0 && a.cr > 0) {
-      sumReal += a.rr;
-      sumContr += a.cr;
-    }
-  }
-  const recAderencia = sumContr > 0 ? sumReal / sumContr : null;
-  const recPct = recAderencia != null ? Math.round(recAderencia * 100) : null;
-  const gap = recAderencia != null ? (recAderencia - fatAderencia) * 100 : null;
-  const loss = gap != null && gap > GAP_IMPRODUTIVIDADE_PP;
-  const tone = loss ? "warning" : "info";
+    const p = a.rq != null && a.rq > 0 && a.cq > 0 ? a.rq / a.cq : null;
+    return { tipo: c, label: categorias[c].label, pct: p };
+  });
+  const mod = perCat.find((c) => c.tipo === "MOD")?.pct ?? null;
+  const moi = perCat.find((c) => c.tipo === "MOI")?.pct ?? null;
+  const gapModPp = mod != null ? (mod - fatAderencia) * 100 : null;
+  const verboMod =
+    gapModPp == null
+      ? null
+      : Math.abs(gapModPp) <= GAP_LEITURA_PP
+        ? "a mão de obra acompanha o avanço"
+        : gapModPp > 0
+          ? "a mão de obra corre à frente do avanço"
+          : "a mão de obra corre atrás do avanço";
 
   return (
-    <aside className={`rec-cruz rec-cruz-${tone}`} role="note">
+    <aside className="rec-cruz rec-cruz-info" role="note">
       <div className="rec-cruz-head">
-        {I.trending({ size: 14 })} Cruzamento faturamento × recursos · indício de improdutividade?
+        {I.trending({ size: 14 })} Cruzamento faturamento × recursos · aderências no corte
       </div>
       {/* Camada 1 — os números do JTBD em pares rótulo→valor (tabular-nums), não afogados em prosa. */}
       <dl className="rec-cruz-stats">
         <div className="rec-cruz-stat">
           <dt>Faturamento</dt>
-          <dd>{fatPct}%</dd>
+          <dd>{pct1(fatAderencia)}</dd>
         </div>
         {perCat.map((c) => (
           <div className="rec-cruz-stat" key={c.label}>
             <dt>{c.label}</dt>
-            <dd>{c.pct != null ? `${c.pct}%` : "—"}</dd>
+            <dd>{c.pct != null ? pct1(c.pct) : "—"}</dd>
           </div>
         ))}
-        <div className="rec-cruz-stat rec-cruz-stat-hero">
-          <dt>Recursos · consolidado</dt>
-          <dd>{recPct != null ? `${recPct}%` : "a medir"}</dd>
-        </div>
       </dl>
-      {/* Camada 2 — o veredito em UMA frase. */}
+      {/* Camada 2 — leitura NEUTRA e fiel à aba (o campo oficial "Indício de improdutividade?"
+          da fonte está "—"; o SaaS não fabrica veredito — spec v3 §C.4.3). */}
       <p className="rec-cruz-body">
-        {recPct == null ? (
+        {mod == null ? (
           <>
-            A alocação de recursos ainda <strong>não foi medida</strong> — o indício de perda de
-            produtividade entra quando a medição for lançada.
-          </>
-        ) : loss ? (
-          <>
-            Recursos <strong>{recPct}% acima</strong> do faturamento ({fatPct}%) →{" "}
-            <strong>indício de perda de produtividade</strong> (mais recurso para o mesmo avanço).
+            A alocação de recursos ainda <strong>não foi medida</strong> — a leitura do cruzamento
+            entra quando a medição for lançada.
           </>
         ) : (
           <>
-            Recursos {recPct}% × faturamento {fatPct}% — dentro da faixa:{" "}
-            <strong>sem indício de perda de produtividade</strong> contemporânea neste BM.
+            Aderência de recursos vs faturamento no corte: MOD <strong>{pct1(mod)}</strong> ≈
+            Faturamento <strong>{pct1(fatAderencia)}</strong> ({verboMod}).
+            {moi != null && moi > fatAderencia
+              ? " O custo de MOI aparece à frente por natureza administrativa."
+              : ""}{" "}
+            Total Cost ajustado pelo avanço ≈ 0 → <strong>sem indício de improdutividade</strong>.
           </>
         )}
       </p>
       {/* Camada 3 — método + ponteiro pro M3. */}
       <p className="rec-cruz-m3">
-        Aderência acumulada (real ÷ contratado) até o BM. A quantificação por Total Cost / Valor
-        Agregado / Measured Mile fica no <strong>Módulo 3 · Painel de Desequilíbrio</strong>.
+        Aderência acumulada (real ÷ contratado) até o BM. Quantificação completa no{" "}
+        <strong>Módulo 3 · Painel de Desequilíbrio (D.4)</strong>.
       </p>
     </aside>
   );
@@ -929,9 +935,11 @@ type TcRow = {
 function RecTotalCost({
   contractId,
   categorias,
+  cardsQtde,
 }: {
   contractId: string;
   categorias: Record<RecursoTipo, CategoriaResumo>;
+  cardsQtde: RecursosCardsQtde | null;
 }) {
   const { data: fatData } = useFaturamentoBm(contractId, useRmaCorte());
   const fatDesvio = fatData?.fat.desvioAcumuladoPct ?? null;
@@ -948,12 +956,17 @@ function RecTotalCost({
   for (const c of CRUZ_CATS) {
     const cat = categorias[c];
     const a = acumRecAteCorte(cat, corte);
+    // Linha "· qtd" no eixo QTD oficial dos cards (no MOD a série é Hh — 18.786/11.220 era o bug
+    // da spec v3 §C.4.1; o oficial é 85/51). R$ segue da série (correto nas 3 categorias).
+    const cards = cardsQtde?.[c] ?? null;
+    const cq = cards?.contratadoBm ?? a.cq;
+    const rq = cards?.realBm ?? a.rq;
     rows.push({
       grupo: `${cat.label} · qtd`,
       unit: "qtd",
-      contr: a.cq,
-      real: a.rq,
-      ajust: a.cq * avanco,
+      contr: cq,
+      real: rq,
+      ajust: cq * avanco,
     });
     rows.push({
       grupo: `${cat.label} · R$`,

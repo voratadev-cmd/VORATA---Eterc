@@ -3,11 +3,15 @@
 // Disciplina/Frente · Bloco Contratado|Real · Métrica "R$ Mês" · Mês 1..18).
 //
 // REGRAS VALIDADAS AO CENTAVO contra o "C.3 — Resumo por Frente" da própria fonte:
-//   • cada linha da árvore JÁ agrega o próprio subtree → somar linhas de níveis diferentes conta
-//     o mesmo real várias vezes (raiz Σ = 39.776.000 = CFF inteiro). Por isso:
-//     – disciplinas = APENAS linhas nível 2 (1.1..1.9), valores da própria linha;
-//     – frentes = APENAS folhas (Folha='S'), agregadas pela coluna Frente
+//   • a árvore NÃO é confiável linha a linha: no bloco Real as linhas-pai vêm sub-agregadas
+//     (a 1.1 carrega só o 1.1.1 → real 2,13 mi em vez de 2.453.151,38 — defeito da fonte,
+//     spec ajustes-REVISADO-v3). E somar NÍVEIS conta o mesmo real várias vezes. Por isso
+//     TODA célula exibida é agregada de FOLHAS (Folha='S'):
+//     – disciplinas = nível 2 (1.1..1.9), célula = Σ folhas do prefixo · filhos = nível 3,
+//       célula = Σ folhas do prefixo (há folhas nível 4 — filho n3 também não é confiável cru);
+//     – frentes = folhas agregadas pela coluna Frente
 //       (TPS Σ folhas = 30.639.182,94 = o Contratado que o Resumo por Frente declara).
+//     Invariante v3 nº1: TOTAL Real por Disciplina == por Frente == 10.219.922,61 (BM-9).
 //   • contratado = Σ Mês 1..18 · até período = Σ Mês 1..n · real = Σ Mês 1..n do bloco Real,
 //     onde n = último mês com Real > 0 em qualquer folha (SBSO: 9 = jun/26; confere
 //     TPS até-período 11.216.431,88 e real 6.612.480,49 exatos).
@@ -154,17 +158,32 @@ export async function getFaturamentoWbs(contractId: string): Promise<Faturamento
   const ordCod = (a: No, b: No) =>
     a.cod.localeCompare(b.cod, undefined, { numeric: true, sensitivity: "base" });
 
-  // ── Por disciplina: pais = nível 2 · filhos = nível 3 do mesmo prefixo (spec: até 1.3.1) ──
+  // Célula agregada das FOLHAS de um prefixo WBS (inclui o próprio nó quando ele é folha).
+  // É a única agregação confiável: as linhas-pai do bloco Real vêm sub-agregadas da fonte.
+  const celDeFolhas = (prefixo: string): WbsCel => {
+    const fs = lista.filter(
+      (f) => f.folha && (f.cod === prefixo || f.cod.startsWith(`${prefixo}.`)),
+    );
+    if (!fs.length) return { contratado: null, acum: null, real: null };
+    return {
+      contratado: r2(fs.reduce((s, f) => s + soma(f.contratadoMeses, 18), 0)),
+      acum: r2(fs.reduce((s, f) => s + soma(f.contratadoMeses, n), 0)),
+      real: r2(fs.reduce((s, f) => s + soma(f.realMeses, n), 0)),
+    };
+  };
+
+  // ── Por disciplina: pais = nível 2 · filhos = nível 3 do mesmo prefixo (spec: até 1.3.1);
+  //    células SEMPRE Σ folhas do prefixo (linha-pai da fonte herda só o 1º filho no Real) ──
   const disciplinas: WbsLinha[] = lista
     .filter((no) => no.nivel === 2)
     .sort(ordCod)
     .map((no) => ({
       nome: no.disciplina ?? no.nome,
-      ...celDe(no),
+      ...celDeFolhas(no.cod),
       filhos: lista
         .filter((f) => f.nivel === 3 && f.cod.startsWith(`${no.cod}.`))
         .sort(ordCod)
-        .map((f) => ({ nome: `${f.cod} ${f.nome}`, ...celDe(f) })),
+        .map((f) => ({ nome: `${f.cod} ${f.nome}`, ...celDeFolhas(f.cod) })),
     }));
 
   // ── Por frente: pais = agregado das FOLHAS pela coluna Frente · filhos = as folhas ──
