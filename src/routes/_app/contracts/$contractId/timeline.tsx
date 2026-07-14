@@ -666,6 +666,12 @@ function EventosTabela({ eventos }: { eventos: TimelineEvento[] }) {
         columns={[
           { key: "data", label: "Data", width: "96px", render: (e) => fmtBR(e.dataInicio) },
           {
+            key: "marco",
+            label: "Marco / Evento",
+            width: "1.4fr",
+            render: (e) => <span className="tl-evnm">{e.titulo}</span>,
+          },
+          {
             key: "tipo",
             label: "Tipo",
             width: "110px",
@@ -675,12 +681,6 @@ function EventosTabela({ eventos }: { eventos: TimelineEvento[] }) {
               ) : (
                 "—"
               ),
-          },
-          {
-            key: "marco",
-            label: "Marco / Evento",
-            width: "1.4fr",
-            render: (e) => <span className="tl-evnm">{e.titulo}</span>,
           },
           {
             key: "desc",
