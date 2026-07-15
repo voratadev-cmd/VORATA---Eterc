@@ -495,3 +495,54 @@
 .sub-prog {
   min-width: 150px;
 }
+
+/* ── polimento UX (rodada "ótima experiência") ── */
+/* respiro e leitura nas tabelas */
+.sub-tab th,
+.sub-tab td {
+  padding: 10px var(--s-3);
+}
+/* zebra sutil (não toca TOTAL nem linhas de drill) */
+.sub-tab tbody tr:nth-child(even):not(.sub-total):not(.sub-drillrow) td {
+  background: color-mix(in srgb, var(--surface-2) 45%, var(--surface));
+}
+.sub-tab tbody tr:hover:not(.sub-total):not(.sub-drillrow) td {
+  background: var(--surface-2);
+}
+/* cabeçalho fixo ao rolar tabelas longas (20 CTs, mestra) */
+.sub-tab thead th {
+  position: sticky;
+  top: 0;
+  background: var(--surface);
+  z-index: 1;
+}
+/* valores-resultado (economia/potencial/conclusão coloridos) ganham peso */
+.sub-pos,
+.sub-neg {
+  font-weight: var(--fw-semibold);
+}
+/* cards do topo: valor mais forte e sub com respiro */
+.sub-card-valor {
+  font-size: var(--fs-22);
+  letter-spacing: -0.01em;
+}
+.sub-card-sub {
+  margin-top: 4px;
+}
+/* seções: título com mais presença e divisor suave do cabeçalho */
+.sub-secao-h {
+  padding-bottom: var(--s-2);
+  border-bottom: 1px solid var(--border);
+  margin-bottom: var(--s-4);
+}
+/* linhas expansíveis: affordance clara */
+.sub-linha-exp:hover .sub-exp-chev {
+  color: var(--text);
+}
+.sub-linha-exp td:first-child {
+  border-left: none; /* garantia: nenhuma tarja */
+}
+/* timeline: hover na linha */
+.sub-tl-row:hover .sub-tl-track {
+  background: color-mix(in srgb, var(--surface-2) 70%, var(--border));
+}
