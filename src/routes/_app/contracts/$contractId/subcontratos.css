@@ -421,7 +421,8 @@
   background: var(--success);
 }
 .sub-tl-ref-contratual {
-  background: var(--ink);
+  /* navy canônico do ChartKit: --ink no claro, --text no escuro (visível nos 2 temas) */
+  background: var(--rma-navy);
   opacity: 0.55;
 }
 .sub-tl-vals {
@@ -444,7 +445,7 @@
   background: var(--success);
 }
 .sub-tl-refleg-contratual {
-  background: var(--ink);
+  background: var(--rma-navy);
   opacity: 0.55;
 }
 @media (max-width: 880px) {
