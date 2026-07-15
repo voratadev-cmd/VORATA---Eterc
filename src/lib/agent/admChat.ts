@@ -5,7 +5,12 @@
 // Auth: Bearer VITE_ADM_BEARER (dev-only · no go-live mover /ask pra trás de uma Edge/Vercel function
 // que injeta o VPS_SECRET server-side — o Bearer NÃO deve ir no bundle do front em prod).
 
-const API_URL = (import.meta.env.VITE_API_URL as string | undefined) ?? "http://localhost:8000";
+// PROD (Vercel): default = SAME-ORIGIN — o rewrite do vercel.json proxia /api/agents/* pro
+// droplet server-side (https→http sem mixed content). Antes o fallback localhost:8000 vazava
+// pro bundle de produção e o chat morria com "Failed to fetch". Dev continua no localhost.
+const API_URL =
+  (import.meta.env.VITE_API_URL as string | undefined) ??
+  (import.meta.env.PROD ? "" : "http://localhost:8000");
 const BEARER = import.meta.env.VITE_ADM_BEARER as string | undefined;
 
 export type AdmAskResult = { conversation_id: string; message_id: string; status: string };

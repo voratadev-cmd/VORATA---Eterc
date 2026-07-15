@@ -3,5 +3,14 @@
   "buildCommand": "yarn build",
   "outputDirectory": "dist/client",
   "framework": null,
-  "rewrites": [{ "source": "/(.*)", "destination": "/_shell.html" }]
+  "rewrites": [
+    {
+      "source": "/api/agents/:path*",
+      "destination": "http://159.89.82.159:8001/api/agents/:path*"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/_shell.html"
+    }
+  ]
 }
