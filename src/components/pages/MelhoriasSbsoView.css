@@ -1,0 +1,293 @@
+/* C.15 Melhorias Documentais · dialeto SBSO — tokens-only, KPI canônico (chip, sem tarja) */
+
+.c15s-main {
+  padding: var(--s-6) var(--s-8);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-5);
+}
+.c15s-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--s-4);
+  flex-wrap: wrap;
+}
+.c15s-titulo {
+  margin: 0;
+  font-size: var(--fs-24);
+  font-weight: var(--fw-bold);
+  color: var(--text);
+}
+.c15s-sub {
+  margin: var(--s-1) 0 0;
+  font-size: var(--fs-13);
+  color: var(--text-3);
+  font-variant-numeric: tabular-nums;
+}
+
+.c15s-cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--s-3);
+}
+.c15s-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: var(--s-3) var(--s-4);
+  transition:
+    transform 0.15s var(--easing),
+    border-color 0.15s var(--easing),
+    box-shadow 0.15s var(--easing);
+}
+.c15s-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--border-strong);
+  box-shadow: var(--sh-sm);
+}
+.c15s-card-top {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+}
+.c15s-card-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: var(--r-sm);
+  background: var(--surface-2);
+  color: var(--text-2);
+  flex: none;
+}
+.c15s-card-label {
+  font-size: 11px;
+  font-weight: var(--fw-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--text-3);
+}
+.c15s-card-valor {
+  margin-top: var(--s-2);
+  font-size: var(--fs-18);
+  font-weight: var(--fw-bold);
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+.c15s-card-sub {
+  margin-top: 4px;
+  font-size: var(--fs-12);
+  color: var(--text-3);
+  font-variant-numeric: tabular-nums;
+}
+.c15s-neg {
+  color: var(--danger);
+}
+
+.c15s-secao {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: var(--s-4) var(--s-5);
+}
+.c15s-secao-h {
+  display: flex;
+  align-items: baseline;
+  gap: var(--s-3);
+  flex-wrap: wrap;
+  padding-bottom: var(--s-2);
+  border-bottom: 1px solid var(--border);
+  margin-bottom: var(--s-4);
+}
+.c15s-secao-t {
+  margin: 0;
+  font-size: var(--fs-15);
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+}
+.c15s-secao-sub {
+  font-size: var(--fs-12);
+  color: var(--text-3);
+}
+
+/* desvios em cards */
+.c15s-desvios {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--s-3);
+}
+.c15s-desvio-top {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  flex-wrap: wrap;
+}
+.c15s-desvio-item {
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+  font-size: var(--fs-13);
+}
+.c15s-fonte {
+  margin-left: auto;
+  font-size: var(--fs-12);
+  color: var(--text-3);
+  background: var(--surface-2);
+  border-radius: var(--r-pill);
+  padding: 2px 10px;
+}
+.c15s-desvio-kv {
+  margin: var(--s-3) 0 0;
+  display: grid;
+  gap: var(--s-2);
+}
+.c15s-desvio-kv dt {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--text-4);
+  font-weight: var(--fw-semibold);
+}
+.c15s-desvio-kv dd {
+  margin: 2px 0 0;
+  font-size: var(--fs-13);
+  color: var(--text-2);
+}
+.c15s-acao {
+  margin: var(--s-3) 0 0;
+  padding: var(--s-2) var(--s-3);
+  background: var(--surface-2);
+  border-radius: var(--r-sm);
+  font-size: var(--fs-13);
+  color: var(--text-2);
+  line-height: var(--lh-normal);
+}
+
+/* defasagem — tabela */
+.c15s-tab-wrap {
+  overflow-x: auto;
+}
+.c15s-tab {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-13);
+  color: var(--text-2);
+}
+.c15s-tab th {
+  font-size: 11px;
+  font-weight: var(--fw-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--text-3);
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  padding: 10px var(--s-3);
+  white-space: nowrap;
+  position: sticky;
+  top: 0;
+  background: var(--surface);
+}
+.c15s-tab td {
+  padding: 10px var(--s-3);
+  border-bottom: 1px solid var(--border);
+}
+.c15s-tab .r {
+  text-align: right;
+}
+.c15s-tab .tabular {
+  font-variant-numeric: tabular-nums;
+}
+.c15s-tab tbody tr:nth-child(even):not(.c15s-total) td {
+  background: color-mix(in srgb, var(--surface-2) 45%, var(--surface));
+}
+.c15s-tab tbody tr:hover:not(.c15s-total) td {
+  background: var(--surface-2);
+}
+.c15s-forte {
+  font-weight: var(--fw-medium);
+  color: var(--text);
+}
+.c15s-sit {
+  font-size: var(--fs-12);
+  color: var(--text-3);
+  max-width: 260px;
+}
+.c15s-total td {
+  background: var(--surface-2);
+  border-top: 1px solid var(--border-strong);
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+}
+
+/* achados — texto estruturado */
+.c15s-rico {
+  line-height: var(--lh-normal);
+}
+.c15s-rico-secao {
+  margin: var(--s-4) 0 var(--s-2);
+  font-size: var(--fs-15);
+  font-weight: var(--fw-bold);
+  color: var(--text);
+}
+.c15s-rico-secao:first-child {
+  margin-top: 0;
+}
+.c15s-rico-doc {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  margin: var(--s-3) 0 var(--s-1);
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+  font-size: var(--fs-13);
+  flex-wrap: wrap;
+}
+.c15s-rico-label {
+  margin: var(--s-2) 0 var(--s-1);
+  font-size: 11px;
+  font-weight: var(--fw-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.c15s-rico-label.no {
+  color: var(--danger);
+}
+.c15s-rico-label.ok {
+  color: var(--success);
+}
+.c15s-rico-bullet {
+  display: flex;
+  gap: var(--s-2);
+  font-size: var(--fs-13);
+  color: var(--text-2);
+  padding: 3px 0 3px var(--s-2);
+}
+.c15s-rico-bullet span {
+  flex: none;
+  color: var(--text-4);
+}
+.c15s-rico-bullet.ok span {
+  color: var(--success);
+}
+.c15s-rico-p {
+  margin: var(--s-2) 0;
+  font-size: var(--fs-13);
+  color: var(--text-2);
+}
+
+@media (max-width: 1100px) {
+  .c15s-cards,
+  .c15s-desvios {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 720px) {
+  .c15s-main {
+    padding: var(--s-5) var(--s-4);
+  }
+  .c15s-cards,
+  .c15s-desvios {
+    grid-template-columns: 1fr;
+  }
+}

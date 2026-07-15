@@ -24,6 +24,8 @@ import { Badge, Card, EmptyState, I, Skeleton } from "@/components/ds";
 import type { BadgeProps } from "@/components/ds";
 import { type MelhoriasDesvio, type MelhoriasDocView } from "@/lib/supabase/melhoriasDoc";
 import { type MelhoriasDocResult, useMelhoriasDoc } from "@/lib/hooks/useMelhoriasDoc";
+import { useMelhoriasSbso } from "@/lib/hooks/useMelhoriasSbso";
+import { MelhoriasSbsoView } from "@/components/pages/MelhoriasSbsoView";
 import "./melhorias-doc.css";
 
 export const Route = createFileRoute("/_app/contracts/$contractId/melhorias-doc")({
@@ -52,6 +54,9 @@ function FarolBadge({ farol }: { farol: string | null }) {
 function MelhoriasRoute() {
   const { contractId } = Route.useParams();
   const { data, isLoading, isError } = useMelhoriasDoc(contractId);
+  // dialeto SBSO (painel + desvios + defasagem + achados): view própria; BR-101 segue narrativa.
+  const sbso = useMelhoriasSbso(contractId);
+  if (sbso.data) return <MelhoriasSbsoView d={sbso.data} />;
 
   if (isLoading) {
     return (
