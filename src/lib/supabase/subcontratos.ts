@@ -92,6 +92,18 @@ export type SubMedicaoDisc = {
   potencialLiberado: number | null;
 };
 export type SubDrillItem = { codigo: string | null; descricao: string; valorRs: number | null };
+/** Barra da Timeline (vigência × avanço) — 1 por contrato, datas agregadas da Lista. */
+export type SubTimelineItem = {
+  numContrato: string;
+  nome: string;
+  contratado: number | null;
+  medido: number | null;
+  /** % medido CRU (pode passar de 100 no estouro — a barra satura em 100 e marca crítico). */
+  pctMed: number | null;
+  estado: "andamento" | "concluido" | "cancelado" | "critico" | "aprovacao";
+  inicioISO: string | null;
+  terminoISO: string | null;
+};
 
 export type Subcontratos = {
   mestre: SubMestre[];
@@ -115,6 +127,12 @@ export type Subcontratos = {
   /** drill do bloco 3: itens SUBEMPREITEIROS da S-AUX2 por nº de disciplina (Classificação). */
   drill: Map<number, SubDrillItem[]>;
   criticos: number;
+  /** Timeline de vigências (1 barra por contrato, ordenada por Data Início). */
+  timeline: SubTimelineItem[];
+  /** Contratos sem Data Início/Término na fonte — listados à parte, sem barra inventada. */
+  timelineSemVigencia: SubTimelineItem[];
+  /** STATUS = "Em andamento" (por contrato agregado). */
+  ativos: number;
 };
 
 const soma = (xs: Array<number | null>) =>
@@ -164,16 +182,19 @@ export async function getSubcontratos(contractId: string): Promise<Subcontratos 
   };
 
   // ── Bloco 5: 20 CTs (já agregados na captura) + STATUS via Lista (47 linhas) ──
+  // Chave NORMALIZADA pelo nº do CT: a fonte tem um número sujo ("CT016-1027CT015-1027VIGE")
+  // que sem normalização perdia o join de status (e o card de ativos dava 16 em vez de 17).
+  const ctKey = (s: string) => (s.match(/CT\s*\d+/i)?.[0] ?? s).replace(/\s+/g, "").toUpperCase();
   const statusPorCt = new Map<string, string>();
   for (const r of listaRaw) {
-    const ct = str(r["Num. Contrato"]);
+    const ct = ctKey(str(r["Num. Contrato"]) ?? "");
     const st = str(r["STATUS"]);
     if (ct && st && !statusPorCt.has(ct)) statusPorCt.set(ct, st);
   }
   const contratos: SubContrato[] = medCtRaw.map((r) => {
     const contratado = num(r["valorContrato"]);
     const medido = num(r["medidoAcumuladoBM04"]);
-    const status = statusPorCt.get(str(r["numContrato"]) ?? "") ?? null;
+    const status = statusPorCt.get(ctKey(str(r["numContrato"]) ?? "")) ?? null;
     const stNorm = (status ?? "").toLowerCase();
     // Farol da spec: 🔴 medido>contratado OU (contratado≥500k e medido=0) · 🟡 %med<20% e
     // contratado≥100k · ✅/⚫ por STATUS · 🟢 em dia. Precedência: cancelado silencia tudo
@@ -281,6 +302,54 @@ export async function getSubcontratos(contractId: string): Promise<Subcontratos 
 
   const criticos = contratos.filter((x) => x.farol === "critico").length;
 
+  // ── Timeline: datas agregadas da Lista (min início · max término) por contrato, chave
+  // normalizada (ctKey) — linhas do mesmo contrato (CT004/CT015 multi-disciplina) colapsam
+  // numa vigência só. Estado por STATUS + regra de farol do bloco 5. ──
+  const datas = new Map<string, { ini: string; fim: string }>();
+  for (const r of listaRaw) {
+    const k = ctKey(str(r["Num. Contrato"]) ?? "");
+    if (!k) continue;
+    const ini = str(r["Data Início"])?.slice(0, 10);
+    const fim = str(r["Data Término"])?.slice(0, 10);
+    if (!ini && !fim) continue;
+    const cur = datas.get(k);
+    datas.set(k, {
+      ini: cur?.ini && ini ? (ini < cur.ini ? ini : cur.ini) : (ini ?? cur?.ini ?? ""),
+      fim: cur?.fim && fim ? (fim > cur.fim ? fim : cur.fim) : (fim ?? cur?.fim ?? ""),
+    });
+  }
+  const timelineTodos: SubTimelineItem[] = contratos.map((x) => {
+    const dt = datas.get(ctKey(x.numContrato));
+    const stNorm = (x.status ?? "").toLowerCase();
+    const estado: SubTimelineItem["estado"] =
+      x.farol === "critico"
+        ? "critico"
+        : x.farol === "cancelado"
+          ? "cancelado"
+          : x.farol === "concluido"
+            ? "concluido"
+            : /aprova/.test(stNorm)
+              ? "aprovacao"
+              : "andamento";
+    return {
+      numContrato: x.numContrato,
+      nome: x.nome,
+      contratado: x.contratado,
+      medido: x.medido,
+      pctMed: x.contratado ? ((x.medido ?? 0) / x.contratado) * 100 : null,
+      estado,
+      inicioISO: dt?.ini || null,
+      terminoISO: dt?.fim || null,
+    };
+  });
+  const timeline = timelineTodos
+    .filter((t) => t.inicioISO && t.terminoISO)
+    .sort((a, b) => (a.inicioISO ?? "").localeCompare(b.inicioISO ?? ""));
+  const timelineSemVigencia = timelineTodos.filter((t) => !t.inicioISO || !t.terminoISO);
+  // "Ativos" = STATUS da fonte (contratos em andamento), independente do farol — o CT crítico
+  // parado continua ativo contratualmente (spec: 17).
+  const ativos = contratos.filter((x) => /^em andamento/i.test(x.status ?? "")).length;
+
   return {
     mestre,
     tot,
@@ -293,5 +362,8 @@ export async function getSubcontratos(contractId: string): Promise<Subcontratos 
     frentes,
     drill,
     criticos,
+    timeline,
+    timelineSemVigencia,
+    ativos,
   };
 }

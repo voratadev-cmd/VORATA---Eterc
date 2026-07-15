@@ -340,3 +340,120 @@
     text-align: left;
   }
 }
+
+/* ── Timeline de vigências (aba Timeline) ── */
+.sub-head-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-4);
+  flex-wrap: wrap;
+}
+.sub-tl-eixo {
+  display: grid;
+  grid-template-columns: 260px 1fr 150px;
+  gap: var(--s-3);
+  margin-bottom: var(--s-1);
+}
+.sub-tl-eixo-track {
+  position: relative;
+  height: 16px;
+}
+.sub-tl-tick {
+  position: absolute;
+  transform: translateX(-50%);
+  font-size: 10px;
+  color: var(--text-4);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.sub-tl {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.sub-tl-row {
+  display: grid;
+  grid-template-columns: 260px 1fr 150px;
+  gap: var(--s-3);
+  align-items: center;
+  font-size: var(--fs-12);
+}
+.sub-tl-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: var(--fw-medium);
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.sub-tl-track {
+  position: relative;
+  height: 18px;
+  background: var(--surface-2);
+  border-radius: var(--r-sm);
+  overflow: hidden;
+}
+.sub-tl-bar {
+  position: absolute;
+  top: 2px;
+  bottom: 2px;
+  border: 1px solid;
+  border-radius: 4px;
+  background: var(--surface);
+  overflow: hidden;
+}
+.sub-tl-fill {
+  display: block;
+  height: 100%;
+  opacity: 0.55;
+}
+.sub-tl-ref {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  z-index: 1;
+}
+.sub-tl-ref-hoje {
+  background: var(--success);
+}
+.sub-tl-ref-contratual {
+  background: var(--ink);
+  opacity: 0.55;
+}
+.sub-tl-vals {
+  color: var(--text-3);
+  text-align: right;
+  white-space: nowrap;
+}
+.sub-tl-leg {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.sub-tl-refleg {
+  display: inline-block;
+  width: 2px;
+  height: 12px;
+  vertical-align: -2px;
+}
+.sub-tl-refleg-hoje {
+  background: var(--success);
+}
+.sub-tl-refleg-contratual {
+  background: var(--ink);
+  opacity: 0.55;
+}
+@media (max-width: 880px) {
+  .sub-tl-row,
+  .sub-tl-eixo {
+    grid-template-columns: 150px 1fr;
+  }
+  .sub-tl-vals,
+  .sub-tl-eixo-espaco-r {
+    display: none;
+  }
+}

@@ -116,18 +116,39 @@ function SubcontratosPage() {
 }
 
 function SubcontratosView({ d }: { d: Subcontratos }) {
+  // Duas abas na MESMA tela (decisão de IA: mesmo domínio/fonte → não incha a sidebar):
+  // Carteira (9 blocos da spec 1) · Timeline (vigência × avanço, spec 2).
+  const [aba, setAba] = useState<"carteira" | "timeline">("carteira");
   return (
     <main className="sub-main">
       <header className="sub-head">
-        <h1 className="sub-titulo">
-          <Link2 size={20} aria-hidden /> Central de Subcontratos
-        </h1>
+        <div className="sub-head-row">
+          <h1 className="sub-titulo">
+            <Link2 size={20} aria-hidden /> Central de Subcontratos
+          </h1>
+          <Segmented<"carteira" | "timeline">
+            value={aba}
+            onChange={setAba}
+            aria-label="Visão dos subcontratos"
+            items={[
+              { value: "carteira", label: "Carteira" },
+              { value: "timeline", label: "Timeline" },
+            ]}
+          />
+        </div>
         <p className="sub-sub">
           carteira de subempreiteiros × PSQ reajustada · corte <b>30/06/2026</b> · <b>BM04</b> ·
           fonte: RMA (tabelas calculadas — lidas, não recalculadas)
         </p>
       </header>
+      {aba === "timeline" ? <TimelineSubs d={d} /> : <CarteiraSubs d={d} />}
+    </main>
+  );
+}
 
+function CarteiraSubs({ d }: { d: Subcontratos }) {
+  return (
+    <>
       {/* ── Bloco 1 · cards ── */}
       <div className="sub-cards">
         <CardKpi
@@ -414,7 +435,160 @@ function SubcontratosView({ d }: { d: Subcontratos }) {
           </table>
         </div>
       </Secao>
-    </main>
+    </>
+  );
+}
+
+// ── Timeline (vigência × avanço) — spec 2: só S_SUBCONTRATADOS, sem cruzar com o C.5 ──────────
+const TL_CORTE = "2026-06-30"; // hoje = corte BM04
+const TL_CONTRATUAL = "2027-03-09"; // término contratual DOS TIMELINES (decisão do dono: manter 09/03)
+const TL_ESTADO: Record<string, { cor: string; label: string }> = {
+  andamento: { cor: "var(--success)", label: "Em andamento" },
+  concluido: { cor: "var(--info)", label: "Concluído" },
+  critico: { cor: "var(--danger)", label: "Crítico (estouro/parado)" },
+  cancelado: { cor: "var(--text-4)", label: "Cancelado" },
+  aprovacao: { cor: "var(--warning)", label: "Em aprovação" },
+};
+const tlMs = (iso: string) => Date.UTC(+iso.slice(0, 4), +iso.slice(5, 7) - 1, +iso.slice(8, 10));
+
+function TimelineSubs({ d }: { d: Subcontratos }) {
+  const dataMin = d.timeline[0]?.inicioISO ?? TL_CORTE;
+  const dataMax = d.timeline.reduce(
+    (m, t) => ((t.terminoISO ?? "") > m ? t.terminoISO! : m),
+    TL_CONTRATUAL,
+  );
+  // janela = 1º dia do mês do menor início → último dia do mês do maior término/contratual
+  const ini = tlMs(`${dataMin.slice(0, 7)}-01`);
+  const fimMes = new Date(Date.UTC(+dataMax.slice(0, 4), +dataMax.slice(5, 7), 1));
+  const fim = fimMes.getTime();
+  const pos = (iso: string) => Math.max(0, Math.min(100, ((tlMs(iso) - ini) / (fim - ini)) * 100));
+  // ticks trimestrais
+  const ticks: Array<{ pct: number; label: string }> = [];
+  const MESES = [
+    "jan",
+    "fev",
+    "mar",
+    "abr",
+    "mai",
+    "jun",
+    "jul",
+    "ago",
+    "set",
+    "out",
+    "nov",
+    "dez",
+  ];
+  for (let t = new Date(ini); t.getTime() < fim; t.setUTCMonth(t.getUTCMonth() + 3)) {
+    ticks.push({
+      pct: ((t.getTime() - ini) / (fim - ini)) * 100,
+      label: `${MESES[t.getUTCMonth()]}/${String(t.getUTCFullYear()).slice(2)}`,
+    });
+  }
+  return (
+    <>
+      <div className="sub-cards">
+        <CardKpi
+          icone={<CircleDollarSign size={15} aria-hidden />}
+          label="Carteira contratada"
+          valor={fmtMi(d.contratosTot.contratado)}
+          sub={`${d.timeline.length + d.timelineSemVigencia.length} contratos`}
+        />
+        <CardKpi
+          icone={<PiggyBank size={15} aria-hidden />}
+          label="Medido total"
+          valor={fmtMi(d.contratosTot.medido)}
+          sub={`${fmtPct1(d.contratosTot.pctMed)} da carteira`}
+        />
+        <CardKpi
+          icone={<ClipboardList size={15} aria-hidden />}
+          label="Contratos ativos"
+          valor={String(d.ativos)}
+          sub="STATUS = Em andamento"
+        />
+        <CardKpi
+          icone={<Telescope size={15} aria-hidden />}
+          label="Críticos"
+          valor={String(d.criticos)}
+          sub="estouros CT011/CT012 + parado relevante"
+          tone={d.criticos > 0 ? "danger" : undefined}
+        />
+      </div>
+
+      <Secao
+        titulo="Vigência × avanço — 1 barra por contrato"
+        sub="início→término da vigência · preenchimento = % medido (satura em 100% no estouro)"
+      >
+        <div className="sub-tl-eixo">
+          <span className="sub-tl-eixo-espaco" />
+          <div className="sub-tl-eixo-track">
+            {ticks.map((t) => (
+              <span key={t.label} className="sub-tl-tick" style={{ left: `${t.pct}%` }}>
+                {t.label}
+              </span>
+            ))}
+          </div>
+          <span className="sub-tl-eixo-espaco-r" />
+        </div>
+        <div className="sub-tl">
+          {d.timeline.map((t) => {
+            const e = TL_ESTADO[t.estado];
+            const left = pos(t.inicioISO!);
+            const width = Math.max(1.2, pos(t.terminoISO!) - left);
+            const fill = Math.max(0, Math.min(100, t.pctMed ?? 0));
+            return (
+              <div className="sub-tl-row" key={t.numContrato}>
+                <span className="sub-tl-label" title={`${t.numContrato} · ${t.nome}`}>
+                  <span className="sub-dot" style={{ background: e.cor }} aria-hidden />
+                  {t.numContrato.split(/[-/]/)[0]} · {t.nome}
+                </span>
+                <div className="sub-tl-track">
+                  <span
+                    className="sub-tl-ref sub-tl-ref-hoje"
+                    style={{ left: `${pos(TL_CORTE)}%` }}
+                  />
+                  <span
+                    className="sub-tl-ref sub-tl-ref-contratual"
+                    style={{ left: `${pos(TL_CONTRATUAL)}%` }}
+                  />
+                  <span
+                    className="sub-tl-bar"
+                    style={{ left: `${left}%`, width: `${width}%`, borderColor: e.cor }}
+                    title={`${t.inicioISO} → ${t.terminoISO}`}
+                  >
+                    <span
+                      className="sub-tl-fill"
+                      style={{ width: `${fill}%`, background: e.cor }}
+                    />
+                  </span>
+                </div>
+                <span className="sub-tl-vals tabular">
+                  {t.pctMed != null ? `${Math.round(t.pctMed)}%` : "—"} · {fmtBRL0(t.contratado)}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+        <p className="sub-legenda">
+          {Object.values(TL_ESTADO).map((e) => (
+            <span key={e.label} className="sub-tl-leg">
+              <Dot cor={e.cor} /> {e.label} &nbsp;
+            </span>
+          ))}
+          &nbsp;|&nbsp; <span className="sub-tl-refleg sub-tl-refleg-hoje" /> hoje (corte BM04 ·
+          30/06/2026) · <span className="sub-tl-refleg sub-tl-refleg-contratual" /> término
+          contratual da obra (09/03/2027)
+        </p>
+        {d.timelineSemVigencia.length > 0 ? (
+          <p className="sub-nota">
+            Sem vigência cadastrada (sem barra):{" "}
+            {d.timelineSemVigencia.map((t) => `${t.numContrato} (${t.nome})`).join(" · ")}
+          </p>
+        ) : null}
+        <p className="sub-nota">
+          Timeline das vigências dos subcontratos — não cruza com o cronograma da obra (C.5).
+        </p>
+      </Secao>
+    </>
   );
 }
 

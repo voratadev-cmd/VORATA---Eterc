@@ -73,6 +73,28 @@ ok("mestre rótulos vivos", d.mestre.filter((m) => m.disciplina).length, 9, 0);
 ok("frentes rótulos vivos", d.frentes.filter((f) => f.frente).length, 6, 0);
 ok("drill disciplinas c/ itens", d.drill.size, 0, 99); // informativo (>=0)
 
+// Timeline (spec 2) — vigência × avanço
+ok("tl barras", d.timeline.length, 20, 0);
+ok("tl ativos", d.ativos, 17, 0);
+const tl = (ct: string) => d.timeline.find((t) => t.numContrato.includes(ct));
+ok("tl CT011 %med (estouro 126)", tl("CT011")?.pctMed ?? null, 126.3, 0.5);
+ok("tl CT012 %med (estouro 121)", tl("CT012")?.pctMed ?? null, 120.7, 0.5);
+ok("tl CT015 parada 0%", tl("CT015")?.pctMed ?? null, 0, 0.01);
+ok("tl CT015 crítico", tl("CT015")?.estado === "critico" ? 1 : 0, 1, 0);
+ok("tl CT002 cancelado", tl("CT002")?.estado === "cancelado" ? 1 : 0, 1, 0);
+ok("tl CT010 em aprovação", tl("CT010")?.estado === "aprovacao" ? 1 : 0, 1, 0);
+ok(
+  "tl Σ contratado",
+  d.timeline.reduce((s, t) => s + (t.contratado ?? 0), 0),
+  13374922,
+);
+ok(
+  "tl Σ medido",
+  d.timeline.reduce((s, t) => s + (t.medido ?? 0), 0),
+  3031866,
+);
+ok("tl sem vigência", d.timelineSemVigencia.length, 0, 0);
+
 if (falhas.length) {
   console.error(`\nGATE SUBCONTRATOS FALHOU: ${falhas.join(" · ")}`);
   process.exit(1);
