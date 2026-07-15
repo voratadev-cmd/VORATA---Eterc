@@ -172,6 +172,7 @@ export function PlanoAcaoView({ contractId }: { contractId: string }) {
         t.vinculacao,
         t.porQue,
         t.esforco,
+        t.prazoTexto,
       ]
         .filter(Boolean)
         .join(" "),
@@ -229,6 +230,8 @@ export function PlanoAcaoView({ contractId }: { contractId: string }) {
 
   const { resumo, leituraIA } = data;
   const filtrando = Boolean(col.debounced) || Boolean(fStatus);
+  // SBSO não tem a coluna Esforço no quadro — quando 100% vazia, a coluna some (sem "—" em série).
+  const temEsforco = tarefas.some((t) => t.esforco);
 
   return (
     <main className="pa-main">
@@ -242,9 +245,19 @@ export function PlanoAcaoView({ contractId }: { contractId: string }) {
               <>
                 {" "}
                 · Total <b>{resumo.total}</b> · concluídas{" "}
-                <b className="tabular">{fmtPct(resumo.pctConcluidas)}</b> · SLA médio{" "}
-                <b className="tabular">{resumo.slaMedioDias ?? "—"} dias</b> · vinculadas à C.11{" "}
-                <b className="tabular">{resumo.vinculadasAC11 ?? "—"}</b>
+                <b className="tabular">{fmtPct(resumo.pctConcluidas)}</b>
+                {resumo.slaMedioDias != null ? (
+                  <>
+                    {" "}
+                    · SLA médio <b className="tabular">{resumo.slaMedioDias} dias</b>
+                  </>
+                ) : null}
+                {resumo.vinculadasAC11 != null ? (
+                  <>
+                    {" "}
+                    · vinculadas à C.11 <b className="tabular">{resumo.vinculadasAC11}</b>
+                  </>
+                ) : null}
               </>
             ) : null}
           </p>
@@ -272,7 +285,7 @@ export function PlanoAcaoView({ contractId }: { contractId: string }) {
               {filtrando
                 ? `${col.total} de ${col.nItens} ações`
                 : `${col.nItens} ${col.nItens === 1 ? "ação" : "ações"}`}{" "}
-              · O QUE / POR QUÊ / QUEM / QUANDO / ONDE / ESFORÇO / STATUS
+              · O QUE / POR QUÊ / QUEM / QUANDO / ONDE{temEsforco ? " / ESFORÇO" : ""} / STATUS
             </div>
           </div>
         </header>
@@ -324,7 +337,7 @@ export function PlanoAcaoView({ contractId }: { contractId: string }) {
                 </div>
               )
             ) : (
-              <div className="pa-tabela" role="table">
+              <div className={`pa-tabela${temEsforco ? "" : " pa-tabela-sem-esf"}`} role="table">
                 <div className="pa-tabela-head" role="row">
                   <span role="columnheader">ID</span>
                   <span role="columnheader">Tarefa</span>
@@ -332,10 +345,10 @@ export function PlanoAcaoView({ contractId }: { contractId: string }) {
                   <span role="columnheader">Prazo</span>
                   <span role="columnheader">Urgência</span>
                   <span role="columnheader">Status</span>
-                  <span role="columnheader">Esforço</span>
+                  {temEsforco ? <span role="columnheader">Esforço</span> : null}
                 </div>
                 {col.visible.map((t) => (
-                  <TarefaRow key={t.id || t.titulo} t={t} />
+                  <TarefaRow key={t.id || t.titulo} t={t} temEsforco={temEsforco} />
                 ))}
               </div>
             )}
@@ -517,7 +530,7 @@ function DistStatus({ resumo }: { resumo: PlanoResumo }) {
 // 2 linhas + expansor EXPLÍCITO (nunca só title/hover). Origem/vinculação viram pílulas.
 const PQ_LONGO = 140;
 
-function TarefaRow({ t }: { t: PlanoTarefa }) {
+function TarefaRow({ t, temEsforco }: { t: PlanoTarefa; temEsforco: boolean }) {
   const [pqAberto, setPqAberto] = useState(false);
   const atrasada = prazoAtrasada(t.prazo, t.status);
   const rel = prazoRelativo(t.prazo);
@@ -566,7 +579,10 @@ function TarefaRow({ t }: { t: PlanoTarefa }) {
         {t.frenteTrecho ? <span className="pa-frt">{t.frenteTrecho}</span> : null}
       </span>
       <span role="cell" className="pa-cell-prazo tabular" data-l="Prazo">
-        <span>{fmtDate(t.prazo)}</span>
+        {/* prazo não-data ("a definir") mostra o TEXTO da fonte — "—" mentiria ausência */}
+        <span className={t.prazo ? undefined : "pa-prazo-txt"}>
+          {t.prazo ? fmtDate(t.prazo) : (t.prazoTexto ?? "—")}
+        </span>
         {rel ? <span className="pa-prazo-rel">{rel}</span> : null}
         {atrasada ? <span className="pa-flag pa-flag-late">atrasada</span> : null}
       </span>
@@ -576,9 +592,11 @@ function TarefaRow({ t }: { t: PlanoTarefa }) {
       <span role="cell" className="pa-cell-status" data-l="Status">
         {t.status ? <Badge tone={statusTone(t.status)}>{t.status}</Badge> : "—"}
       </span>
-      <span role="cell" className="pa-cell-esf tabular" data-l="Esforço">
-        {t.esforco ?? "—"}
-      </span>
+      {temEsforco ? (
+        <span role="cell" className="pa-cell-esf tabular" data-l="Esforço">
+          {t.esforco ?? "—"}
+        </span>
+      ) : null}
     </div>
   );
 }

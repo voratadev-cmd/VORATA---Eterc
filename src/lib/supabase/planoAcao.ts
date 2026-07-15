@@ -61,6 +61,8 @@ export type PlanoTarefa = {
   origem: string | null; // "C.11 #2"
   responsavel: string | null;
   prazo: string | null; // ISO "2026-06-10"
+  /** texto literal da fonte quando o prazo NÃO é data ("a definir" na SBSO) — exibir como está. */
+  prazoTexto: string | null;
   urgencia: string | null; // "Crítica" / "Média" (sem o ●)
   frenteTrecho: string | null;
   status: string | null; // "Em Andamento" / "A Fazer" / "Concluída"
@@ -114,20 +116,24 @@ export async function getPlanoAcao(contractId: string): Promise<PlanoAcao | null
   // texto não-ISO vira null (exibe "—"), nunca uma data fabricada.
   const isoOuNull = (v: string | null): string | null =>
     v && /^\d{4}-\d{2}-\d{2}/.test(v) ? v.slice(0, 10) : null;
-  const tarefas: PlanoTarefa[] = (tarefasRows ?? []).map((r) => ({
-    id: str(pick(r, "id (t", "id", "tarefa")) ?? "",
-    titulo: str(pick(r, "título", "titulo", "descrição", "descricao")) ?? "",
-    origem: str(pick(r, "origem")),
-    responsavel: str(pick(r, "responsável", "responsavel")),
-    prazo: isoOuNull(str(pick(r, "prazo"))),
-    urgencia: (str(pick(r, "urgência", "urgencia")) ?? "").replace(/^[●○•]\s*/, "") || null,
-    frenteTrecho: str(pick(r, "frente/trecho", "frente")),
-    status: str(pick(r, "status")),
-    // SBSO traz "Documento" (entregável da tarefa: RDO/Carta/LD…) no lugar da vinculação
-    vinculacao: str(pick(r, "vinculação", "vinculacao", "documento")),
-    porQue: str(pick(r, "por quê", "por que", "justificativa")),
-    esforco: str(pick(r, "esforço", "esforco")),
-  }));
+  const tarefas: PlanoTarefa[] = (tarefasRows ?? []).map((r) => {
+    const prazoRaw = str(pick(r, "prazo"));
+    return {
+      id: str(pick(r, "id (t", "id", "tarefa")) ?? "",
+      titulo: str(pick(r, "título", "titulo", "descrição", "descricao")) ?? "",
+      origem: str(pick(r, "origem")),
+      responsavel: str(pick(r, "responsável", "responsavel")),
+      prazo: isoOuNull(prazoRaw),
+      prazoTexto: prazoRaw && !isoOuNull(prazoRaw) ? prazoRaw : null,
+      urgencia: (str(pick(r, "urgência", "urgencia")) ?? "").replace(/^[●○•]\s*/, "") || null,
+      frenteTrecho: str(pick(r, "frente/trecho", "frente")),
+      status: str(pick(r, "status")),
+      // SBSO traz "Documento" (entregável da tarefa: RDO/Carta/LD…) no lugar da vinculação
+      vinculacao: str(pick(r, "vinculação", "vinculacao", "documento")),
+      porQue: str(pick(r, "por quê", "por que", "justificativa")),
+      esforco: str(pick(r, "esforço", "esforco")),
+    };
+  });
 
   const resumo: PlanoResumo | null = resumoObj
     ? (() => {

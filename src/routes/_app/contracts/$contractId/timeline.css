@@ -810,3 +810,84 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* faixa de vigência dos subcontratos (item 5) — mesma escala/offset do Gantt */
+.tl-subhead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s-3);
+  flex-wrap: wrap;
+}
+.tl-subtoggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  font-size: var(--fs-12);
+  color: var(--text-3);
+  cursor: pointer;
+  user-select: none;
+}
+.tl-subfiltro {
+  margin-bottom: var(--s-3);
+}
+.tl-subrow {
+  min-height: 28px;
+}
+.tl-sublabel {
+  padding-left: 8px;
+  font-size: var(--fs-12);
+}
+.tl-subdot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: inline-block;
+}
+.tl-subtrack {
+  height: 28px;
+}
+.tl-subbar {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 12px;
+  border: 1px solid;
+  border-radius: 6px;
+  background: var(--surface);
+  overflow: hidden;
+}
+.tl-subfill {
+  display: block;
+  height: 100%;
+  opacity: 0.55;
+}
+.tl-subvazio {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-3);
+  padding: var(--s-8);
+  font-size: var(--fs-13);
+  color: var(--text-3);
+}
+.tl-subleg {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-2) var(--s-4);
+  margin: var(--s-2) 0 0;
+  font-size: var(--fs-12);
+  color: var(--text-3);
+}
+.tl-subleg-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+}
+.tl-subleg-nota {
+  flex-basis: 100%;
+  color: var(--text-4);
+}

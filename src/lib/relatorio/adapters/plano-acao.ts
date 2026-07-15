@@ -103,7 +103,9 @@ export async function dadosPlanoAcao(contractId: string): Promise<RelatorioDados
           t.id || "—",
           t.titulo || "—",
           t.responsavel ?? "—",
-          fmtDate(t.prazo) + (prazoAtrasada(t.prazo, t.status) ? " (atrasada)" : ""),
+          t.prazo
+            ? fmtDate(t.prazo) + (prazoAtrasada(t.prazo, t.status) ? " (atrasada)" : "")
+            : (t.prazoTexto ?? "—"),
           t.urgencia ?? "—",
           t.status ?? "—",
           t.frenteTrecho ?? "—",

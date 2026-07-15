@@ -236,6 +236,11 @@
   gap: var(--s-3);
   padding: var(--s-3) var(--s-2);
 }
+/* SBSO: quadro sem Esforço → 6 colunas (a coluna não renderiza vazia em série) */
+.pa-tabela-sem-esf .pa-tabela-head,
+.pa-tabela-sem-esf .pa-tabela-row {
+  grid-template-columns: 56px 2.6fr 1.3fr 1.1fr 0.9fr 1.1fr;
+}
 .pa-tabela-head {
   font-size: 11px;
   font-weight: var(--fw-semibold);
@@ -364,6 +369,11 @@
   flex-direction: column;
   gap: 2px;
   align-items: flex-start;
+}
+/* prazo em TEXTO da fonte ("a definir") — distinto de data, sem fingir ausência */
+.pa-prazo-txt {
+  color: var(--text-3);
+  font-style: italic;
 }
 .pa-prazo-rel {
   font-size: 11px;

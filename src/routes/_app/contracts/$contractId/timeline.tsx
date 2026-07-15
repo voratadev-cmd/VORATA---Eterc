@@ -14,8 +14,19 @@
 
 import { useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { Badge, Card, DataTable, EmptyState, I, Skeleton } from "@/components/ds";
+import {
+  Badge,
+  Card,
+  DataTable,
+  EmptyState,
+  I,
+  Segmented,
+  Skeleton,
+  Toggle,
+} from "@/components/ds";
 import { useTimeline } from "@/lib/hooks/useTimeline";
+import { useSubcontratos } from "@/lib/hooks/useSubcontratos";
+import type { SubTimelineItem } from "@/lib/supabase/subcontratos";
 import type {
   TimelineEvento,
   TimelineParams,
@@ -321,6 +332,14 @@ function TimelineView({ view }: { view: View }) {
         })}
       </div>
 
+      {/* ── Faixa de vigência dos subcontratos (spec item 5 · toggle) ── */}
+      <SubsFaixa
+        pct={model.pct}
+        anos={model.anos}
+        hoje={model.hoje}
+        hojeVisivel={model.hojeVisivel}
+      />
+
       {/* ── Zoom por trecho ─────────────────────────────────────────── */}
       <h2 className="tl-sec">Detalhe do trecho (zoom)</h2>
       <div className="tl-zchips">
@@ -556,6 +575,131 @@ function Bars({
         style={{ left: `${pct(t.dataTermino)}%` }}
         title={`Término: ${fmtBR(t.dataTermino)}`}
       />
+    </>
+  );
+}
+
+// ── Faixa de vigência dos subcontratos (spec item 5) ────────────────────────
+// Mesma escala `pct` do Gantt acima → correlação temporal CT × disciplina lado a lado.
+// Dado da Central de Subcontratos (S_SUBCONTRATADOS · useSubcontratos, cache compartilhado
+// com a tela C.7): vigência = min início → max término por CT, preenchimento = % medido
+// (satura em 100 no estouro). Obra sem seções S (BR-101) → a faixa simplesmente não existe.
+const SUB_ESTADO: Record<SubTimelineItem["estado"], { cor: string; label: string }> = {
+  andamento: { cor: "var(--success)", label: "Em andamento" },
+  concluido: { cor: "var(--info)", label: "Concluído" },
+  critico: { cor: "var(--danger)", label: "Crítico (estouro/parado)" },
+  cancelado: { cor: "var(--text-4)", label: "Cancelado" },
+  aprovacao: { cor: "var(--warning)", label: "Em aprovação" },
+};
+
+function SubsFaixa({
+  pct,
+  anos,
+  hoje,
+  hojeVisivel,
+}: {
+  pct: (s: string | null | undefined) => number;
+  anos: { label: number; left: number }[];
+  hoje: number;
+  hojeVisivel: boolean;
+}) {
+  const { contractId } = Route.useParams();
+  const { data: subs } = useSubcontratos(contractId);
+  const [ligada, setLigada] = useState(true);
+  const [fEstado, setFEstado] = useState<"todos" | SubTimelineItem["estado"]>("todos");
+  if (!subs || !subs.timeline.length) return null;
+  const nPor = (e: SubTimelineItem["estado"]) => subs.timeline.filter((t) => t.estado === e).length;
+  const barras =
+    fEstado === "todos" ? subs.timeline : subs.timeline.filter((t) => t.estado === fEstado);
+  return (
+    <>
+      <div className="tl-subhead">
+        <h2 className="tl-sec">
+          Vigência dos subcontratos{" "}
+          <span className="tl-sec-hint">
+            · {subs.timeline.length} contratos · mesma escala do Gantt · preenchimento = % medido
+          </span>
+        </h2>
+        <label className="tl-subtoggle">
+          Mostrar faixa
+          <Toggle
+            checked={ligada}
+            onCheckedChange={setLigada}
+            aria-label="Mostrar faixa de vigência dos subcontratos"
+          />
+        </label>
+      </div>
+      {ligada && (
+        <>
+          <div className="tl-subfiltro">
+            <Segmented<"todos" | SubTimelineItem["estado"]>
+              value={fEstado}
+              onChange={setFEstado}
+              aria-label="Filtrar subcontratos por estado"
+              items={[
+                { value: "todos", label: `Todos · ${subs.timeline.length}` },
+                { value: "critico", label: `Críticos · ${nPor("critico")}` },
+                { value: "andamento", label: `Em andamento · ${nPor("andamento")}` },
+                { value: "concluido", label: `Concluídos · ${nPor("concluido")}` },
+                { value: "aprovacao", label: `Aprovação · ${nPor("aprovacao")}` },
+                { value: "cancelado", label: `Cancelados · ${nPor("cancelado")}` },
+              ]}
+            />
+          </div>
+          <div className="tl-gantt tl-subband">
+            {barras.map((t) => {
+              const e = SUB_ESTADO[t.estado];
+              const left = pct(t.inicioISO);
+              const width = Math.max(0.6, pct(t.terminoISO) - left);
+              const fill = clamp(t.pctMed ?? 0);
+              return (
+                <div className="tl-row tl-subrow" key={t.numContrato}>
+                  <div className="tl-label tl-sublabel" title={`${t.numContrato} · ${t.nome}`}>
+                    <span className="tl-subdot" style={{ background: e.cor }} aria-hidden />
+                    <span className="tl-nm">
+                      {t.numContrato.split(/[-/]/)[0]} · {t.nome}
+                    </span>
+                  </div>
+                  <div className="tl-track tl-subtrack">
+                    <Gridlines anos={anos} hoje={hoje} hojeVisivel={hojeVisivel} />
+                    <span
+                      className="tl-subbar"
+                      style={{ left: `${left}%`, width: `${width}%`, borderColor: e.cor }}
+                      title={`${t.numContrato} · ${t.nome} — vigência ${fmtBR(t.inicioISO)} → ${fmtBR(
+                        t.terminoISO,
+                      )} · ${t.pctMed != null ? `${Math.round(t.pctMed)}% medido` : "sem medição"} · ${e.label}`}
+                    >
+                      <span
+                        className="tl-subfill"
+                        style={{ width: `${fill}%`, background: e.cor }}
+                      />
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+            {barras.length === 0 && (
+              <div className="tl-subvazio">
+                Nenhum subcontrato no estado selecionado.{" "}
+                <button type="button" className="tl-btn" onClick={() => setFEstado("todos")}>
+                  Limpar filtro
+                </button>
+              </div>
+            )}
+          </div>
+          <p className="tl-subleg">
+            {Object.values(SUB_ESTADO).map((e) => (
+              <span key={e.label} className="tl-subleg-item">
+                <span className="tl-subdot" style={{ background: e.cor }} aria-hidden /> {e.label}
+              </span>
+            ))}
+            <span className="tl-subleg-nota">
+              Vigências da Central de Subcontratos (C.7) na escala do contrato — correlação temporal
+              apenas; não entram no caminho crítico nem na conta de impacto.
+            </span>
+          </p>
+        </>
+      )}
     </>
   );
 }
