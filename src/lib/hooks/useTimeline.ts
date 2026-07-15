@@ -24,6 +24,10 @@ export type TimelineView = {
   eventos: TimelineEvento[];
   params: TimelineParams | null;
   projecao: TimelineProjecao[];
+  /** painel físico da C.5 (cards do topo: impacto crítico/tendência/avanço). */
+  painel: import("@/lib/supabase/prazoC5").PrazoC5Painel | null;
+  /** prazo contratual declarado (540 na SBSO · premissas oficiais da obra). */
+  prazoDias: number | null;
 };
 
 export function useTimeline(contractId: string) {
@@ -97,12 +101,17 @@ export function useTimeline(contractId: string) {
           windowsObs: obs.length ? obs.join(" ") : (params?.windowsObs ?? null),
         };
       }
+      const prazoDias =
+        (obra as { premissas?: { datas_oficiais?: { prazo_dias?: number } } } | null)?.premissas
+          ?.datas_oficiais?.prazo_dias ?? null;
       return {
         nome: obra?.nome_interno ?? null,
         tarefas,
         eventos: eventos ?? [],
         params: paramsFinal ?? null,
         projecao: projecao ?? [],
+        painel: c5?.painel ?? null,
+        prazoDias,
       };
     },
   });

@@ -73,14 +73,18 @@ function TimelineRoute() {
 type View = NonNullable<ReturnType<typeof useTimeline>["data"]>;
 
 function TimelineView({ view }: { view: View }) {
-  const { tarefas, eventos, params, projecao } = view;
+  const { tarefas, eventos, params, projecao, painel } = view;
 
   const model = useMemo(() => {
     // eixo: OS real → término contratual (fallback: min/max das tarefas)
     const inicios = tarefas.map((t) => t.dataInicio).filter(Boolean) as string[];
     const fins = tarefas.map((t) => t.dataTermino).filter(Boolean) as string[];
     const t0s = params?.osReal ?? inicios.sort()[0] ?? null;
-    const t1s = params?.terminoContratual ?? fins.sort().slice(-1)[0] ?? null;
+    // término CONTRATUAL (pino/rótulo) ≠ fim do EIXO: o eixo estende até o término de impacto
+    // mais tardio — é isso que deixa a 3ª faixa (+71d) VISÍVEL além do previsto (spec item 3).
+    const tCon = params?.terminoContratual ?? fins.sort().slice(-1)[0] ?? null;
+    const finsImpacto = tarefas.map((t) => t.dataTerminoImpacto).filter(Boolean) as string[];
+    const t1s = [tCon, ...finsImpacto].filter(Boolean).sort().slice(-1)[0] ?? null;
     const t0 = t0s ? ms(t0s) : 0;
     const t1 = t1s ? ms(t1s) : 1;
     const span = Math.max(1, t1 - t0);
@@ -127,6 +131,7 @@ function TimelineView({ view }: { view: View }) {
       reprog,
       t0s,
       t1s,
+      tCon,
       eixoValido,
       impactos,
       corte,
@@ -169,14 +174,48 @@ function TimelineView({ view }: { view: View }) {
         <Badge tone={farol.tone}>{farol.label}</Badge>
       </header>
 
+      {/* cards de início (spec item 2) — contratual · impacto crítico · tendência · físico */}
       <div className="tl-kpis">
-        <Kpi label="Trechos / grupos" value={String(model.grupos.length)} />
-        <Kpi label="Término contratual" value={fmtBR(model.t1s)} />
         <Kpi
-          label="Reprogramado (OS real)"
-          value={model.reprog != null ? `+${model.reprog}d` : "—"}
+          label="Término contratual"
+          value={fmtBR(model.tCon)}
+          sub={`${view.prazoDias != null ? `${view.prazoDias} dias · ` : ""}OS ${fmtBR(model.t0s)}`}
         />
-        <Kpi label="OS real" value={fmtBR(model.t0s)} />
+        <Kpi
+          label="Impacto crítico físico"
+          value={painel?.impactoFinalDias != null ? `+${painel.impactoFinalDias} dias` : "—"}
+          sub={
+            painel?.terminoCriticoFisicoISO
+              ? `término ${fmtBR(painel.terminoCriticoFisicoISO)}`
+              : undefined
+          }
+          tone="danger"
+        />
+        <Kpi
+          label="Tendência por ritmo"
+          value={
+            painel?.deltaVsContratualDias != null ? `+${painel.deltaVsContratualDias} dias` : "—"
+          }
+          sub={
+            painel?.terminoProjetado
+              ? `término ${fmtBR(painel.terminoProjetado.slice(0, 10))}`
+              : undefined
+          }
+          tone="warning"
+        />
+        <Kpi
+          label="Avanço físico real"
+          value={
+            painel?.fisicoRealPct != null
+              ? `${painel.fisicoRealPct.toFixed(1).replace(".", ",")}%`
+              : "—"
+          }
+          sub={
+            painel?.fisicoPrevistoPct != null && painel?.atrasoAcumPp != null
+              ? `previsto ${painel.fisicoPrevistoPct.toFixed(1).replace(".", ",")}% · −${painel.atrasoAcumPp.toFixed(1).replace(".", ",")} pp`
+              : undefined
+          }
+        />
         <div className="tl-legend">
           <LegItem cls="tl-sw-ctr-g" text="Contratado" />
           <LegItem cls="tl-sw-real" text="Real" />
@@ -215,7 +254,7 @@ function TimelineView({ view }: { view: View }) {
               className="tl-mbar"
               style={{
                 left: `${model.pct(model.t0s)}%`,
-                right: `${100 - model.pct(model.t1s)}%`,
+                right: `${100 - model.pct(model.tCon)}%`,
               }}
             />
             {model.grupos.map((g) => (
@@ -243,9 +282,9 @@ function TimelineView({ view }: { view: View }) {
               sub="OS real"
             />
             <Pin
-              leftPct={model.pct(model.t1s)}
+              leftPct={model.pct(model.tCon)}
               align="end"
-              label={fmtBR(model.t1s)}
+              label={fmtBR(model.tCon)}
               sub="Térm. contr."
             />
           </div>
@@ -298,11 +337,8 @@ function TimelineView({ view }: { view: View }) {
       </div>
       <ZoomView grupoIdx={zoom} rows={model.rows} corte={model.corte} />
 
-      {/* ── Eventos ─────────────────────────────────────────────────── */}
-      <h2 className="tl-sec">Registro de eventos que impactam o prazo</h2>
-      <Card className="tl-card">
-        <EventosTabela eventos={eventos} />
-      </Card>
+      {/* ── Tabela de impacto resumida + a conta dos 71 dias (spec item 4) ── */}
+      <ImpactoResumo tarefas={tarefas} tCon={model.tCon} painel={painel} />
 
       {/* ── Windows Analysis ────────────────────────────────────────── */}
       {params && <WindowsPanel params={params} nEventos={eventos.length} />}
@@ -374,10 +410,21 @@ function ProjecaoTabela({ linhas }: { linhas: TimelineProjecao[] }) {
 
 // ── Subcomponentes ───────────────────────────────────────────────────────────
 
-function Kpi({ label, value }: { label: string; value: string }) {
+function Kpi({
+  label,
+  value,
+  sub,
+  tone,
+}: {
+  label: string;
+  value: string;
+  sub?: string;
+  tone?: "danger" | "warning";
+}) {
   return (
-    <span className="tl-kpi">
+    <span className={`tl-kpi${tone ? ` tl-kpi-${tone}` : ""}`}>
       {label} <b>{value}</b>
+      {sub ? <em className="tl-kpi-sub">{sub}</em> : null}
     </span>
   );
 }
@@ -485,16 +532,23 @@ function Bars({
       )}
       {/* impacto (◆ · SBSO): janela de impacto declarada pela tabela da aba C.5 */}
       {temImpacto ? (
-        <div
-          className="tl-ibar"
-          style={{
-            left: `${pct(t.dataInicioImpacto)}%`,
-            width: `${Math.max(0.4, pct(t.dataTerminoImpacto) - pct(t.dataInicioImpacto))}%`,
-          }}
-          title={`Impacto: ${fmtBR(t.dataInicioImpacto)} → ${fmtBR(t.dataTerminoImpacto)}${
-            t.impactoDias != null ? ` (+${t.impactoDias}d)` : ""
-          }${t.natureza ? ` · ${t.natureza}` : ""}`}
-        />
+        <>
+          <div
+            className={`tl-ibar ${/realizado/i.test(t.natureza ?? "") ? "tl-ibar-real" : "tl-ibar-proj"}`}
+            style={{
+              left: `${pct(t.dataInicioImpacto)}%`,
+              width: `${Math.max(0.4, pct(t.dataTerminoImpacto) - pct(t.dataInicioImpacto))}%`,
+            }}
+            title={`Impacto: ${fmtBR(t.dataInicioImpacto)} → ${fmtBR(t.dataTerminoImpacto)}${
+              t.impactoDias != null ? ` (+${t.impactoDias}d)` : ""
+            }${t.natureza ? ` · ${t.natureza}` : ""}`}
+          />
+          {t.impactoDias != null ? (
+            <span className="tl-ilabel" style={{ left: `${pct(t.dataTerminoImpacto)}%` }}>
+              +{t.impactoDias}d
+            </span>
+          ) : null}
+        </>
       ) : null}
       {/* marco de término */}
       <span
@@ -633,136 +687,122 @@ function ZoomView({
   );
 }
 
-function EventosTabela({ eventos }: { eventos: TimelineEvento[] }) {
-  if (!eventos.length) {
-    return (
-      <EmptyState
-        icon={I.flag({ size: 40 })}
-        title="Sem eventos cadastrados"
-        text="Nenhum evento que impacta o prazo foi registrado no cronograma desta obra."
-      />
-    );
-  }
-  const fmtJanela = (e: TimelineEvento) =>
-    e.janelaInicio ? `${fmtBR(e.janelaInicio)} → ${e.janelaFim ?? "—"}` : "—";
-  // Dialeto SBSO ("Marcos & Eventos para o timeline"): a fonte só tem Data · Tipo · Marco/Evento ·
-  // Descrição — reproduzir as colunas DELA e omitir as demais (spec: nunca preencher de outra tabela).
-  const shapeSbso = eventos.every(
-    (e) => e.frenteTrecho == null && e.impacta == null && e.diasAtraso == null && e.fonte == null,
-  );
-  if (shapeSbso) {
-    const toneTipo: Record<string, "info" | "warning" | "danger" | "success"> = {
-      contratual: "info",
-      execução: "success",
-      execucao: "success",
-      medição: "info",
-      medicao: "info",
-      atraso: "danger",
-      projeção: "warning",
-      projecao: "warning",
-    };
-    return (
-      <DataTable<TimelineEvento>
-        columns={[
-          { key: "data", label: "Data", width: "96px", render: (e) => fmtBR(e.dataInicio) },
-          {
-            key: "marco",
-            label: "Marco / Evento",
-            width: "1.4fr",
-            render: (e) => <span className="tl-evnm">{e.titulo}</span>,
-          },
-          {
-            key: "tipo",
-            label: "Tipo",
-            width: "110px",
-            render: (e) =>
-              e.categoria ? (
-                <Badge tone={toneTipo[e.categoria.toLowerCase()] ?? "info"}>{e.categoria}</Badge>
-              ) : (
-                "—"
-              ),
-          },
-          {
-            key: "desc",
-            label: "Descrição / Observação",
-            width: "2fr",
-            render: (e) => <span className="tl-fonte">{e.clausulas ?? "—"}</span>,
-          },
-        ]}
-        rows={eventos}
-        getRowId={(e) => e.evId ?? String(e.ordem)}
-      />
-    );
-  }
-  return (
-    <DataTable<TimelineEvento>
-      columns={[
-        { key: "ev", label: "ID", width: "58px", render: (e) => e.evId ?? "—" },
-        { key: "data", label: "Data", width: "86px", render: (e) => fmtBR(e.dataInicio) },
-        {
-          key: "ev2",
-          label: "Evento (fato real)",
-          width: "1.7fr",
-          render: (e) => (
-            <span className="tl-evnm">
-              {e.critico && <span className="tl-evcrit" title="Crítico" />}
-              {e.titulo}
-            </span>
-          ),
-        },
-        {
-          key: "frente",
-          label: "Frente / km",
-          width: "118px",
-          render: (e) => e.frenteTrecho ?? "—",
-        },
-        {
-          key: "imp",
-          label: "Impacta crítico?",
-          width: "108px",
-          align: "center",
-          render: (e) =>
-            e.impacta == null ? (
-              "—"
-            ) : (
-              <Badge tone={e.impacta ? "danger" : "success"}>{e.impacta ? "Sim" : "Não"}</Badge>
-            ),
-        },
-        {
-          key: "jan",
-          label: "Janela do impacto",
-          width: "148px",
-          render: (e) => <span className="tl-janela tabular">{fmtJanela(e)}</span>,
-        },
-        {
-          key: "atr",
-          label: "Dias de atraso",
-          width: "104px",
-          align: "right",
-          render: (e) =>
-            e.diasAtraso == null ? (
-              <span className="tl-nulo">—</span>
-            ) : e.diasAtraso > 0 ? (
-              <strong className="tl-atraso tabular">{e.diasAtraso} d</strong>
-            ) : (
-              <span className="tl-nulo tabular">0 d</span>
-            ),
-        },
-        {
-          key: "fonte",
-          label: "Fonte",
-          width: "1.2fr",
-          render: (e) => <span className="tl-fonte">{e.fonte ?? "—"}</span>,
-        },
-      ]}
-      rows={eventos}
-      getRowId={(e) => e.evId ?? String(e.ordem)}
-    />
-  );
-}
-
 const fmtPct1 = (v: number) =>
   `${v.toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%`;
+
+function ImpactoResumo({
+  tarefas,
+  tCon,
+  painel,
+}: {
+  tarefas: TimelineTarefa[];
+  tCon: string | null;
+  painel: View["painel"];
+}) {
+  // 1 linha por DISCIPLINA (nível 0 da tabela de impacto da aba C.5) — é daqui que saem os 71d.
+  const discs = tarefas.filter((t) => t.nivel === 0);
+  if (!discs.length) return null;
+  const maxImpacto = discs
+    .map((t) => t.dataTerminoImpacto)
+    .filter(Boolean)
+    .sort()
+    .slice(-1)[0] as string | undefined;
+  const impactoFinal =
+    tCon && maxImpacto ? Math.round((ms(maxImpacto) - ms(tCon)) / 86_400_000) : null;
+  const noLimite = discs
+    .filter((t) => t.dataTerminoImpacto === maxImpacto)
+    .map((t) => nomeCurto(t.nome));
+  return (
+    <>
+      <h2 className="tl-sec">Tabela de impacto por disciplina</h2>
+      <Card className="tl-card">
+        <div className="tl-resumo-wrap">
+          <table className="tl-resumo">
+            <thead>
+              <tr>
+                <th>Cód</th>
+                <th>Disciplina</th>
+                <th>Início prev.</th>
+                <th>Térm. prev.</th>
+                <th>Início Real</th>
+                <th>Térm. Real</th>
+                <th className="r">Atraso</th>
+                <th className="r">Impacto</th>
+                <th>Térm. Impacto</th>
+                <th>Natureza</th>
+              </tr>
+            </thead>
+            <tbody>
+              {discs.map((t) => (
+                <tr key={t.ordem}>
+                  <td className="tabular">{t.numeroItem ?? t.codigo ?? "—"}</td>
+                  <td className="tl-resumo-nm">{t.nome}</td>
+                  <td className="tabular">{fmtBR(t.dataInicio)}</td>
+                  <td className="tabular">{fmtBR(t.dataTermino)}</td>
+                  <td className="tabular">{fmtBR(t.dataInicioReal)}</td>
+                  <td className="tabular">{fmtBR(t.dataTerminoReal)}</td>
+                  <td className="r tabular">{t.desvioDias ?? "—"}</td>
+                  <td className="r tabular tl-resumo-imp">
+                    {t.impactoDias != null ? t.impactoDias : "—"}
+                  </td>
+                  <td className="tabular">{fmtBR(t.dataTerminoImpacto)}</td>
+                  <td>
+                    {t.natureza ? (
+                      <Badge tone={/realizado/i.test(t.natureza) ? "danger" : "warning"}>
+                        {t.natureza}
+                      </Badge>
+                    ) : (
+                      "—"
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="tl-conta">
+          <div className="tl-conta-bloco">
+            <b>IMPACTO FINAL — CENÁRIO CRÍTICO FÍSICO</b>
+            <span>
+              Término contratual: <b className="tabular">{fmtBR(tCon)}</b>
+            </span>
+            <span>
+              Data de impacto mais tardia (físicas):{" "}
+              <b className="tabular">{fmtBR(maxImpacto ?? null)}</b>
+              {noLimite.length ? ` (${noLimite.join(", ")})` : ""}
+            </span>
+            <span>
+              IMPACTO FINAL (prorrogação) ={" "}
+              <b className="tabular">{impactoFinal != null ? `${impactoFinal} dias` : "—"}</b>
+              {maxImpacto && tCon ? ` [= ${fmtBR(maxImpacto)} − ${fmtBR(tCon)}]` : ""}
+            </span>
+          </div>
+          <div className="tl-conta-bloco">
+            <b>CENÁRIO TENDÊNCIA (POR RITMO)</b>
+            <span>
+              Término projetado:{" "}
+              <b className="tabular">{fmtBR(painel?.terminoProjetado?.slice(0, 10) ?? null)}</b> ·
+              Prorrogação:{" "}
+              <b className="tabular">
+                {painel?.deltaVsContratualDias != null
+                  ? `${painel.deltaVsContratualDias} dias`
+                  : "—"}
+              </b>{" "}
+              · ritmo {painel?.ritmoVsNecessario ?? "—"}
+            </span>
+          </div>
+        </div>
+        <p className="tl-conta-nota">
+          O impacto final NÃO é a soma dos impactos individuais — é o término de impacto mais tardio
+          ({fmtBR(maxImpacto ?? null)}) menos o término contratual ({fmtBR(tCon)}). Três disciplinas
+          do encadeamento desembocam nessa data; Serviços Finais (a última da cadeia) confirma.
+          Fundações tem o maior impacto individual (+113d) mas termina antes (23/10/2026) — por isso
+          não define o fim.
+        </p>
+      </Card>
+    </>
+  );
+}
 
 function WindowsPanel({ params, nEventos }: { params: TimelineParams; nEventos: number }) {
   const fmtPp = (v: number | null) =>

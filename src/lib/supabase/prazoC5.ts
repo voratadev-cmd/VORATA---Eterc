@@ -71,6 +71,8 @@ export type PrazoC5Painel = {
   inicioOsISO: string | null;
   /** data de corte (fim do BM) declarada pela fonte (ISO) — 2026-06-30. */
   dataCorteISO: string | null;
+  /** término do cenário CRÍTICO FÍSICO (data de impacto mais tardia) — 19/05/2027 na SBSO. */
+  terminoCriticoFisicoISO: string | null;
   terminoProjetado: string | null;
   deltaVsContratualDias: number | null;
   prorrogacaoEstimadaMeses: number | null;
@@ -148,6 +150,7 @@ export async function getPrazoC5(contractId: string): Promise<PrazoC5 | null> {
       ritmoNecessarioPctMes: num(pick(p, "ritmoNecessario_percMes")),
       ritmoVsNecessario: str(pick(p, "impactoCritico_ritmoRecenteVsNecessario")),
       terminoContratual: str(pick(p, "terminoContratual")),
+      terminoCriticoFisicoISO: str(pick(p, "terminoCriticoFisico"))?.slice(0, 10) ?? null,
       terminoProjetado: str(
         pick(p, "terminoProjetadoTendencia", "impactoCritico_cenarioTendencia_terminoProjetado"),
       ),

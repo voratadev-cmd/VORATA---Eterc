@@ -700,3 +700,113 @@
   background: var(--danger);
   opacity: 0.75;
 }
+
+/* ── ajustes spec Timeline (cards, impacto 3ª faixa, tabela da conta) ── */
+.tl-kpi-sub {
+  display: block;
+  font-style: normal;
+  font-size: var(--fs-12);
+  color: var(--text-3);
+  font-variant-numeric: tabular-nums;
+}
+.tl-kpi-danger b {
+  color: var(--danger);
+}
+.tl-kpi-warning b {
+  color: var(--warning);
+}
+/* impacto: vermelho = Realizado · laranja = Projetado (dependência) */
+.tl-ibar-real {
+  background: color-mix(in srgb, var(--danger) 55%, transparent);
+  border: 1px solid var(--danger);
+}
+.tl-ibar-proj {
+  background: color-mix(in srgb, var(--warning) 45%, transparent);
+  border: 1px solid var(--warning);
+}
+.tl-ilabel {
+  position: absolute;
+  top: 50%;
+  transform: translate(4px, -50%);
+  font-size: 10px;
+  font-weight: var(--fw-semibold);
+  color: var(--text-2);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  pointer-events: none;
+}
+/* tabela de impacto resumida + conta dos 71 dias */
+.tl-resumo-wrap {
+  overflow-x: auto;
+}
+.tl-resumo {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-12);
+  color: var(--text-2);
+}
+.tl-resumo th {
+  font-size: 10px;
+  font-weight: var(--fw-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--text-3);
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  padding: 8px var(--s-2);
+  white-space: nowrap;
+}
+.tl-resumo td {
+  padding: 8px var(--s-2);
+  border-bottom: 1px solid var(--border);
+}
+.tl-resumo .r {
+  text-align: right;
+}
+.tl-resumo .tabular {
+  font-variant-numeric: tabular-nums;
+}
+.tl-resumo tbody tr:hover td {
+  background: var(--surface-2);
+}
+.tl-resumo-nm {
+  font-weight: var(--fw-medium);
+  color: var(--text);
+  max-width: 260px;
+}
+.tl-resumo-imp {
+  font-weight: var(--fw-semibold);
+  color: var(--danger);
+}
+.tl-conta {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: var(--s-4);
+  margin-top: var(--s-4);
+}
+.tl-conta-bloco {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: var(--fs-13);
+  color: var(--text-2);
+  background: var(--surface-2);
+  border-radius: var(--r-md);
+  padding: var(--s-3) var(--s-4);
+}
+.tl-conta-bloco > b {
+  font-size: 11px;
+  letter-spacing: 0.03em;
+  color: var(--text-3);
+}
+.tl-conta-nota {
+  margin: var(--s-3) 0 0;
+  font-size: var(--fs-12);
+  color: var(--text-3);
+  line-height: var(--lh-normal);
+}
+@media (max-width: 880px) {
+  .tl-conta {
+    grid-template-columns: 1fr;
+  }
+}
