@@ -3,7 +3,7 @@
 // exibidos são as âncoras validadas no gate (probe_subcontratos_gate). Corte 30/06/2026 · BM04.
 // "Medido subs" (interno ETERC) ≠ "Medido BM04" (faturamento INFRAERO) — nunca somar/confundir.
 
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import {
   Building2,
@@ -55,8 +55,13 @@ function farolFuturo(m: SubMestre): { cor: string; titulo: string } {
   if (!m.saldoExecutar) return { cor: "var(--text-4)", titulo: "fechado" };
   const p = m.potencialFuturo ?? 0;
   if (p > 0) return { cor: "var(--success)", titulo: "potencial de ganho" };
-  if (p < 0) return { cor: "var(--danger)", titulo: "risco de estouro" };
-  return { cor: "var(--warning)", titulo: "atenção" };
+  if (p < 0)
+    // negativo: 🟡 atenção quando a disciplina já está parcialmente contratada (Arquitetura);
+    // 🔴 risco quando não há contratação nenhuma e a projeção estoura o saldo (Elétricos).
+    return m.contratado
+      ? { cor: "var(--warning)", titulo: "atenção — projeção acima do saldo (parcial)" }
+      : { cor: "var(--danger)", titulo: "risco — sem contratação e projeção acima do saldo" };
+  return { cor: "var(--warning)", titulo: "atenção — sem projeção declarada" };
 }
 const FAROL_CT: Record<
   SubContrato["farol"],
@@ -165,9 +170,10 @@ function CarteiraSubs({ d }: { d: Subcontratos }) {
         />
         <CardKpi
           icone={<CircleDollarSign size={15} aria-hidden />}
-          label="Medido subs"
-          valor={fmtMi(d.contratosTot.medido)}
-          sub={`${fmtPct1(d.contratosTot.pctMed)} da carteira contratada`}
+          label="Ajuste do futuro"
+          valor={fmtMi(d.tot.potencialFuturo)}
+          sub="a contratar · instalações puxam p/ baixo"
+          tone={(d.tot.potencialFuturo ?? 0) < 0 ? "danger" : undefined}
         />
         <CardKpi
           icone={<ClipboardList size={15} aria-hidden />}
@@ -207,17 +213,19 @@ function CarteiraSubs({ d }: { d: Subcontratos }) {
                 const f = farolFuturo(m);
                 return (
                   <tr key={m.n}>
-                    <td className="sub-farol2">
-                      <span
-                        className="sub-dot"
-                        style={{ background: h.cor }}
-                        title={`hoje: ${h.titulo}`}
-                      />
-                      <span
-                        className="sub-dot"
-                        style={{ background: f.cor }}
-                        title={`futuro: ${f.titulo}`}
-                      />
+                    <td>
+                      <div className="sub-farol2">
+                        <span
+                          className="sub-dot"
+                          style={{ background: h.cor }}
+                          title={`hoje: ${h.titulo}`}
+                        />
+                        <span
+                          className="sub-dot"
+                          style={{ background: f.cor }}
+                          title={`futuro: ${f.titulo}`}
+                        />
+                      </div>
                     </td>
                     <td className="sub-disc" title={m.conclusaoTxt ?? undefined}>
                       {m.disciplina ?? "—"}
@@ -258,56 +266,22 @@ function CarteiraSubs({ d }: { d: Subcontratos }) {
           Farol duplo por linha — <b>hoje</b>: <Dot cor="var(--success)" /> economia ·{" "}
           <Dot cor="var(--danger)" /> contratou acima da PSQ · <Dot cor="var(--text-4)" /> sem
           contratação &nbsp;|&nbsp; <b>futuro</b>: <Dot cor="var(--success)" /> potencial ·{" "}
-          <Dot cor="var(--warning)" /> atenção · <Dot cor="var(--danger)" /> risco ·{" "}
-          <Dot cor="var(--text-4)" /> fechado
+          <Dot cor="var(--warning)" /> atenção (projeção acima · já contratada) ·{" "}
+          <Dot cor="var(--danger)" /> risco (sem contratação) · <Dot cor="var(--text-4)" /> fechado
         </p>
       </Secao>
 
-      {/* ── Bloco 3 · onde está a economia ── */}
-      <Secao titulo="Onde está a economia — PSQ × Contratado (expanda para o item a item)">
-        {d.mestre
-          .filter((m) => (m.contratado ?? 0) > 0)
-          .map((m) => (
-            <details key={m.n} className="sub-exp">
-              <summary>
-                <span className="sub-exp-disc">{m.disciplina ?? "—"}</span>
-                <span className="sub-exp-vals tabular">
-                  PSQ do item {fmtBRL0(m.psqItemSubc)} × contratado {fmtBRL0(m.contratado)} →{" "}
-                  <b className={sinal(m.economiaJa)}>{fmtBRL0(m.economiaJa)}</b>
-                  {(m.saldoExecutar ?? 0) > 0 ? (
-                    <span className="sub-exp-parcial">
-                      {" "}
-                      · +{fmtBRL0(m.saldoExecutar)} saldo não subcontratado (fora da economia)
-                    </span>
-                  ) : null}
-                </span>
-                <ChevronDown size={14} className="sub-exp-chev" aria-hidden />
-              </summary>
-              <DrillItens itens={d.drill.get(m.n) ?? []} />
-            </details>
-          ))}
+      {/* ── Bloco 3 · onde está a economia (tabela 4 colunas · linha expande p/ o item a item) ── */}
+      <Secao titulo="Onde está a economia — PSQ × Contratado (clique na linha para o item a item)">
+        <EconTable d={d} />
         <p className="sub-nota">
           Validação: Σ economia = <b>{fmtBRL0(d.tot.economiaJa)}</b>.
         </p>
       </Secao>
 
-      {/* ── Bloco 4 · onde está o potencial futuro ── */}
-      <Secao titulo="Onde está o potencial futuro — Saldo × Projeção">
-        {d.mestre
-          .filter((m) => (m.saldoExecutar ?? 0) > 0)
-          .map((m) => (
-            <details key={m.n} className="sub-exp">
-              <summary>
-                <span className="sub-exp-disc">{m.disciplina ?? "—"}</span>
-                <span className="sub-exp-vals tabular">
-                  saldo {fmtBRL0(m.saldoExecutar)} × previsto {fmtBRL0(m.previstoSubc)} →{" "}
-                  <b className={sinal(m.potencialFuturo)}>{fmtBRL0(m.potencialFuturo)}</b>
-                </span>
-                <ChevronDown size={14} className="sub-exp-chev" aria-hidden />
-              </summary>
-              <p className="sub-exp-txt">{m.oQueFalta ?? "—"}</p>
-            </details>
-          ))}
+      {/* ── Bloco 4 · potencial futuro (tabela 4 colunas · linha expande p/ "o que falta") ── */}
+      <Secao titulo="Onde está o potencial futuro — Saldo × Projeção (clique na linha para o detalhe)">
+        <PotTable d={d} />
         <p className="sub-nota">
           Validação: saldo <b>{fmtBRL0(d.tot.saldoExecutar)}</b> · previsto{" "}
           <b>{fmtBRL0(d.tot.previstoSubc)}</b> · potencial{" "}
@@ -663,6 +637,122 @@ function Leitura({
   );
 }
 
+// Bloco 3 em TABELA (ajuste do idealizador): Item | PSQ (reajustada) | Contratado | Economia.
+// A nota "+saldo não subcontratado" fica JUNTO do nome (não é coluna); linha clica → drill S-AUX2.
+function EconTable({ d }: { d: Subcontratos }) {
+  const [aberto, setAberto] = useState<number | null>(null);
+  const linhas = d.mestre.filter((m) => (m.contratado ?? 0) > 0);
+  return (
+    <div className="sub-tab-wrap">
+      <table className="sub-tab">
+        <thead>
+          <tr>
+            <th>Item</th>
+            <th className="r">PSQ (reajustada)</th>
+            <th className="r">Contratado</th>
+            <th className="r">Economia</th>
+          </tr>
+        </thead>
+        <tbody>
+          {linhas.map((m) => (
+            <Fragment key={m.n}>
+              <tr className="sub-linha-exp" onClick={() => setAberto(aberto === m.n ? null : m.n)}>
+                <td className="sub-disc sub-item">
+                  <ChevronDown
+                    size={13}
+                    className={`sub-exp-chev ${aberto === m.n ? "sub-chev-on" : ""}`}
+                    aria-hidden
+                  />
+                  {m.disciplina ?? "—"}
+                  {(m.saldoExecutar ?? 0) > 0 ? (
+                    <span className="sub-item-nota">
+                      +{fmtBRL0(m.saldoExecutar)} saldo não subcontratado (fora da economia)
+                    </span>
+                  ) : null}
+                </td>
+                <td className="r tabular">{fmtBRL0(m.valorPsq)}</td>
+                <td className="r tabular">{fmtBRL0(m.contratado)}</td>
+                <td className={`r tabular ${sinal(m.economiaJa)}`}>{fmtBRL0(m.economiaJa)}</td>
+              </tr>
+              {aberto === m.n ? (
+                <tr className="sub-drillrow">
+                  <td colSpan={4}>
+                    <DrillItens itens={d.drill.get(m.n) ?? []} />
+                  </td>
+                </tr>
+              ) : null}
+            </Fragment>
+          ))}
+          <tr className="sub-total">
+            <td>TOTAL</td>
+            <td className="r tabular">
+              {fmtBRL0(linhas.reduce((t, m) => t + (m.valorPsq ?? 0), 0))}
+            </td>
+            <td className="r tabular">{fmtBRL0(d.tot.contratado)}</td>
+            <td className="r tabular">{fmtBRL0(d.tot.economiaJa)}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+// Bloco 4 em TABELA: Item | Saldo a executar (PSQ) | Projeção de custo | Potencial +/−.
+function PotTable({ d }: { d: Subcontratos }) {
+  const [aberto, setAberto] = useState<number | null>(null);
+  const linhas = d.mestre.filter((m) => (m.saldoExecutar ?? 0) > 0);
+  return (
+    <div className="sub-tab-wrap">
+      <table className="sub-tab">
+        <thead>
+          <tr>
+            <th>Item</th>
+            <th className="r">Saldo a executar (PSQ)</th>
+            <th className="r">Projeção de custo</th>
+            <th className="r">Potencial +/−</th>
+          </tr>
+        </thead>
+        <tbody>
+          {linhas.map((m) => (
+            <Fragment key={m.n}>
+              <tr className="sub-linha-exp" onClick={() => setAberto(aberto === m.n ? null : m.n)}>
+                <td className="sub-disc sub-item">
+                  <ChevronDown
+                    size={13}
+                    className={`sub-exp-chev ${aberto === m.n ? "sub-chev-on" : ""}`}
+                    aria-hidden
+                  />
+                  {m.disciplina ?? "—"}
+                </td>
+                <td className="r tabular">{fmtBRL0(m.saldoExecutar)}</td>
+                <td className="r tabular">{fmtBRL0(m.previstoSubc)}</td>
+                <td className={`r tabular ${sinal(m.potencialFuturo)}`}>
+                  {fmtBRL0(m.potencialFuturo)}
+                </td>
+              </tr>
+              {aberto === m.n ? (
+                <tr className="sub-drillrow">
+                  <td colSpan={4}>
+                    <p className="sub-exp-txt">{m.oQueFalta ?? "—"}</p>
+                  </td>
+                </tr>
+              ) : null}
+            </Fragment>
+          ))}
+          <tr className="sub-total">
+            <td>TOTAL</td>
+            <td className="r tabular">{fmtBRL0(d.tot.saldoExecutar)}</td>
+            <td className="r tabular">{fmtBRL0(d.tot.previstoSubc)}</td>
+            <td className={`r tabular ${sinal(d.tot.potencialFuturo)}`}>
+              {fmtBRL0(d.tot.potencialFuturo)}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
 function DrillItens({
   itens,
 }: {
@@ -727,7 +817,7 @@ function FarolContratos({
         cmp: (a, b) => a.numContrato.localeCompare(b.numContrato),
       },
     ],
-    perPage: 10,
+    perPage: 25, // os 20 CTs SEMPRE visíveis numa lista só (ajuste do idealizador)
   });
   return (
     <Secao titulo={`Farol de contratos — ${contratos.length} CTs`}>
@@ -816,27 +906,57 @@ function CarteiraPorVisao({ d }: { d: Subcontratos }) {
           ]}
         />
       </div>
-      <div className="sub-visao">
-        {linhas
-          .filter((l) => l.contratado > 0)
-          .map((l) => {
-            const pct = l.contratado > 0 ? (l.medido / l.contratado) * 100 : 0;
-            return (
-              <div className="sub-visao-linha" key={l.nome}>
-                <span className="sub-visao-nome" title={l.nome}>
-                  {l.nome}
-                </span>
-                <ProgressBar
-                  size="sm"
-                  value={Math.max(0, Math.min(100, pct))}
-                  aria-label={`% medido de ${l.nome}`}
-                />
-                <span className="sub-visao-vals tabular">
-                  {fmtBRL0(l.medido)} / {fmtBRL0(l.contratado)} · {fmtPct1(pct)}
-                </span>
-              </div>
-            );
-          })}
+      {/* Disciplina: TODAS as 9 SEMPRE (zeradas incluídas — ajuste do idealizador); 🔴 = parado
+          relevante (contratado ≥ 500k e medido 0 · Mecânicos/Joule). Sub: só com contratação. */}
+      <div className="sub-tab-wrap">
+        <table className="sub-tab">
+          <thead>
+            <tr>
+              <th>{visao === "disc" ? "Disciplina" : "Subempreiteiro"}</th>
+              <th className="r">Contratado</th>
+              <th className="r">Medido</th>
+              <th className="sub-prog-th">Progresso</th>
+              <th className="r">% Med.</th>
+            </tr>
+          </thead>
+          <tbody>
+            {(visao === "disc" ? linhas : linhas.filter((l) => l.contratado > 0)).map((l) => {
+              const pct = l.contratado > 0 ? (l.medido / l.contratado) * 100 : 0;
+              const parado = l.contratado >= 500_000 && l.medido === 0;
+              return (
+                <tr key={l.nome}>
+                  <td className="sub-disc sub-item">
+                    {parado ? (
+                      <span
+                        className="sub-dot"
+                        style={{ background: "var(--danger)" }}
+                        title="parado — contrato relevante sem medição"
+                      />
+                    ) : null}
+                    {l.nome}
+                  </td>
+                  <td className="r tabular">{fmtBRL0(l.contratado)}</td>
+                  <td className="r tabular">{fmtBRL0(l.medido)}</td>
+                  <td className="sub-prog">
+                    <ProgressBar
+                      size="sm"
+                      value={Math.max(0, Math.min(100, pct))}
+                      aria-label={`% medido de ${l.nome}`}
+                    />
+                  </td>
+                  <td className={`r tabular ${parado ? "sub-neg" : ""}`}>{fmtPct1(pct)}</td>
+                </tr>
+              );
+            })}
+            <tr className="sub-total">
+              <td>TOTAL</td>
+              <td className="r tabular">{fmtBRL0(d.contratosTot.contratado)}</td>
+              <td className="r tabular">{fmtBRL0(d.contratosTot.medido)}</td>
+              <td />
+              <td className="r tabular">{fmtPct1(d.contratosTot.pctMed)}</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
       {visao === "disc" ? (
         <p className="sub-nota">
