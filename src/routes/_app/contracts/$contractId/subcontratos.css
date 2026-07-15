@@ -546,3 +546,8 @@
 .sub-tl-row:hover .sub-tl-track {
   background: color-mix(in srgb, var(--surface-2) 70%, var(--border));
 }
+
+/* filtro de estado da timeline */
+.sub-tl-filtro {
+  margin-bottom: var(--s-3);
+}

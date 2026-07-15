@@ -26,7 +26,12 @@ import {
 } from "@/components/ds";
 import { ColPag, ColToolbar, ColVazio, useColecao } from "@/lib/rma/colecao";
 import { useSubcontratos } from "@/lib/hooks/useSubcontratos";
-import type { SubContrato, SubMestre, Subcontratos } from "@/lib/supabase/subcontratos";
+import type {
+  SubContrato,
+  SubMestre,
+  SubTimelineItem,
+  Subcontratos,
+} from "@/lib/supabase/subcontratos";
 import "./subcontratos.css";
 
 export const Route = createFileRoute("/_app/contracts/$contractId/subcontratos")({
@@ -426,6 +431,10 @@ const TL_ESTADO: Record<string, { cor: string; label: string }> = {
 const tlMs = (iso: string) => Date.UTC(+iso.slice(0, 4), +iso.slice(5, 7) - 1, +iso.slice(8, 10));
 
 function TimelineSubs({ d }: { d: Subcontratos }) {
+  // filtro por estado (coleção 20 barras · regra 5+ itens) — contagens nos chips
+  const [fEstado, setFEstado] = useState<"todos" | SubTimelineItem["estado"]>("todos");
+  const nPor = (e: SubTimelineItem["estado"]) => d.timeline.filter((t) => t.estado === e).length;
+  const barras = fEstado === "todos" ? d.timeline : d.timeline.filter((t) => t.estado === fEstado);
   const dataMin = d.timeline[0]?.inicioISO ?? TL_CORTE;
   const dataMax = d.timeline.reduce(
     (m, t) => ((t.terminoISO ?? "") > m ? t.terminoISO! : m),
@@ -490,8 +499,23 @@ function TimelineSubs({ d }: { d: Subcontratos }) {
 
       <Secao
         titulo="Vigência × avanço — 1 barra por contrato"
-        sub="início→término da vigência · preenchimento = % medido (satura em 100% no estouro)"
+        sub={`início→término da vigência · preenchimento = % medido (satura em 100% no estouro) · mostrando ${barras.length} de ${d.timeline.length}`}
       >
+        <div className="sub-tl-filtro">
+          <Segmented<"todos" | SubTimelineItem["estado"]>
+            value={fEstado}
+            onChange={setFEstado}
+            aria-label="Filtrar contratos por estado"
+            items={[
+              { value: "todos", label: `Todos · ${d.timeline.length}` },
+              { value: "critico", label: `Críticos · ${nPor("critico")}` },
+              { value: "andamento", label: `Em andamento · ${nPor("andamento")}` },
+              { value: "concluido", label: `Concluídos · ${nPor("concluido")}` },
+              { value: "aprovacao", label: `Aprovação · ${nPor("aprovacao")}` },
+              { value: "cancelado", label: `Cancelados · ${nPor("cancelado")}` },
+            ]}
+          />
+        </div>
         <div className="sub-tl-eixo">
           <span className="sub-tl-eixo-espaco" />
           <div className="sub-tl-eixo-track">
@@ -504,7 +528,7 @@ function TimelineSubs({ d }: { d: Subcontratos }) {
           <span className="sub-tl-eixo-espaco-r" />
         </div>
         <div className="sub-tl">
-          {d.timeline.map((t) => {
+          {barras.map((t) => {
             const e = TL_ESTADO[t.estado];
             const left = pos(t.inicioISO!);
             const width = Math.max(1.2, pos(t.terminoISO!) - left);
@@ -892,7 +916,29 @@ function CarteiraPorVisao({ d }: { d: Subcontratos }) {
           contratado: x.contratado,
           medido: x.medido,
         }))
-      : d.porSub;
+      : d.porSub.filter((l) => l.contratado > 0);
+  // Coleção canônica (CLAUDE.md 5+ itens): busca + ordenação + paginação. Na visão Disciplina
+  // as 9 entram SEMPRE (regra do idealizador) — a busca só filtra se o usuário digitar.
+  const col = useColecao(linhas, {
+    busca: (l) => l.nome,
+    ordenacoes: [
+      {
+        value: "valor",
+        label: "Maior contratado",
+        cmp: (a, b) => b.contratado - a.contratado,
+      },
+      { value: "nome", label: "Nome (A–Z)", cmp: (a, b) => a.nome.localeCompare(b.nome, "pt-BR") },
+      {
+        value: "pct",
+        label: "% medido",
+        cmp: (a, b) =>
+          (b.contratado ? b.medido / b.contratado : -1) -
+          (a.contratado ? a.medido / a.contratado : -1),
+      },
+    ],
+    perPage: 12,
+    resetKey: visao,
+  });
   return (
     <Secao titulo="Carteira por visão">
       <div className="sub-visao-toggle">
@@ -908,6 +954,16 @@ function CarteiraPorVisao({ d }: { d: Subcontratos }) {
       </div>
       {/* Disciplina: TODAS as 9 SEMPRE (zeradas incluídas — ajuste do idealizador); 🔴 = parado
           relevante (contratado ≥ 500k e medido 0 · Mecânicos/Joule). Sub: só com contratação. */}
+      {col.showToolbar ? (
+        <ColToolbar
+          col={col}
+          placeholder={
+            visao === "disc"
+              ? "Buscar disciplina — ex.: fundações…"
+              : "Buscar subempreiteiro — ex.: DBG, Joule…"
+          }
+        />
+      ) : null}
       <div className="sub-tab-wrap">
         <table className="sub-tab">
           <thead>
@@ -920,7 +976,7 @@ function CarteiraPorVisao({ d }: { d: Subcontratos }) {
             </tr>
           </thead>
           <tbody>
-            {(visao === "disc" ? linhas : linhas.filter((l) => l.contratado > 0)).map((l) => {
+            {col.visible.map((l) => {
               const pct = l.contratado > 0 ? (l.medido / l.contratado) * 100 : 0;
               const parado = l.contratado >= 500_000 && l.medido === 0;
               return (
@@ -948,8 +1004,20 @@ function CarteiraPorVisao({ d }: { d: Subcontratos }) {
                 </tr>
               );
             })}
+            {col.visible.length === 0 ? (
+              <tr>
+                <td colSpan={5}>
+                  <ColVazio
+                    termo={col.debounced}
+                    rotulo={visao === "disc" ? "disciplina" : "subempreiteiro"}
+                    artigo={visao === "disc" ? "Nenhuma" : "Nenhum"}
+                    onClear={() => col.setQuery("")}
+                  />
+                </td>
+              </tr>
+            ) : null}
             <tr className="sub-total">
-              <td>TOTAL</td>
+              <td>TOTAL (carteira completa)</td>
               <td className="r tabular">{fmtBRL0(d.contratosTot.contratado)}</td>
               <td className="r tabular">{fmtBRL0(d.contratosTot.medido)}</td>
               <td />
@@ -958,6 +1026,7 @@ function CarteiraPorVisao({ d }: { d: Subcontratos }) {
           </tbody>
         </table>
       </div>
+      <ColPag col={col} rotulo={visao === "disc" ? "disciplinas" : "subempreiteiros"} />
       {visao === "disc" ? (
         <p className="sub-nota">
           Medido por disciplina lido do Acompanhamento de Medição (a quebra oficial do Excel — o
