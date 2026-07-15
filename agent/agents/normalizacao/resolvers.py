@@ -3847,7 +3847,6 @@ def extrair_prazo_marcos(secoes: list[dict]) -> dict:
                 cT = _achar_coluna(cols2, "termino previsto", "término previsto")
                 cP = _achar_coluna(cols2, "% real")
                 cS = _achar_coluna(cols2, "status")
-                cN = _achar_coluna(cols2, "natureza")
                 for r in (s2.get("linhas") or []):
                     if not isinstance(r, dict) or eh_linha_rotulo(r):
                         continue
@@ -3861,7 +3860,11 @@ def extrair_prazo_marcos(secoes: list[dict]) -> dict:
                     st_raw = str(r.get(cS) or "").strip() if cS else ""
                     marcos2.append({
                         "ordem": len(marcos2), "categoria": disc[:60],
-                        "trecho": (str(r.get(cN) or "").strip()[:120] or None) if cN else None,
+                        # trecho NÃO existe na tabela de marcos por disciplina. A coluna "Natureza"
+                        # da MESMA linha pertence à tabela vizinha "Natureza do avanço real"
+                        # (colunas L–N da aba, fundidas na captura) — mapeá-la aqui contaminava o
+                        # banco com textos alheios (spec ajustes-REVISADO-v3 §C.5.1).
+                        "trecho": None,
                         "data_limite": str(r.get(cT) or "").strip()[:20] or None,
                         "pct_concluido": pr if isinstance(pr, float) else None,
                         "farol": (_limpa_glifo(st_raw)[:30] or None) if st_raw else None,
