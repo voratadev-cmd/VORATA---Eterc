@@ -176,17 +176,17 @@ export async function getSubcontratos(contractId: string): Promise<Subcontratos 
     const status = statusPorCt.get(str(r["numContrato"]) ?? "") ?? null;
     const stNorm = (status ?? "").toLowerCase();
     // Farol da spec: 🔴 medido>contratado OU (contratado≥500k e medido=0) · 🟡 %med<20% e
-    // contratado≥100k · ✅/⚫ por STATUS · 🟢 em dia.
+    // contratado≥100k · ✅/⚫ por STATUS · 🟢 em dia. Precedência: cancelado silencia tudo
+    // (medido 0 é natural); o CRÍTICO vence "concluído" — estouro sem aditivo não deixa de
+    // ser vermelho porque o contrato foi dado por encerrado.
+    const estouro = medido != null && contratado != null && medido > contratado;
+    const paradoRelevante = (contratado ?? 0) >= 500_000 && (medido ?? 0) === 0;
+    const lento = contratado != null && contratado >= 100_000 && (medido ?? 0) / contratado < 0.2;
     let farol: SubContrato["farol"] = "emdia";
     if (stNorm.startsWith("cancel")) farol = "cancelado";
+    else if (estouro || (paradoRelevante && !stNorm.startsWith("conclu"))) farol = "critico";
     else if (stNorm.startsWith("conclu")) farol = "concluido";
-    else if (
-      (medido != null && contratado != null && medido > contratado) ||
-      ((contratado ?? 0) >= 500_000 && (medido ?? 0) === 0)
-    )
-      farol = "critico";
-    else if ((contratado ?? 0) >= 100_000 && contratado ? (medido ?? 0) / contratado! < 0.2 : false)
-      farol = "atencao";
+    else if (lento) farol = "atencao";
     return {
       numContrato: str(r["numContrato"]) ?? "—",
       nome: str(r["nomeFornecedor"]) ?? "—",

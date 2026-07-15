@@ -63,7 +63,7 @@ const FAROL_CT: Record<
   { tone: "success" | "info" | "warning" | "danger" | "neutral"; label: string }
 > = {
   critico: { tone: "danger", label: "Crítico" },
-  atencao: { tone: "warning", label: "Atenção" },
+  atencao: { tone: "warning", label: "Observação" },
   emdia: { tone: "success", label: "Em dia" },
   concluido: { tone: "info", label: "Concluído" },
   cancelado: { tone: "neutral", label: "Cancelado" },
