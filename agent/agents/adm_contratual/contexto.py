@@ -97,9 +97,19 @@ def coletar_fatos(obra_id: str) -> dict:
                   .eq("contrato_id", obra_id).order("created_at", desc=True).limit(1)
                   .execute().data or [])
         mfat = (supabase.table("obra_faturamento_meses")
-                .select("ano, mes, projecao_rs_acumulado, contratado_rs_acumulado")
+                .select("ano, mes, projecao_rs_acumulado, contratado_rs_acumulado, real_rs")
                 .eq("curva_id", curvas[0]["id"]).execute().data if curvas else []) or []
         corte = _achar_corte(mfat, realizado)
+        if not corte:
+            # workbook-motor sem projeção acumulada (SBSO: projecao_rs_acumulado NULL nos 18
+            # meses) → corte = último mês com real_rs > 0, a MESMA regra do front
+            # (useFaturamentoBm/curva). Sem isso a aderência (58,7% na SBSO) ficava "pendente".
+            com_real = sorted(
+                (m for m in mfat if (_num(m.get("real_rs")) or 0) > 0),
+                key=lambda m: (m["ano"], m["mes"]),
+            )
+            if com_real:
+                corte = (com_real[-1]["ano"], com_real[-1]["mes"])
         if corte and realizado:
             cm = next((m for m in mfat if m["ano"] == corte[0] and m["mes"] == corte[1]), {})
             ct_corte = _num(cm.get("contratado_rs_acumulado"))

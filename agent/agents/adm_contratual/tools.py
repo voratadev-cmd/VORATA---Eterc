@@ -871,6 +871,10 @@ def build_adm_tools_server(obra_id: str, return_callables: bool = False):
         # número não existe na fonte.) A tabela obra_desequilibrio está defasada (antiga) — NÃO usar.
         b2 = _secao_dados(obra_id, "D.0 — Bloco 2")
         if not isinstance(b2, list) or not b2:
+            # dialeto SBSO: "D.0 — Composição do Desequilíbrio por Categoria (Bloco 2 · Tab 6.2)"
+            # — fragmento multi-% (mesma técnica do read-model desequilibrioPainel do front).
+            b2 = _secao_dados(obra_id, "D.0%Bloco 2")
+        if not isinstance(b2, list) or not b2:
             return _pendente("Desequilíbrio (Painel D.0)")
         cat_nome = {
             "D.1": "Custos Indiretos", "D.2": "BDI", "D.3": "Encargos Sociais",
