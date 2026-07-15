@@ -1,0 +1,271 @@
+/* C.6 Insumos · regime SBSO (cl. 7 INCC-DI) — tokens-only, padrão canônico de KPI (chip, sem tarja) */
+
+.c6s-farol {
+  margin-left: var(--s-2);
+  vertical-align: 1px;
+}
+
+/* ── 6 cards do regime ── */
+.c6s-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--s-3);
+  margin: var(--s-4) 0 var(--s-5);
+}
+.c6s-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: var(--s-3) var(--s-4);
+  transition:
+    transform 0.15s var(--easing),
+    border-color 0.15s var(--easing),
+    box-shadow 0.15s var(--easing);
+}
+.c6s-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--border-strong);
+  box-shadow: var(--sh-sm);
+}
+.c6s-card-top {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+}
+.c6s-card-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: var(--r-sm);
+  background: var(--surface-2);
+  color: var(--text-2);
+  flex: none;
+}
+.c6s-card-label {
+  font-size: 11px;
+  font-weight: var(--fw-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--text-3);
+}
+.c6s-card-valor {
+  margin-top: var(--s-2);
+  font-size: var(--fs-18);
+  font-weight: var(--fw-bold);
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+.c6s-card-sub {
+  margin-top: 2px;
+  font-size: var(--fs-12);
+  color: var(--text-3);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── painéis ── */
+.c6s-panel {
+  margin-bottom: var(--s-4);
+}
+.c6s-panel-t {
+  font-size: var(--fs-15);
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+  margin-bottom: var(--s-3);
+}
+.c6s-grid2 {
+  display: grid;
+  grid-template-columns: 1.25fr 1fr;
+  gap: var(--s-4);
+  align-items: stretch;
+}
+.c6s-chart {
+  margin: 0 0 var(--s-2);
+}
+.c6s-nota {
+  margin: var(--s-3) 0 0;
+  font-size: var(--fs-12);
+  color: var(--text-3);
+  display: flex;
+  gap: 6px;
+  align-items: flex-start;
+  font-variant-numeric: tabular-nums;
+}
+.c6s-nota svg {
+  flex: none;
+  margin-top: 2px;
+}
+.c6s-texto {
+  margin: 0;
+  font-size: var(--fs-13);
+  color: var(--text-2);
+  line-height: var(--lh-normal);
+}
+
+/* ── tabela de índices ── */
+.c6s-idx {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-13);
+  color: var(--text-2);
+}
+.c6s-idx th {
+  font-size: 11px;
+  font-weight: var(--fw-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--text-3);
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  padding: var(--s-2);
+}
+.c6s-idx td {
+  padding: var(--s-2);
+  border-bottom: 1px solid var(--border);
+}
+.c6s-idx .r {
+  text-align: right;
+}
+.c6s-idx .tabular {
+  font-variant-numeric: tabular-nums;
+}
+.c6s-idx-cod {
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+  white-space: nowrap;
+}
+.c6s-idx-ref {
+  font-size: var(--fs-12);
+  color: var(--text-3);
+  white-space: nowrap;
+}
+.c6s-idx-desc td {
+  color: var(--text-4);
+}
+
+/* ── tabela principal ── */
+.c6s-tab-wrap {
+  overflow-x: auto;
+}
+.c6s-tab {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-13);
+  color: var(--text-2);
+}
+.c6s-tab th {
+  font-size: 11px;
+  font-weight: var(--fw-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--text-3);
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  padding: var(--s-2);
+  white-space: nowrap;
+}
+.c6s-tab td {
+  padding: var(--s-2);
+  border-bottom: 1px solid var(--border);
+}
+.c6s-tab .r {
+  text-align: right;
+}
+.c6s-tab .tabular {
+  font-variant-numeric: tabular-nums;
+}
+.c6s-tab tbody tr {
+  transition: background 0.12s var(--easing);
+}
+.c6s-tab tbody tr:hover {
+  background: var(--surface-2);
+}
+.c6s-tab-nome {
+  max-width: 340px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: var(--fw-medium);
+  color: var(--text);
+}
+.c6s-tab-pend {
+  color: var(--text-4);
+}
+.c6s-tab-balde td {
+  color: var(--text-3);
+  font-style: italic;
+}
+.c6s-tab-balde .c6s-tab-nome {
+  font-style: italic;
+  font-weight: var(--fw-regular);
+}
+.c6s-tab-total td {
+  background: var(--surface-2);
+  border-top: 1px solid var(--border-strong);
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+}
+
+/* classe ABC — dot + letra (sem tarja) */
+.c6s-classe {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: var(--fw-semibold);
+  font-variant-numeric: tabular-nums;
+}
+.c6s-classe::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--text-4);
+}
+.c6s-classe-a::before {
+  background: var(--brand);
+}
+.c6s-classe-b::before {
+  background: var(--info);
+}
+.c6s-classe-c::before {
+  background: var(--text-4);
+}
+
+/* ── leitura da IA ── */
+.c6s-ia {
+  margin-bottom: var(--s-4);
+}
+.c6s-ia-tag {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  font-size: var(--fs-12);
+  font-weight: var(--fw-semibold);
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin-bottom: var(--s-2);
+}
+.c6s-ia-text {
+  margin: 0;
+  font-size: var(--fs-13);
+  color: var(--text-2);
+  line-height: var(--lh-normal);
+  font-variant-numeric: tabular-nums;
+}
+
+/* responsivo (breakpoints do DS) */
+@media (max-width: 1100px) {
+  .c6s-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .c6s-grid2 {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 720px) {
+  .c6s-cards {
+    grid-template-columns: 1fr;
+  }
+}

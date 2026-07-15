@@ -51,6 +51,8 @@ import {
   useSelecaoInsumosFd,
 } from "@/components/InsumosFd/InsumosFdShared";
 import { useInsumosFd } from "@/lib/hooks/useInsumosFd";
+import { useInsumosSbso } from "@/lib/hooks/useInsumosSbso";
+import { InsumosSbsoView } from "@/components/InsumosSbso/InsumosSbso";
 import { useObra } from "@/lib/hooks/useObra";
 import { useSinteseContrato } from "@/lib/hooks/useSinteseContrato";
 import {
@@ -644,6 +646,10 @@ function InsumosC6Aba() {
   const { contractId } = Route.useParams();
   const q = useInsumosFd(contractId);
   const sel = useSelecaoInsumosFd(q.data);
+  // Regime SBSO (cl. 7 · INCC-DI): quando a obra declara os cards de reajuste da C.6, a tela
+  // troca pro layout contratual (spec ajustes-REVISADO-v3) — o multifonte ATERPA abaixo segue
+  // intacto para as obras IPCA/8.8 (BR-101).
+  const sbso = useInsumosSbso(contractId);
   // identificação do contrato derivada dos read-models (era literal da BR-101, que mentia em
   // qualquer outra obra): Nº do Contrato + nº interno vêm da captura da C.1 (obra_secoes);
   // fallback honesto = nome interno da obra (useObra, já em cache pelo shell do RMA).
@@ -656,7 +662,11 @@ function InsumosC6Aba() {
     obra?.nome_interno ||
     "—";
 
-  if (q.isLoading) {
+  if (sbso.data) {
+    return <InsumosSbsoView dados={sbso.data} contratoLabel={contratoLabel} />;
+  }
+
+  if (q.isLoading || sbso.isLoading) {
     // Skeleton com a FORMA da tela (regra nº4): título/sub → param bar → 4 KPIs → presets →
     // painel ABC → painel índices → bloco alto da tabela.
     return (

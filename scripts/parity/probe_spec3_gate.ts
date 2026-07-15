@@ -1,6 +1,7 @@
 // GATE da SPEC 3 (ajustes-REVISADO-v3) · invariantes executáveis da Onda 1.
 // bun run scripts/parity/probe_spec3_gate.ts [obra_id] — sai !=0 em divergência.
 import { getFaturamentoWbs } from "../../src/lib/supabase/faturamentoWbs";
+import { getInsumosSbso } from "../../src/lib/supabase/insumosSbso";
 import { getPrazoC5 } from "../../src/lib/supabase/prazoC5";
 import { getRecursosCardsQtde } from "../../src/lib/supabase/recursosCardsQtde";
 import { getSinteseContrato } from "../../src/lib/supabase/sinteseContrato";
@@ -13,11 +14,12 @@ const ok = (nome: string, cond: boolean, det: string) => {
 };
 const r2 = (v: number) => Math.round(v * 100) / 100;
 
-const [wbs, c5, cards, sintese] = await Promise.all([
+const [wbs, c5, cards, sintese, insumos] = await Promise.all([
   getFaturamentoWbs(ID),
   getPrazoC5(ID),
   getRecursosCardsQtde(ID),
   getSinteseContrato(ID),
+  getInsumosSbso(ID),
 ]);
 
 // Invariante 1 — TOTAL Real "Por Disciplina" == "Por Frente" (BM-9).
@@ -76,6 +78,34 @@ if (sintese) {
     "v3#5 BDI oficial (Painel 3)",
     sintese.financeiro.bdiPct != null,
     `${sintese.financeiro.bdiPct?.toFixed(2)}%`,
+  );
+}
+
+// Invariante 6 — Reajuste (C.6 SBSO): concedido + novo == acumulado; acumulado ÷ base == ~11,98%;
+// Σ por item == cards (oracle); Σ itens fd == base.
+if (insumos) {
+  const ic = insumos.cards;
+  ok(
+    "v3#6 concedido + novo == acumulado",
+    Math.abs(ic.concedidoRs + ic.novoRs - ic.acumRs) < 0.02,
+    `${r2(ic.concedidoRs)} + ${r2(ic.novoRs)} = ${r2(ic.concedidoRs + ic.novoRs)} × ${r2(ic.acumRs)}`,
+  );
+  ok(
+    "v3#6 acumulado ÷ base == 11,98%",
+    Math.abs(ic.acumRs / ic.baseRs - 0.119772) < 0.0005,
+    `${((ic.acumRs / ic.baseRs) * 100).toFixed(3)}%`,
+  );
+  const somaItens = r2(insumos.itens.reduce((s, x) => s + x.custoTotalRs, 0));
+  ok(
+    "v3#6 Σ itens fd == base",
+    Math.abs(somaItens - ic.baseRs) < 0.02,
+    `${somaItens} × ${ic.baseRs}`,
+  );
+  const somaConc = r2(insumos.itens.reduce((s, x) => s + x.concedidoRs, 0));
+  ok(
+    "v3#6 Σ por item == card concedido",
+    Math.abs(somaConc - ic.concedidoRs) < 0.02,
+    `${somaConc} × ${r2(ic.concedidoRs)}`,
   );
 }
 
