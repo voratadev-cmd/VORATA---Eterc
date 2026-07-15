@@ -200,6 +200,12 @@ function buildNavItems(contractId: string): NavItem[] {
           // matchPrefix acende o item em qualquer sub-rota /rma/*
           matchPrefix: true,
         },
+        {
+          id: "m2-1-2b",
+          label: "2.1.2b Subcontratos",
+          to: "/contracts/$contractId/subcontratos",
+          params: c,
+        },
         { id: "m2-1-3", label: "2.1.3 Timeline", to: "/contracts/$contractId/timeline", params: c },
         {
           id: "m2-1-4",

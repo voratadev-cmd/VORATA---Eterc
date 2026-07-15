@@ -22,6 +22,7 @@ import { Route as AppAdminAuditRouteImport } from './routes/_app/admin/audit'
 import { Route as AppContractsContractIdIndexRouteImport } from './routes/_app/contracts/$contractId/index'
 import { Route as AppContractsContractIdVistoriaImagemRouteImport } from './routes/_app/contracts/$contractId/vistoria-imagem'
 import { Route as AppContractsContractIdTimelineRouteImport } from './routes/_app/contracts/$contractId/timeline'
+import { Route as AppContractsContractIdSubcontratosRouteImport } from './routes/_app/contracts/$contractId/subcontratos'
 import { Route as AppContractsContractIdRmaRouteImport } from './routes/_app/contracts/$contractId/rma'
 import { Route as AppContractsContractIdPlanoAcaoRouteImport } from './routes/_app/contracts/$contractId/plano-acao'
 import { Route as AppContractsContractIdNormalizacaoRouteImport } from './routes/_app/contracts/$contractId/normalizacao'
@@ -138,6 +139,12 @@ const AppContractsContractIdTimelineRoute =
   AppContractsContractIdTimelineRouteImport.update({
     id: '/contracts/$contractId/timeline',
     path: '/contracts/$contractId/timeline',
+    getParentRoute: () => AppRoute,
+  } as any)
+const AppContractsContractIdSubcontratosRoute =
+  AppContractsContractIdSubcontratosRouteImport.update({
+    id: '/contracts/$contractId/subcontratos',
+    path: '/contracts/$contractId/subcontratos',
     getParentRoute: () => AppRoute,
   } as any)
 const AppContractsContractIdRmaRoute =
@@ -462,6 +469,7 @@ export interface FileRoutesByFullPath {
   '/contracts/$contractId/normalizacao': typeof AppContractsContractIdNormalizacaoRoute
   '/contracts/$contractId/plano-acao': typeof AppContractsContractIdPlanoAcaoRoute
   '/contracts/$contractId/rma': typeof AppContractsContractIdRmaRouteWithChildren
+  '/contracts/$contractId/subcontratos': typeof AppContractsContractIdSubcontratosRoute
   '/contracts/$contractId/timeline': typeof AppContractsContractIdTimelineRoute
   '/contracts/$contractId/vistoria-imagem': typeof AppContractsContractIdVistoriaImagemRoute
   '/contracts/$contractId/': typeof AppContractsContractIdIndexRoute
@@ -525,6 +533,7 @@ export interface FileRoutesByTo {
   '/contracts/$contractId/melhorias-doc': typeof AppContractsContractIdMelhoriasDocRoute
   '/contracts/$contractId/normalizacao': typeof AppContractsContractIdNormalizacaoRoute
   '/contracts/$contractId/plano-acao': typeof AppContractsContractIdPlanoAcaoRoute
+  '/contracts/$contractId/subcontratos': typeof AppContractsContractIdSubcontratosRoute
   '/contracts/$contractId/timeline': typeof AppContractsContractIdTimelineRoute
   '/contracts/$contractId/vistoria-imagem': typeof AppContractsContractIdVistoriaImagemRoute
   '/contracts/$contractId': typeof AppContractsContractIdIndexRoute
@@ -591,6 +600,7 @@ export interface FileRoutesById {
   '/_app/contracts/$contractId/normalizacao': typeof AppContractsContractIdNormalizacaoRoute
   '/_app/contracts/$contractId/plano-acao': typeof AppContractsContractIdPlanoAcaoRoute
   '/_app/contracts/$contractId/rma': typeof AppContractsContractIdRmaRouteWithChildren
+  '/_app/contracts/$contractId/subcontratos': typeof AppContractsContractIdSubcontratosRoute
   '/_app/contracts/$contractId/timeline': typeof AppContractsContractIdTimelineRoute
   '/_app/contracts/$contractId/vistoria-imagem': typeof AppContractsContractIdVistoriaImagemRoute
   '/_app/contracts/$contractId/': typeof AppContractsContractIdIndexRoute
@@ -657,6 +667,7 @@ export interface FileRouteTypes {
     | '/contracts/$contractId/normalizacao'
     | '/contracts/$contractId/plano-acao'
     | '/contracts/$contractId/rma'
+    | '/contracts/$contractId/subcontratos'
     | '/contracts/$contractId/timeline'
     | '/contracts/$contractId/vistoria-imagem'
     | '/contracts/$contractId/'
@@ -720,6 +731,7 @@ export interface FileRouteTypes {
     | '/contracts/$contractId/melhorias-doc'
     | '/contracts/$contractId/normalizacao'
     | '/contracts/$contractId/plano-acao'
+    | '/contracts/$contractId/subcontratos'
     | '/contracts/$contractId/timeline'
     | '/contracts/$contractId/vistoria-imagem'
     | '/contracts/$contractId'
@@ -785,6 +797,7 @@ export interface FileRouteTypes {
     | '/_app/contracts/$contractId/normalizacao'
     | '/_app/contracts/$contractId/plano-acao'
     | '/_app/contracts/$contractId/rma'
+    | '/_app/contracts/$contractId/subcontratos'
     | '/_app/contracts/$contractId/timeline'
     | '/_app/contracts/$contractId/vistoria-imagem'
     | '/_app/contracts/$contractId/'
@@ -926,6 +939,13 @@ declare module '@tanstack/react-router' {
       path: '/contracts/$contractId/timeline'
       fullPath: '/contracts/$contractId/timeline'
       preLoaderRoute: typeof AppContractsContractIdTimelineRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/contracts/$contractId/subcontratos': {
+      id: '/_app/contracts/$contractId/subcontratos'
+      path: '/contracts/$contractId/subcontratos'
+      fullPath: '/contracts/$contractId/subcontratos'
+      preLoaderRoute: typeof AppContractsContractIdSubcontratosRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/contracts/$contractId/rma': {
@@ -1350,6 +1370,7 @@ interface AppRouteChildren {
   AppContractsContractIdNormalizacaoRoute: typeof AppContractsContractIdNormalizacaoRoute
   AppContractsContractIdPlanoAcaoRoute: typeof AppContractsContractIdPlanoAcaoRoute
   AppContractsContractIdRmaRoute: typeof AppContractsContractIdRmaRouteWithChildren
+  AppContractsContractIdSubcontratosRoute: typeof AppContractsContractIdSubcontratosRoute
   AppContractsContractIdTimelineRoute: typeof AppContractsContractIdTimelineRoute
   AppContractsContractIdVistoriaImagemRoute: typeof AppContractsContractIdVistoriaImagemRoute
   AppContractsContractIdIndexRoute: typeof AppContractsContractIdIndexRoute
@@ -1401,6 +1422,8 @@ const AppRouteChildren: AppRouteChildren = {
     AppContractsContractIdNormalizacaoRoute,
   AppContractsContractIdPlanoAcaoRoute: AppContractsContractIdPlanoAcaoRoute,
   AppContractsContractIdRmaRoute: AppContractsContractIdRmaRouteWithChildren,
+  AppContractsContractIdSubcontratosRoute:
+    AppContractsContractIdSubcontratosRoute,
   AppContractsContractIdTimelineRoute: AppContractsContractIdTimelineRoute,
   AppContractsContractIdVistoriaImagemRoute:
     AppContractsContractIdVistoriaImagemRoute,
