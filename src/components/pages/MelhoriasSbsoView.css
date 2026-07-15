@@ -291,3 +291,8 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* filtro de severidade dos desvios */
+.c15s-filtro {
+  margin-left: auto;
+}

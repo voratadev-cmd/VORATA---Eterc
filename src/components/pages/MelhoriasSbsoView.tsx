@@ -2,9 +2,9 @@
 // Painel (4 KPIs + farol geral) → Desvios do Previsto (8 cards CFF×RDO×PDOT) → Defasagem de
 // Faturamento por disciplina (9 + TOTAL, conserva com o C.3) → Achados/Melhorias/Síntese
 // (texto estruturado da fonte, parseado por marcadores ①②/✗/✓/• — sem reescrever conteúdo).
-import { Fragment } from "react";
+import { Fragment, useState } from "react";
 import { ClipboardList, FileText, Files, Gauge } from "lucide-react";
-import { Badge, Card } from "@/components/ds";
+import { Badge, Card, Segmented } from "@/components/ds";
 import type { MelhoriasSbso } from "@/lib/supabase/melhoriasSbso";
 import "./MelhoriasSbsoView.css";
 
@@ -54,6 +54,11 @@ function parseAchados(texto: string): LinhaRica[] {
 
 export function MelhoriasSbsoView({ d }: { d: MelhoriasSbso }) {
   const fg = farolGeral(d.painel.farolGeral);
+  // filtro por severidade dos Desvios (coleção 5+ itens · regra do CLAUDE.md)
+  const [sev, setSev] = useState<"todos" | "danger" | "warning">("todos");
+  const desviosVisiveis =
+    sev === "todos" ? d.desvios : d.desvios.filter((x) => sevTone(x.severidade) === sev);
+  const nCriticos = d.desvios.filter((x) => sevTone(x.severidade) === "danger").length;
   const [rdosValor, ...rdosSub] = (d.painel.rdos ?? "—").split("·");
   const [defValor, ...defSub] = (d.painel.defasagem ?? "—").split("·");
   const [atasValor, ...atasSub] = (d.painel.atas ?? "—").split("—");
@@ -117,12 +122,23 @@ export function MelhoriasSbsoView({ d }: { d: MelhoriasSbso }) {
         <div className="c15s-secao-h">
           <h3 className="c15s-secao-t">Desvios do Previsto — varredura CFF × RDO × PDOT</h3>
           <span className="c15s-secao-sub">
-            {d.desvios.length} desvios ·{" "}
-            {d.desvios.filter((x) => sevTone(x.severidade) === "danger").length} críticos
+            mostrando {desviosVisiveis.length} de {d.desvios.length} · {nCriticos} críticos
           </span>
+          <div className="c15s-filtro">
+            <Segmented<"todos" | "danger" | "warning">
+              value={sev}
+              onChange={setSev}
+              aria-label="Filtrar desvios por severidade"
+              items={[
+                { value: "todos", label: `Todos · ${d.desvios.length}` },
+                { value: "danger", label: `Críticos · ${nCriticos}` },
+                { value: "warning", label: `Riscos · ${d.desvios.length - nCriticos}` },
+              ]}
+            />
+          </div>
         </div>
         <div className="c15s-desvios">
-          {d.desvios.map((x) => (
+          {desviosVisiveis.map((x) => (
             <Card key={x.item} className="c15s-desvio">
               <div className="c15s-desvio-top">
                 <Badge tone={sevTone(x.severidade)}>{x.severidade ?? "—"}</Badge>
