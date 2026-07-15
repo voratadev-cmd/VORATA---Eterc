@@ -101,29 +101,56 @@ function mapFarol(raw: string | null): { nivel: FarolNivel; label: string } {
 /** Plano de Ação (C.12) a partir das seções obra_secoes. null se a obra não tem C.12 normalizada. */
 export async function getPlanoAcao(contractId: string): Promise<PlanoAcao | null> {
   const [tarefasRows, resumoObj, leituraObj] = await Promise.all([
-    getSecaoTabela(contractId, "C.12 Plano de Ação — Quadro"),
+    // dialeto SBSO: a seção do quadro chama "C.12 — Plano de Ação (Kanban de tarefas)"
+    getSecaoTabela(contractId, "C.12 Plano de Ação — Quadro").then(
+      (v) => v ?? getSecaoTabela(contractId, "Plano de Ação (Kanban"),
+    ),
     getSecaoObj(contractId, "C.12 Plano de Ação — Resumo"),
     getSecaoObj(contractId, "C.12 Plano de Ação — Leitura"),
   ]);
   if (!tarefasRows && !resumoObj) return null;
 
+  // prazo do quadro pode vir texto ("a definir" na SBSO) — a view calcula atraso por data;
+  // texto não-ISO vira null (exibe "—"), nunca uma data fabricada.
+  const isoOuNull = (v: string | null): string | null =>
+    v && /^\d{4}-\d{2}-\d{2}/.test(v) ? v.slice(0, 10) : null;
   const tarefas: PlanoTarefa[] = (tarefasRows ?? []).map((r) => ({
-    id: str(pick(r, "id (t", "id")) ?? "",
-    titulo: str(pick(r, "título", "titulo")) ?? "",
+    id: str(pick(r, "id (t", "id", "tarefa")) ?? "",
+    titulo: str(pick(r, "título", "titulo", "descrição", "descricao")) ?? "",
     origem: str(pick(r, "origem")),
     responsavel: str(pick(r, "responsável", "responsavel")),
-    prazo: str(pick(r, "prazo")),
+    prazo: isoOuNull(str(pick(r, "prazo"))),
     urgencia: (str(pick(r, "urgência", "urgencia")) ?? "").replace(/^[●○•]\s*/, "") || null,
     frenteTrecho: str(pick(r, "frente/trecho", "frente")),
     status: str(pick(r, "status")),
-    vinculacao: str(pick(r, "vinculação", "vinculacao")),
+    // SBSO traz "Documento" (entregável da tarefa: RDO/Carta/LD…) no lugar da vinculação
+    vinculacao: str(pick(r, "vinculação", "vinculacao", "documento")),
     porQue: str(pick(r, "por quê", "por que", "justificativa")),
     esforco: str(pick(r, "esforço", "esforco")),
   }));
 
   const resumo: PlanoResumo | null = resumoObj
     ? (() => {
-        const farol = mapFarol(str(pick(resumoObj, "faroldaaba", "farol")));
+        // SBSO não declara farol na seção — DERIVAR (documentado): tarefa crítica em aberto →
+        // Risco; backlog sem crítica → Observação; tudo concluído → Conforme. Nunca "Conforme"
+        // silencioso com crítica aberta.
+        const farolRaw = str(pick(resumoObj, "faroldaaba", "farol"));
+        const criticas = num(pick(resumoObj, "criticas", "críticas")) ?? 0;
+        const aFazerN = num(pick(resumoObj, "afazer")) ?? 0;
+        const farol = farolRaw
+          ? mapFarol(farolRaw)
+          : criticas > 0
+            ? { nivel: "risco" as FarolNivel, label: "Risco" }
+            : aFazerN > 0
+              ? { nivel: "observacao" as FarolNivel, label: "Observação" }
+              : { nivel: "conforme" as FarolNivel, label: "Conforme" };
+        const criterioDerivado = farolRaw
+          ? null
+          : criticas > 0
+            ? `derivado: ${criticas} tarefa(s) crítica(s) em aberto`
+            : aFazerN > 0
+              ? "derivado: backlog a fazer sem críticas"
+              : "derivado: sem pendências";
         return {
           total: num(pick(resumoObj, "totaldeacoes", "total")) ?? tarefas.length,
           aFazer: num(pick(resumoObj, "afazer")) ?? 0,
@@ -134,10 +161,17 @@ export async function getPlanoAcao(contractId: string): Promise<PlanoAcao | null
           criticasAtrasadas: num(pick(resumoObj, "criticasatrasadas")) ?? 0,
           slaMedioDias: num(pick(resumoObj, "slamediodias", "sla")),
           vinculadasAC11: num(pick(resumoObj, "vinculadasac11", "vinculadas")),
-          pctConcluidas: num(pick(resumoObj, "percentualavancoconcluidas", "percentual")),
+          pctConcluidas:
+            num(pick(resumoObj, "percentualavancoconcluidas", "percentual")) ??
+            (() => {
+              // SBSO não traz o % — derivar de concluídas ÷ total (0/8 = 0%).
+              const tot = num(pick(resumoObj, "totaldeacoes", "total")) ?? tarefas.length;
+              const conc = num(pick(resumoObj, "concluidas")) ?? 0;
+              return tot > 0 ? conc / tot : null;
+            })(),
           farolNivel: farol.nivel,
           farolLabel: farol.label,
-          farolCriterio: str(pick(resumoObj, "farolcriterio", "criterio")),
+          farolCriterio: str(pick(resumoObj, "farolcriterio", "criterio")) ?? criterioDerivado,
         };
       })()
     : null;
